@@ -44,6 +44,19 @@ generate_api_key() {
     fi
 }
 
+# Function to regenerate API key (when expired)
+regenerate_api_key() {
+    local new_key
+    new_key=$(generate_api_key)
+    API_KEY="$new_key"
+
+    # Update config file
+    sed -i.bak "s/api_key:.*/api_key: \"$new_key\"/" "$PLASTER_CONFIG"
+    rm -f "$PLASTER_CONFIG.bak"
+
+    echo "✓ New API key generated: $new_key" >&2
+}
+
 # Function to load configuration
 load_config() {
     if [[ ! -f "$PLASTER_CONFIG" ]]; then
@@ -98,10 +111,23 @@ show_help() {
 push_text() {
     local text="$1"
     local response
-    response=$(curl -s -X POST "$SERVER_URL/push" \
+    local http_code
+    response=$(curl -s -w "\n%{http_code}" -X POST "$SERVER_URL/push" \
         -H "Content-Type: application/json" \
         -H "X-API-Key: $API_KEY" \
         -d "{\"text\": $(echo "$text" | jq -Rs .)}" 2>&1)
+
+    http_code=$(echo "$response" | tail -n 1)
+    response=$(echo "$response" | sed '$d')
+
+    # Check for expired/invalid key (401)
+    if [[ "$http_code" == "401" ]]; then
+        echo "API key expired. Generating new one..." >&2
+        regenerate_api_key
+        # Retry with new key
+        push_text "$text"
+        return
+    fi
 
     if echo "$response" | grep -q "status.*ok"; then
         echo "✓ Text pushed to clipboard" >&2
@@ -112,11 +138,43 @@ push_text() {
     fi
 }
 
+# Helper to make API calls with 401 handling
+api_call() {
+    local method="$1"
+    local endpoint="$2"
+    local data="$3"
+    local response
+    local http_code
+
+    if [[ -z "$data" ]]; then
+        response=$(curl -s -w "\n%{http_code}" -X "$method" "$SERVER_URL$endpoint" \
+            -H "X-API-Key: $API_KEY" 2>&1)
+    else
+        response=$(curl -s -w "\n%{http_code}" -X "$method" "$SERVER_URL$endpoint" \
+            -H "Content-Type: application/json" \
+            -H "X-API-Key: $API_KEY" \
+            -d "$data" 2>&1)
+    fi
+
+    http_code=$(echo "$response" | tail -n 1)
+    response=$(echo "$response" | sed '$d')
+
+    # Check for expired key
+    if [[ "$http_code" == "401" ]]; then
+        echo "API key expired. Generating new one..." >&2
+        regenerate_api_key
+        # Retry with new key
+        api_call "$method" "$endpoint" "$data"
+        return
+    fi
+
+    echo "$response"
+}
+
 # Function to get latest entry
 get_latest() {
     local response
-    response=$(curl -s -X GET "$SERVER_URL/peek" \
-        -H "X-API-Key: $API_KEY" 2>&1)
+    response=$(api_call GET /peek)
 
     if echo "$response" | grep -q '"status".*"ok"'; then
         echo "$response" | jq -r '.text'

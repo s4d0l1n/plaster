@@ -7,6 +7,7 @@ import json
 import os
 import secrets
 import time
+import threading
 from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime
@@ -33,7 +34,9 @@ DEFAULT_CONFIG = {
     "max_entry_size_mb": 10,
     "max_total_size_mb": 500,
     "rate_limit_requests": 100,
-    "rate_limit_window_seconds": 60
+    "rate_limit_window_seconds": 60,
+    "idle_timeout_days": 7,
+    "cleanup_interval_hours": 24
 }
 
 class TextEntry(BaseModel):
@@ -168,6 +171,23 @@ class APIKeyManager:
             return True
         return False
 
+    def cleanup_expired_keys(self, idle_timeout_days: int) -> List[str]:
+        """Delete keys that haven't been used for idle_timeout_days"""
+        now = datetime.now()
+        timeout_seconds = idle_timeout_days * 24 * 60 * 60
+        expired_keys = []
+
+        for key, data in list(self.keys_data.items()):
+            last_used_str = data.get("last_used")
+            if last_used_str:
+                last_used = datetime.fromisoformat(last_used_str)
+                age = (now - last_used).total_seconds()
+                if age > timeout_seconds:
+                    expired_keys.append(key)
+                    self.delete_key(key)
+
+        return expired_keys
+
 class RateLimiter:
     """Per-key rate limiting"""
 
@@ -235,6 +255,38 @@ def get_or_create_clipboard(api_key: str) -> Clipboard:
 
 # Create FastAPI app
 app = FastAPI(title="Plaster", version="2.0.0")
+
+# Cleanup background task
+def cleanup_expired_keys_task():
+    """Periodically cleanup expired API keys and their clipboards"""
+    idle_timeout_days = config.get("idle_timeout_days", 7)
+    cleanup_interval_hours = config.get("cleanup_interval_hours", 24)
+    cleanup_interval_seconds = cleanup_interval_hours * 3600
+
+    while True:
+        try:
+            time.sleep(cleanup_interval_seconds)
+            expired_keys = key_manager.cleanup_expired_keys(idle_timeout_days)
+
+            # Delete clipboard data for expired keys
+            for key in expired_keys:
+                if key in clipboards:
+                    del clipboards[key]
+                # Delete backup file
+                backup_file = Path(BACKUP_DIR) / f"{key}.json"
+                if backup_file.exists():
+                    backup_file.unlink()
+
+            if expired_keys:
+                print(f"Cleaned up {len(expired_keys)} expired API keys")
+        except Exception as e:
+            print(f"Error in cleanup task: {e}")
+
+@app.on_event("startup")
+async def startup_event():
+    """Start cleanup task on server startup"""
+    cleanup_thread = threading.Thread(target=cleanup_expired_keys_task, daemon=True)
+    cleanup_thread.start()
 
 # Add CORS middleware
 app.add_middleware(

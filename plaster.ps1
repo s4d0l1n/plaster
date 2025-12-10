@@ -37,7 +37,8 @@ function Invoke-ApiRequest {
     param(
         [string]$Method = 'Get',
         [string]$Endpoint,
-        [object]$Body = $null
+        [object]$Body = $null,
+        [switch]$SkipRetry = $false
     )
 
     $headers = @{
@@ -57,7 +58,18 @@ function Invoke-ApiRequest {
         $params['Body'] = $Body | ConvertTo-Json
     }
 
-    Invoke-WebRequest @params
+    try {
+        Invoke-WebRequest @params
+    } catch {
+        # Check for 401 (expired key)
+        if ($_.Exception.Response.StatusCode -eq 401 -and -not $SkipRetry) {
+            Regenerate-ApiKey
+            # Retry with new key
+            Invoke-ApiRequest -Method $Method -Endpoint $Endpoint -Body $Body -SkipRetry
+        } else {
+            throw $_
+        }
+    }
 }
 
 function New-ApiKey {
@@ -73,6 +85,19 @@ function New-ApiKey {
         Write-Error "Failed to generate API key: $_"
         exit 1
     }
+}
+
+function Regenerate-ApiKey {
+    Write-Host "API key expired. Generating new one..." -ForegroundColor Yellow
+    $newKey = New-ApiKey
+    $script:ApiKey = $newKey
+
+    # Update config file
+    $content = Get-Content $Config -Raw
+    $newContent = $content -replace 'api_key:.*', "api_key: `"$newKey`""
+    Set-Content -Path $Config -Value $newContent
+
+    Write-Host "✓ New API key generated" -ForegroundColor Green
 }
 
 function Load-Config {

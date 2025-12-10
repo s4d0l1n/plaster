@@ -134,10 +134,36 @@ port: 9321
 max_entries: 100
 persistence: true
 backup_file: "~/.plaster/backups/"
-max_entry_size_mb: 10         # Per entry
-max_total_size_mb: 500        # Total per clipboard
-rate_limit_requests: 100      # Per minute
+max_entry_size_mb: 10         # Per entry (10MB default)
+max_total_size_mb: 500        # Total per clipboard (500MB default)
+rate_limit_requests: 100      # Per minute per key
 rate_limit_window_seconds: 60
+idle_timeout_days: 7          # Delete unused keys after 7 days
+cleanup_interval_hours: 24    # Check for expired keys every 24 hours
+```
+
+### Idle Timeout & Auto-Cleanup
+
+**How it works:**
+
+1. **Idle timeout**: After 7 days of inactivity (default), API keys are automatically deleted
+2. **Cleanup task**: Server checks for expired keys every 24 hours (background thread)
+3. **When expired**: All clipboard data and backup files for that key are deleted
+4. **Client behavior**: If client tries expired key → Gets 401 → **Automatically generates new key**
+
+**No manual action needed!** Clients seamlessly regenerate keys when needed.
+
+**Example flow:**
+- Day 1: User generates key → works normally
+- Day 7: No activity → key still valid
+- Day 8: Cleanup runs → deletes old key + clipboard
+- User tries plaster command → 401 error → **auto-generates new key**
+- User continues using Plaster with new key!
+
+**Customize timeouts** in config.yaml:
+```yaml
+idle_timeout_days: 30         # Keep keys for 30 days instead
+cleanup_interval_hours: 6     # Check every 6 hours instead of 24
 ```
 
 **Docker Compose config:**
