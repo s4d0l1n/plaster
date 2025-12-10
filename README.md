@@ -42,19 +42,19 @@ git clone https://github.com/yourusername/plaster.git
 cd plaster
 
 # Start the server
-docker-compose up -d
+docker compose up -d
 ```
 
 That's it! The server is now running at `http://localhost:9321`
 
 **View logs:**
 ```bash
-docker-compose logs -f plaster
+docker compose logs -f plaster
 ```
 
 **Stop the server:**
 ```bash
-docker-compose down
+docker compose down
 ```
 
 **Data persistence:** Clipboard data is stored in a Docker volume called `plaster_data` and will persist across restarts.
