@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  plaster:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: plaster-server
+    ports:
+      - "9321:9321"
+    volumes:
+      # Mount the .plaster directory to persist data across restarts
+      - plaster_data:/root/.plaster
+    environment:
+      # Python output buffering - ensure logs appear immediately
+      PYTHONUNBUFFERED: 1
+    restart: unless-stopped
+    # Resource limits (optional - adjust as needed)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+volumes:
+  # Named volume for persistent clipboard data
+  plaster_data:
+    driver: local

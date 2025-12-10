@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+#
+# Plaster - Cross-platform clipboard service client
+# A FILO (First In, Last Out) clipboard that stores multiple entries
+#
+
+set -euo pipefail
+
+# Default values
+PLASTER_CONFIG="${HOME}/.plaster/config.yaml"
+SERVER_URL="http://localhost:9321"
+HELP_TEXT="Usage: plaster [OPTION]
+
+A FILO clipboard service client.
+
+OPTIONS:
+  (no args)              Get the latest clipboard entry
+  -l, --list             List all clipboard entries (first 50 chars each)
+  -n, --entry <index>    Get specific clipboard entry by index
+  -c, --clear            Clear all clipboard entries
+  --config <path>        Use custom config file path
+  -h, --help             Show this help message
+
+EXAMPLES:
+  echo 'my text' | plaster        # Push text to clipboard
+  plaster                         # Get latest entry
+  plaster --list                  # List all entries
+  plaster -n 3                    # Get 3rd entry
+  plaster --clear                 # Clear clipboard
+"
+
+# Function to load configuration
+load_config() {
+    if [[ ! -f "$PLASTER_CONFIG" ]]; then
+        echo "Error: Config file not found at $PLASTER_CONFIG"
+        echo "Make sure you've started the plaster server first."
+        exit 1
+    fi
+
+    # Extract server_url from YAML
+    SERVER_URL=$(grep "server_url:" "$PLASTER_CONFIG" | head -1 | sed 's/.*: //' | tr -d ' "' || echo "http://localhost:9321")
+}
+
+# Function to check if stdin is being piped
+has_stdin() {
+    [[ ! -t 0 ]]
+}
+
+# Function to show help
+show_help() {
+    echo "$HELP_TEXT"
+}
+
+# Function to push text
+push_text() {
+    local text="$1"
+    local response
+    response=$(curl -s -X POST "$SERVER_URL/push" \
+        -H "Content-Type: application/json" \
+        -d "{\"text\": $(echo "$text" | jq -Rs .)}" 2>&1)
+
+    if echo "$response" | grep -q "status.*ok"; then
+        echo "✓ Text pushed to clipboard"
+    else
+        echo "Error: Failed to push text"
+        echo "$response"
+        exit 1
+    fi
+}
+
+# Function to get latest entry
+get_latest() {
+    local response
+    response=$(curl -s -X GET "$SERVER_URL/peek" 2>&1)
+
+    if echo "$response" | grep -q '"status".*"ok"'; then
+        echo "$response" | jq -r '.text'
+    else
+        echo "Error: Failed to get clipboard entry"
+        exit 1
+    fi
+}
+
+# Function to list all entries
+list_entries() {
+    local response
+    response=$(curl -s -X GET "$SERVER_URL/list" 2>&1)
+
+    if echo "$response" | grep -q '"status".*"ok"'; then
+        local count
+        count=$(echo "$response" | jq -r '.count')
+        echo "Clipboard entries ($count total):"
+        echo "$response" | jq -r '.entries[] | ., ""' | nl
+    else
+        echo "Error: Failed to list entries"
+        exit 1
+    fi
+}
+
+# Function to get specific entry
+get_entry() {
+    local index=$1
+    local response
+    response=$(curl -s -X GET "$SERVER_URL/entry/$index" 2>&1)
+
+    if echo "$response" | grep -q '"status".*"ok"'; then
+        echo "$response" | jq -r '.text'
+    else
+        echo "Error: Failed to get entry at index $index"
+        exit 1
+    fi
+}
+
+# Function to clear clipboard
+clear_clipboard() {
+    local response
+    response=$(curl -s -X DELETE "$SERVER_URL/clear" 2>&1)
+
+    if echo "$response" | grep -q '"status".*"ok"'; then
+        echo "✓ Clipboard cleared"
+    else
+        echo "Error: Failed to clear clipboard"
+        exit 1
+    fi
+}
+
+# Main logic
+main() {
+    load_config
+
+    # Check if text is being piped in
+    if has_stdin; then
+        # Read all stdin and push it
+        local input
+        input=$(cat)
+        push_text "$input"
+        return
+    fi
+
+    # Parse command-line arguments
+    if [[ $# -eq 0 ]]; then
+        # No arguments - get latest entry
+        get_latest
+    else
+        case "$1" in
+            -h|--help)
+                show_help
+                ;;
+            -l|--list)
+                list_entries
+                ;;
+            -n|--entry)
+                if [[ $# -lt 2 ]]; then
+                    echo "Error: -n/--entry requires an index argument"
+                    exit 1
+                fi
+                get_entry "$2"
+                ;;
+            -c|--clear)
+                clear_clipboard
+                ;;
+            --config)
+                if [[ $# -lt 2 ]]; then
+                    echo "Error: --config requires a path argument"
+                    exit 1
+                fi
+                PLASTER_CONFIG="$2"
+                load_config
+                shift 2
+                # Continue processing with remaining args
+                if [[ $# -eq 0 ]]; then
+                    get_latest
+                fi
+                ;;
+            *)
+                echo "Error: Unknown option '$1'"
+                show_help
+                exit 1
+                ;;
+        esac
+    fi
+}
+
+main "$@"

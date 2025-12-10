@@ -1,0 +1,19 @@
+# Plaster Configuration File
+# Location: ~/.plaster/config.yaml
+
+# Server URL - where the plaster service is running
+server_url: "http://localhost:9321"
+
+# Port for the service to listen on
+port: 9321
+
+# Maximum number of clipboard entries to keep
+max_entries: 100
+
+# Data persistence settings
+# If true: keeps entries in memory AND backs them up to disk
+# If false: keeps entries in memory only (lost on restart)
+persistence: true
+
+# Path to backup file (only used if persistence is true)
+backup_file: "~/.plaster/backup.json"
