@@ -1,30 +1,39 @@
 #!/usr/bin/env python3
 """
-Plaster - A clipboard service that stores multiple entries (FILO stack)
+Plaster - A multi-tenant clipboard service with API key authentication
 """
 
 import json
 import os
+import secrets
+import time
 from pathlib import Path
-from typing import List
+from typing import Dict, List, Optional
+from datetime import datetime
 import yaml
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, Request
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 
 # Configuration management
 CONFIG_DIR = Path.home() / ".plaster"
 CONFIG_FILE = CONFIG_DIR / "config.yaml"
-BACKUP_FILE = CONFIG_DIR / "backup.json"
+BACKUP_DIR = CONFIG_DIR / "backups"
+KEYS_FILE = CONFIG_DIR / "keys.json"
 
 # Default configuration
 DEFAULT_CONFIG = {
     "server_url": "http://localhost:9321",
     "max_entries": 100,
     "persistence": True,
-    "backup_file": str(BACKUP_FILE),
-    "port": 9321
+    "backup_file": str(BACKUP_DIR),
+    "port": 9321,
+    "max_entry_size_mb": 10,
+    "max_total_size_mb": 500,
+    "rate_limit_requests": 100,
+    "rate_limit_window_seconds": 60
 }
 
 class TextEntry(BaseModel):
@@ -33,15 +42,24 @@ class TextEntry(BaseModel):
 class Clipboard:
     """Manages clipboard entries with FILO (First In, Last Out) behavior"""
 
-    def __init__(self, max_entries: int = 100, backup_path: str = None, persistence: bool = True):
+    def __init__(self, api_key: str, max_entries: int = 100, backup_path: str = None, persistence: bool = True):
+        self.api_key = api_key
         self.stack: List[str] = []
         self.max_entries = max_entries
         self.persistence = persistence
-        self.backup_path = backup_path or str(BACKUP_FILE)
+        self.backup_path = backup_path
         self.load_from_backup()
 
-    def push(self, text: str) -> None:
+    def push(self, text: str, max_entry_size: int, max_total_size: int) -> None:
         """Add text to clipboard (newest on top)"""
+        # Validate size
+        if len(text) > max_entry_size:
+            raise ValueError(f"Entry exceeds max size of {max_entry_size} bytes")
+
+        total_size = sum(len(e) for e in self.stack) + len(text)
+        if total_size > max_total_size:
+            raise ValueError(f"Clipboard would exceed max total size of {max_total_size} bytes")
+
         self.stack.insert(0, text)
         if len(self.stack) > self.max_entries:
             self.stack.pop()
@@ -82,23 +100,100 @@ class Clipboard:
     def save_to_backup(self) -> None:
         """Save clipboard to disk"""
         try:
-            backup_path = Path(self.backup_path)
-            backup_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(backup_path, 'w') as f:
+            backup_dir = Path(self.backup_path)
+            backup_dir.mkdir(parents=True, exist_ok=True)
+            backup_file = backup_dir / f"{self.api_key}.json"
+            with open(backup_file, 'w') as f:
                 json.dump(self.stack, f)
         except Exception as e:
-            print(f"Warning: Failed to save backup: {e}")
+            print(f"Warning: Failed to save backup for {self.api_key}: {e}")
 
     def load_from_backup(self) -> None:
         """Load clipboard from disk if it exists"""
         try:
-            backup_path = Path(self.backup_path)
-            if backup_path.exists():
-                with open(backup_path, 'r') as f:
+            backup_dir = Path(self.backup_path)
+            backup_file = backup_dir / f"{self.api_key}.json"
+            if backup_file.exists():
+                with open(backup_file, 'r') as f:
                     self.stack = json.load(f)
         except Exception as e:
-            print(f"Warning: Failed to load backup: {e}")
+            print(f"Warning: Failed to load backup for {self.api_key}: {e}")
             self.stack = []
+
+class APIKeyManager:
+    """Manages API keys and their metadata"""
+
+    def __init__(self, keys_file: str):
+        self.keys_file = Path(keys_file)
+        self.keys_data = self.load_keys()
+
+    def load_keys(self) -> dict:
+        """Load keys from file"""
+        if self.keys_file.exists():
+            with open(self.keys_file, 'r') as f:
+                return json.load(f)
+        return {}
+
+    def save_keys(self) -> None:
+        """Save keys to file"""
+        self.keys_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.keys_file, 'w') as f:
+            json.dump(self.keys_data, f, indent=2)
+
+    def generate_key(self) -> str:
+        """Generate a new API key"""
+        key = f"plaster_{secrets.token_hex(16)}"
+        self.keys_data[key] = {
+            "created": datetime.now().isoformat(),
+            "last_used": None
+        }
+        self.save_keys()
+        return key
+
+    def validate_key(self, key: str) -> bool:
+        """Check if key exists"""
+        return key in self.keys_data
+
+    def update_last_used(self, key: str) -> None:
+        """Update last used timestamp"""
+        if key in self.keys_data:
+            self.keys_data[key]["last_used"] = datetime.now().isoformat()
+            self.save_keys()
+
+    def delete_key(self, key: str) -> bool:
+        """Delete an API key"""
+        if key in self.keys_data:
+            del self.keys_data[key]
+            self.save_keys()
+            return True
+        return False
+
+class RateLimiter:
+    """Per-key rate limiting"""
+
+    def __init__(self, requests_per_window: int, window_seconds: int):
+        self.requests_per_window = requests_per_window
+        self.window_seconds = window_seconds
+        self.requests: Dict[str, List[float]] = {}
+
+    def is_allowed(self, key: str) -> bool:
+        """Check if request is allowed for this key"""
+        now = time.time()
+
+        if key not in self.requests:
+            self.requests[key] = []
+
+        # Remove old requests outside the window
+        self.requests[key] = [req_time for req_time in self.requests[key]
+                               if now - req_time < self.window_seconds]
+
+        # Check if limit exceeded
+        if len(self.requests[key]) >= self.requests_per_window:
+            return False
+
+        # Record this request
+        self.requests[key].append(now)
+        return True
 
 def load_config() -> dict:
     """Load configuration from ~/.plaster/config.yaml"""
@@ -114,20 +209,76 @@ def load_config() -> dict:
             yaml.dump(DEFAULT_CONFIG, f)
         return DEFAULT_CONFIG
 
-# Load configuration and initialize clipboard
+# Load configuration
 config = load_config()
-clipboard = Clipboard(
-    max_entries=config.get("max_entries", 100),
-    backup_path=config.get("backup_file", str(BACKUP_FILE)),
-    persistence=config.get("persistence", True)
+
+# Initialize managers
+key_manager = APIKeyManager(str(KEYS_FILE))
+rate_limiter = RateLimiter(
+    config.get("rate_limit_requests", 100),
+    config.get("rate_limit_window_seconds", 60)
 )
 
-# Create FastAPI app
-app = FastAPI(title="Plaster", version="1.0.0")
+# Clipboards storage (per API key)
+clipboards: Dict[str, Clipboard] = {}
 
-def get_html_page() -> str:
+def get_or_create_clipboard(api_key: str) -> Clipboard:
+    """Get or create a clipboard for an API key"""
+    if api_key not in clipboards:
+        clipboards[api_key] = Clipboard(
+            api_key=api_key,
+            max_entries=config.get("max_entries", 100),
+            backup_path=str(BACKUP_DIR),
+            persistence=config.get("persistence", True)
+        )
+    return clipboards[api_key]
+
+# Create FastAPI app
+app = FastAPI(title="Plaster", version="2.0.0")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Authentication middleware
+@app.middleware("http")
+async def check_api_key(request: Request, call_next):
+    """Check API key for all requests except health and key generation"""
+    path = request.url.path
+
+    # Skip auth for health check and static docs
+    if path in ["/health", "/docs", "/openapi.json"]:
+        return await call_next(request)
+
+    # Get API key from header
+    api_key = request.headers.get("X-API-Key")
+
+    if not api_key:
+        return HTTPException(status_code=401, detail="Missing X-API-Key header")
+
+    if not key_manager.validate_key(api_key):
+        return HTTPException(status_code=401, detail="Invalid API key")
+
+    # Check rate limit
+    if not rate_limiter.is_allowed(api_key):
+        return HTTPException(status_code=429, detail="Rate limit exceeded")
+
+    # Update last used
+    key_manager.update_last_used(api_key)
+
+    # Store key in request state for later use
+    request.state.api_key = api_key
+
+    return await call_next(request)
+
+def get_html_page(api_key: str) -> str:
     """Generate the HTML page with embedded CSS and JavaScript"""
-    return """
+    return f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -135,13 +286,13 @@ def get_html_page() -> str:
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Plaster - Clipboard Service</title>
         <style>
-            * {
+            * {{
                 margin: 0;
                 padding: 0;
                 box-sizing: border-box;
-            }
+            }}
 
-            body {
+            body {{
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 min-height: 100vh;
@@ -149,45 +300,118 @@ def get_html_page() -> str:
                 display: flex;
                 justify-content: center;
                 align-items: center;
-            }
+            }}
 
-            .container {
+            .container {{
                 background: white;
                 border-radius: 20px;
                 box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
                 max-width: 600px;
                 width: 100%;
                 overflow: hidden;
-            }
+            }}
 
-            .header {
+            .header {{
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
                 padding: 40px 30px;
                 text-align: center;
-            }
+            }}
 
-            .header h1 {
+            .header h1 {{
                 font-size: 32px;
                 margin-bottom: 8px;
                 font-weight: 700;
-            }
+            }}
 
-            .header p {
+            .header p {{
                 opacity: 0.95;
                 font-size: 14px;
                 letter-spacing: 0.5px;
-            }
+            }}
 
-            .content {
+            .api-key-section {{
+                background: rgba(255, 255, 255, 0.1);
+                padding: 20px;
+                border-radius: 10px;
+                margin-top: 20px;
+                backdrop-filter: blur(10px);
+            }}
+
+            .api-key-label {{
+                font-size: 12px;
+                text-transform: uppercase;
+                opacity: 0.8;
+                letter-spacing: 1px;
+                margin-bottom: 8px;
+                display: block;
+            }}
+
+            .api-key-container {{
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                background: rgba(255, 255, 255, 0.15);
+                padding: 10px 15px;
+                border-radius: 8px;
+                font-family: 'Menlo', monospace;
+                font-size: 12px;
+                word-break: break-all;
+            }}
+
+            .api-key-value {{
+                flex: 1;
+                color: white;
+            }}
+
+            .btn-copy-key {{
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 11px;
+                font-weight: 600;
+                white-space: nowrap;
+                transition: all 0.2s;
+            }}
+
+            .btn-copy-key:hover {{
+                background: rgba(255, 255, 255, 0.3);
+            }}
+
+            .btn-copy-key.copied {{
+                background: #51cf66;
+            }}
+
+            .btn-rotate {{
+                background: #ff6b6b;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 12px;
+                font-weight: 600;
+                transition: all 0.2s;
+                margin-top: 10px;
+                width: 100%;
+            }}
+
+            .btn-rotate:hover {{
+                background: #ee5a52;
+            }}
+
+            .content {{
                 padding: 40px 30px;
-            }
+            }}
 
-            .input-section {
+            .input-section {{
                 margin-bottom: 30px;
-            }
+            }}
 
-            .input-label {
+            .input-label {{
                 display: block;
                 font-size: 14px;
                 font-weight: 600;
@@ -195,14 +419,14 @@ def get_html_page() -> str:
                 margin-bottom: 10px;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
-            }
+            }}
 
-            .input-group {
+            .input-group {{
                 display: flex;
                 gap: 10px;
-            }
+            }}
 
-            #textInput {
+            #textInput {{
                 flex: 1;
                 padding: 14px 16px;
                 border: 2px solid #e0e0e0;
@@ -212,21 +436,21 @@ def get_html_page() -> str:
                 transition: all 0.3s ease;
                 resize: none;
                 min-height: 80px;
-            }
+            }}
 
-            #textInput:focus {
+            #textInput:focus {{
                 outline: none;
                 border-color: #667eea;
                 box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            }
+            }}
 
-            .button-group {
+            .button-group {{
                 display: flex;
                 gap: 10px;
                 margin-top: 15px;
-            }
+            }}
 
-            button {
+            button {{
                 padding: 12px 24px;
                 border: none;
                 border-radius: 10px;
@@ -236,93 +460,93 @@ def get_html_page() -> str:
                 transition: all 0.3s ease;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
-            }
+            }}
 
-            .btn-primary {
+            .btn-primary {{
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
                 flex: 1;
-            }
+            }}
 
-            .btn-primary:hover {
+            .btn-primary:hover {{
                 transform: translateY(-2px);
                 box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-            }
+            }}
 
-            .btn-primary:active {
+            .btn-primary:active {{
                 transform: translateY(0);
-            }
+            }}
 
-            .btn-danger {
+            .btn-danger {{
                 background: #ff6b6b;
                 color: white;
-            }
+            }}
 
-            .btn-danger:hover {
+            .btn-danger:hover {{
                 background: #ee5a52;
                 transform: translateY(-2px);
                 box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
-            }
+            }}
 
-            .btn-danger:active {
+            .btn-danger:active {{
                 transform: translateY(0);
-            }
+            }}
 
-            .btn-copy {
+            .btn-copy {{
                 background: #f0f0f0;
                 color: #333;
                 padding: 8px 12px;
                 font-size: 12px;
                 border-radius: 6px;
                 flex-shrink: 0;
-            }
+            }}
 
-            .btn-copy:hover {
+            .btn-copy:hover {{
                 background: #667eea;
                 color: white;
                 transform: translateY(-2px);
-            }
+            }}
 
-            .btn-copy.copied {
+            .btn-copy.copied {{
                 background: #51cf66;
                 color: white;
-            }
+            }}
 
-            .list-section {
+            .list-section {{
                 margin-top: 40px;
-            }
+            }}
 
-            .list-header {
+            .list-header {{
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 margin-bottom: 20px;
-            }
+            }}
 
-            .list-title {
+            .list-title {{
                 font-size: 18px;
                 font-weight: 700;
                 color: #333;
-            }
+            }}
 
-            .list-count {
+            .list-count {{
                 background: #f0f0f0;
                 color: #666;
                 padding: 6px 12px;
                 border-radius: 20px;
                 font-size: 13px;
                 font-weight: 600;
-            }
+            }}
 
-            .entries-list {
+            .entries-list {{
                 display: flex;
                 flex-direction: column;
                 gap: 12px;
                 max-height: 400px;
                 overflow-y: auto;
-            }
+            }}
 
-            .entry-item {
+            .entry-item {{
                 display: flex;
                 align-items: center;
                 gap: 12px;
@@ -331,48 +555,48 @@ def get_html_page() -> str:
                 border-radius: 10px;
                 border-left: 4px solid #667eea;
                 transition: all 0.3s ease;
-            }
+            }}
 
-            .entry-item:hover {
+            .entry-item:hover {{
                 background: #f0f0f0;
                 transform: translateX(4px);
-            }
+            }}
 
-            .entry-index {
+            .entry-index {{
                 font-weight: 700;
                 color: #667eea;
                 font-size: 12px;
                 min-width: 24px;
                 text-align: center;
-            }
+            }}
 
-            .entry-text {
+            .entry-text {{
                 flex: 1;
                 font-size: 14px;
                 color: #333;
                 word-break: break-word;
                 font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
                 line-height: 1.4;
-            }
+            }}
 
-            .empty-state {
+            .empty-state {{
                 text-align: center;
                 padding: 40px 20px;
                 color: #999;
-            }
+            }}
 
-            .empty-state-icon {
+            .empty-state-icon {{
                 font-size: 48px;
                 margin-bottom: 16px;
                 opacity: 0.5;
-            }
+            }}
 
-            .empty-state-text {
+            .empty-state-text {{
                 font-size: 14px;
                 color: #999;
-            }
+            }}
 
-            .toast {
+            .toast {{
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
@@ -385,51 +609,56 @@ def get_html_page() -> str:
                 transform: translateY(20px);
                 transition: all 0.3s ease;
                 z-index: 1000;
-            }
+            }}
 
-            .toast.show {
+            .toast.show {{
                 opacity: 1;
                 transform: translateY(0);
-            }
+            }}
 
-            ::-webkit-scrollbar {
+            ::-webkit-scrollbar {{
                 width: 6px;
-            }
+            }}
 
-            ::-webkit-scrollbar-track {
+            ::-webkit-scrollbar-track {{
                 background: #f1f1f1;
-            }
+            }}
 
-            ::-webkit-scrollbar-thumb {
+            ::-webkit-scrollbar-thumb {{
                 background: #667eea;
                 border-radius: 3px;
-            }
+            }}
 
-            ::-webkit-scrollbar-thumb:hover {
+            ::-webkit-scrollbar-thumb:hover {{
                 background: #764ba2;
-            }
+            }}
 
-            @media (max-width: 600px) {
-                .header {
+            @media (max-width: 600px) {{
+                .header {{
                     padding: 30px 20px;
-                }
+                }}
 
-                .header h1 {
+                .header h1 {{
                     font-size: 24px;
-                }
+                }}
 
-                .content {
+                .content {{
                     padding: 25px 20px;
-                }
+                }}
 
-                .button-group {
+                .button-group {{
                     flex-direction: column;
-                }
+                }}
 
-                .btn-primary {
+                .btn-primary {{
                     flex: unset;
-                }
-            }
+                }}
+
+                .api-key-container {{
+                    flex-direction: column;
+                    align-items: flex-start;
+                }}
+            }}
         </style>
     </head>
     <body>
@@ -437,6 +666,15 @@ def get_html_page() -> str:
             <div class="header">
                 <h1>📋 Plaster</h1>
                 <p>Your FILO Clipboard Service</p>
+
+                <div class="api-key-section">
+                    <span class="api-key-label">Your API Key</span>
+                    <div class="api-key-container">
+                        <span class="api-key-value" id="apiKeyDisplay">{api_key}</span>
+                        <button class="btn-copy-key" onclick="copyApiKey()">Copy</button>
+                    </div>
+                    <button class="btn-rotate" onclick="rotateKey()">Generate New Key</button>
+                </div>
             </div>
 
             <div class="content">
@@ -463,17 +701,20 @@ def get_html_page() -> str:
 
         <script>
             const API_BASE = window.location.origin;
+            const API_KEY = '{api_key}';
 
-            async function loadEntries() {
-                try {
-                    const response = await fetch(API_BASE + '/list');
+            async function loadEntries() {{
+                try {{
+                    const response = await fetch(API_BASE + '/list', {{
+                        headers: {{'X-API-Key': API_KEY}}
+                    }});
                     const data = await response.json();
 
-                    if (data.status === 'ok') {
+                    if (data.status === 'ok') {{
                         const entriesList = document.getElementById('entriesList');
                         const entryCount = document.getElementById('entryCount');
 
-                        if (data.count === 0) {
+                        if (data.count === 0) {{
                             entriesList.innerHTML = `
                                 <div class="empty-state">
                                     <div class="empty-state-icon">📭</div>
@@ -481,118 +722,154 @@ def get_html_page() -> str:
                                 </div>
                             `;
                             entryCount.textContent = '0 entries';
-                        } else {
+                        }} else {{
                             entriesList.innerHTML = data.entries.map((entry, index) => `
                                 <div class="entry-item">
-                                    <span class="entry-index">#${index}</span>
-                                    <span class="entry-text">${escapeHtml(entry)}</span>
-                                    <button class="btn-copy" onclick="copyToClipboard(${index}, this)">Copy</button>
+                                    <span class="entry-index">#${{index}}</span>
+                                    <span class="entry-text">${{escapeHtml(entry)}}</span>
+                                    <button class="btn-copy" onclick="copyToClipboard(${{index}}, this)">Copy</button>
                                 </div>
                             `).join('');
 
-                            entryCount.textContent = data.count === 1 ? '1 entry' : `${data.count} entries`;
-                        }
-                    }
-                } catch (error) {
+                            entryCount.textContent = data.count === 1 ? '1 entry' : `${{data.count}} entries`;
+                        }}
+                    }}
+                }} catch (error) {{
                     console.error('Error loading entries:', error);
                     showToast('Error loading entries', 'error');
-                }
-            }
+                }}
+            }}
 
-            async function pushText() {
+            async function pushText() {{
                 const text = document.getElementById('textInput').value.trim();
 
-                if (!text) {
+                if (!text) {{
                     showToast('Please enter some text', 'error');
                     return;
-                }
+                }}
 
-                try {
-                    const response = await fetch(API_BASE + '/push', {
+                try {{
+                    const response = await fetch(API_BASE + '/push', {{
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text: text })
-                    });
+                        headers: {{
+                            'Content-Type': 'application/json',
+                            'X-API-Key': API_KEY
+                        }},
+                        body: JSON.stringify({{ text: text }})
+                    }});
 
-                    if (response.ok) {
+                    if (response.ok) {{
                         document.getElementById('textInput').value = '';
                         showToast('✓ Text pushed to clipboard');
                         loadEntries();
-                    } else {
-                        showToast('Error pushing text', 'error');
-                    }
-                } catch (error) {
+                    }} else {{
+                        const error = await response.json();
+                        showToast('Error: ' + error.detail, 'error');
+                    }}
+                }} catch (error) {{
                     console.error('Error:', error);
                     showToast('Error pushing text', 'error');
-                }
-            }
+                }}
+            }}
 
-            async function copyToClipboard(index, button) {
-                try {
-                    const response = await fetch(API_BASE + `/entry/${index}`);
+            async function copyToClipboard(index, button) {{
+                try {{
+                    const response = await fetch(API_BASE + `/entry/${{index}}`, {{
+                        headers: {{'X-API-Key': API_KEY}}
+                    }});
                     const data = await response.json();
 
-                    if (data.status === 'ok') {
+                    if (data.status === 'ok') {{
                         await navigator.clipboard.writeText(data.text);
 
                         button.classList.add('copied');
                         button.textContent = 'Copied!';
 
-                        setTimeout(() => {
+                        setTimeout(() => {{
                             button.classList.remove('copied');
                             button.textContent = 'Copy';
-                        }, 2000);
+                        }}, 2000);
 
                         showToast('✓ Copied to clipboard');
-                    }
-                } catch (error) {
+                    }}
+                }} catch (error) {{
                     console.error('Error:', error);
                     showToast('Error copying to clipboard', 'error');
-                }
-            }
+                }}
+            }}
 
-            async function clearClipboard() {
-                if (!confirm('Are you sure you want to clear all clipboard entries?')) {
+            async function clearClipboard() {{
+                if (!confirm('Are you sure you want to clear all clipboard entries?')) {{
                     return;
-                }
+                }}
 
-                try {
-                    const response = await fetch(API_BASE + '/clear', {
-                        method: 'DELETE'
-                    });
+                try {{
+                    const response = await fetch(API_BASE + '/clear', {{
+                        method: 'DELETE',
+                        headers: {{'X-API-Key': API_KEY}}
+                    }});
 
-                    if (response.ok) {
+                    if (response.ok) {{
                         showToast('✓ Clipboard cleared');
                         loadEntries();
-                    } else {
+                    }} else {{
                         showToast('Error clearing clipboard', 'error');
-                    }
-                } catch (error) {
+                    }}
+                }} catch (error) {{
                     console.error('Error:', error);
                     showToast('Error clearing clipboard', 'error');
-                }
-            }
+                }}
+            }}
 
-            function showToast(message, type = 'success') {
+            async function rotateKey() {{
+                if (!confirm('Generate a new API key? Your old key will still work for 5 minutes.')) {{
+                    return;
+                }}
+
+                try {{
+                    const response = await fetch(API_BASE + '/auth/rotate', {{
+                        method: 'POST',
+                        headers: {{'X-API-Key': API_KEY}}
+                    }});
+
+                    if (response.ok) {{
+                        const data = await response.json();
+                        window.location.reload();
+                    }} else {{
+                        showToast('Error rotating key', 'error');
+                    }}
+                }} catch (error) {{
+                    console.error('Error:', error);
+                    showToast('Error rotating key', 'error');
+                }}
+            }}
+
+            function copyApiKey() {{
+                const keyText = document.getElementById('apiKeyDisplay').textContent;
+                navigator.clipboard.writeText(keyText);
+                showToast('✓ API key copied');
+            }}
+
+            function showToast(message, type = 'success') {{
                 const toast = document.getElementById('toast');
                 toast.textContent = message;
                 toast.className = 'toast show';
 
-                setTimeout(() => {
+                setTimeout(() => {{
                     toast.classList.remove('show');
-                }, 3000);
-            }
+                }}, 3000);
+            }}
 
-            function escapeHtml(text) {
-                const map = {
+            function escapeHtml(text) {{
+                const map = {{
                     '&': '&amp;',
                     '<': '&lt;',
                     '>': '&gt;',
                     '"': '&quot;',
                     "'": '&#039;'
-                };
+                }};
                 return text.replace(/[&<>"']/g, m => map[m]);
-            }
+            }}
 
             // Load entries on page load and set up auto-refresh
             document.addEventListener('DOMContentLoaded', loadEntries);
@@ -600,36 +877,71 @@ def get_html_page() -> str:
             // Refresh entries every 2 seconds
             setInterval(loadEntries, 2000);
 
-            // Allow Enter key to push text
-            document.getElementById('textInput').addEventListener('keydown', (e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            // Allow Ctrl+Enter or Cmd+Enter to push text
+            document.getElementById('textInput').addEventListener('keydown', (e) => {{
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {{
                     pushText();
-                }
-            });
+                }}
+            }});
         </script>
     </body>
     </html>
     """
-
-@app.get("/", response_class=HTMLResponse)
-async def serve_ui():
-    """Serve the web UI"""
-    return get_html_page()
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {"status": "ok"}
 
+@app.get("/", response_class=HTMLResponse)
+async def serve_ui(request: Request):
+    """Serve the web UI"""
+    api_key = request.state.api_key
+    return get_html_page(api_key)
+
+@app.post("/auth/generate")
+async def generate_key():
+    """Generate a new API key (first time setup)"""
+    key = key_manager.generate_key()
+    get_or_create_clipboard(key)
+    return {"status": "ok", "api_key": key}
+
+@app.post("/auth/rotate")
+async def rotate_key(request: Request):
+    """Rotate API key (generates new key, keeps old for backwards compatibility)"""
+    old_key = request.state.api_key
+    new_key = key_manager.generate_key()
+
+    # Copy clipboard from old key to new key
+    if old_key in clipboards:
+        old_clipboard = clipboards[old_key]
+        new_clipboard = get_or_create_clipboard(new_key)
+        new_clipboard.stack = old_clipboard.stack.copy()
+        if config.get("persistence"):
+            new_clipboard.save_to_backup()
+
+    return {"status": "ok", "api_key": new_key}
+
 @app.post("/push")
-async def push(entry: TextEntry):
+async def push(request: Request, entry: TextEntry):
     """Add text to clipboard"""
-    clipboard.push(entry.text)
-    return {"status": "ok", "message": f"Added text (length: {len(entry.text)})"}
+    api_key = request.state.api_key
+    clipboard = get_or_create_clipboard(api_key)
+
+    try:
+        max_entry_size = config.get("max_entry_size_mb", 10) * 1024 * 1024
+        max_total_size = config.get("max_total_size_mb", 500) * 1024 * 1024
+        clipboard.push(entry.text, max_entry_size, max_total_size)
+        return {"status": "ok", "message": f"Added text (length: {len(entry.text)})"}
+    except ValueError as e:
+        raise HTTPException(status_code=413, detail=str(e))
 
 @app.get("/pop")
-async def pop():
+async def pop(request: Request):
     """Get and remove the most recent entry"""
+    api_key = request.state.api_key
+    clipboard = get_or_create_clipboard(api_key)
+
     try:
         entry = clipboard.pop()
         return {"status": "ok", "text": entry}
@@ -637,8 +949,11 @@ async def pop():
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/peek")
-async def peek():
+async def peek(request: Request):
     """Get the most recent entry without removing it"""
+    api_key = request.state.api_key
+    clipboard = get_or_create_clipboard(api_key)
+
     try:
         entry = clipboard.peek()
         return {"status": "ok", "text": entry}
@@ -646,8 +961,11 @@ async def peek():
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/list")
-async def list_entries():
+async def list_entries(request: Request):
     """Get all entries with first 50 characters preview"""
+    api_key = request.state.api_key
+    clipboard = get_or_create_clipboard(api_key)
+
     entries = clipboard.get_all()
     previews = [entry[:50] + ("..." if len(entry) > 50 else "") for entry in entries]
     return {
@@ -657,8 +975,11 @@ async def list_entries():
     }
 
 @app.get("/entry/{index}")
-async def get_entry(index: int):
+async def get_entry(request: Request, index: int):
     """Get specific entry by index"""
+    api_key = request.state.api_key
+    clipboard = get_or_create_clipboard(api_key)
+
     try:
         entry = clipboard.get_entry(index)
         return {"status": "ok", "index": index, "text": entry}
@@ -666,8 +987,11 @@ async def get_entry(index: int):
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.delete("/clear")
-async def clear():
+async def clear(request: Request):
     """Clear all entries"""
+    api_key = request.state.api_key
+    clipboard = get_or_create_clipboard(api_key)
+
     clipboard.clear()
     return {"status": "ok", "message": "Clipboard cleared"}
 
@@ -675,7 +999,11 @@ if __name__ == "__main__":
     port = config.get("port", 9321)
     print(f"Starting Plaster server on port {port}...")
     print(f"Config file: {CONFIG_FILE}")
-    print(f"Backup file: {config.get('backup_file')}")
+    print(f"Backup directory: {BACKUP_DIR}")
+    print(f"API Keys file: {KEYS_FILE}")
     print(f"Max entries: {config.get('max_entries')}")
+    print(f"Max entry size: {config.get('max_entry_size_mb')}MB")
+    print(f"Max total size: {config.get('max_total_size_mb')}MB")
     print(f"Persistence: {config.get('persistence')}")
+    print(f"Rate limit: {config.get('rate_limit_requests')} requests per {config.get('rate_limit_window_seconds')} seconds")
     uvicorn.run(app, host="0.0.0.0", port=port)

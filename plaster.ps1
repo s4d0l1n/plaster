@@ -5,23 +5,7 @@
     A FILO (First In, Last Out) clipboard that stores multiple entries
 
 .DESCRIPTION
-    A PowerShell client for the Plaster clipboard service. Allows pushing text,
-    retrieving entries, listing clipboard history, and clearing entries.
-
-.PARAMETER List
-    List all clipboard entries (first 50 chars each)
-
-.PARAMETER Entry
-    Get specific clipboard entry by index
-
-.PARAMETER Clear
-    Clear all clipboard entries
-
-.PARAMETER Config
-    Use custom config file path
-
-.PARAMETER Help
-    Show help message
+    A PowerShell client for the Plaster clipboard service with automatic API key generation.
 
 .EXAMPLES
     PS> 'my text' | plaster.ps1        # Push text to clipboard
@@ -46,112 +30,125 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$script:ServerUrl = "http://localhost:9321"
+$script:ApiKey = ""
 
-function Show-Help {
-    @"
-Usage: plaster.ps1 [OPTION]
+function Invoke-ApiRequest {
+    param(
+        [string]$Method = 'Get',
+        [string]$Endpoint,
+        [object]$Body = $null
+    )
 
-A FILO clipboard service client.
+    $headers = @{
+        'X-API-Key' = $script:ApiKey
+        'Content-Type' = 'application/json'
+    }
 
-OPTIONS:
-  (no args)              Get the latest clipboard entry
-  -List                  List all clipboard entries (first 50 chars each)
-  -Entry <index>         Get specific clipboard entry by index
-  -Clear                 Clear all clipboard entries
-  -Config <path>         Use custom config file path
-  -Help                  Show this help message
+    $url = "$script:ServerUrl$Endpoint"
+    $params = @{
+        Uri = $url
+        Method = $Method
+        Headers = $headers
+        UseBasicParsing = $true
+    }
 
-EXAMPLES:
-  'my text' | plaster.ps1        # Push text to clipboard
-  plaster.ps1                    # Get latest entry
-  plaster.ps1 -List              # List all entries
-  plaster.ps1 -Entry 3           # Get 3rd entry
-  plaster.ps1 -Clear             # Clear clipboard
-"@
+    if ($Body) {
+        $params['Body'] = $Body | ConvertTo-Json
+    }
+
+    Invoke-WebRequest @params
+}
+
+function New-ApiKey {
+    try {
+        $response = Invoke-WebRequest -Uri "$script:ServerUrl/auth/generate" `
+            -Method Post `
+            -ContentType "application/json" `
+            -UseBasicParsing -ErrorAction Stop
+
+        $data = $response.Content | ConvertFrom-Json
+        return $data.api_key
+    } catch {
+        Write-Error "Failed to generate API key: $_"
+        exit 1
+    }
 }
 
 function Load-Config {
     if (-not (Test-Path $Config)) {
-        Write-Error "Error: Config file not found at $Config"
-        Write-Error "Make sure you've started the plaster server first."
-        exit 1
+        Write-Host "Generating new API key..." -ForegroundColor Cyan
+        $script:ApiKey = New-ApiKey
+
+        # Create directory
+        $configDir = Split-Path $Config
+        if (-not (Test-Path $configDir)) {
+            New-Item -ItemType Directory -Path $configDir -Force | Out-Null
+        }
+
+        # Create config
+        $configContent = @"
+# Plaster Configuration File
+# Auto-generated on first use
+
+server_url: "$script:ServerUrl"
+api_key: "$script:ApiKey"
+port: 9321
+max_entries: 100
+persistence: true
+backup_file: "~/.plaster/backup.json"
+max_entry_size_mb: 10
+max_total_size_mb: 500
+rate_limit_requests: 100
+rate_limit_window_seconds: 60
+"@
+        Set-Content -Path $Config -Value $configContent
+        Write-Host "✓ Configuration created at $Config" -ForegroundColor Green
+        Write-Host "✓ API Key: $script:ApiKey" -ForegroundColor Green
     }
 
-    # Parse YAML config file (simple regex approach)
+    # Parse YAML
     $content = Get-Content $Config -Raw
+
     $match = $content -match 'server_url:\s*["\']?([^"\s]+)'
     if ($match) {
         $script:ServerUrl = $matches[1]
-    } else {
-        $script:ServerUrl = "http://localhost:9321"
     }
-}
 
-function Push-Text {
-    param([string]$Text)
+    $match = $content -match 'api_key:\s*["\']?([^"\s]+)'
+    if ($match) {
+        $script:ApiKey = $matches[1]
+    }
 
-    $body = @{
-        text = $Text
-    } | ConvertTo-Json
-
-    try {
-        $response = Invoke-WebRequest -Uri "$ServerUrl/push" `
-            -Method Post `
-            -ContentType "application/json" `
-            -Body $body `
-            -UseBasicParsing `
-            -ErrorAction Stop
-
-        if ($response.StatusCode -eq 200) {
-            Write-Host "✓ Text pushed to clipboard" -ForegroundColor Green
-        }
-    } catch {
-        Write-Error "Error: Failed to push text`n$_"
+    if ([string]::IsNullOrEmpty($script:ApiKey)) {
+        Write-Error "No API key found in config"
         exit 1
     }
 }
 
 function Get-LatestEntry {
     try {
-        $response = Invoke-WebRequest -Uri "$ServerUrl/peek" `
-            -Method Get `
-            -UseBasicParsing `
-            -ErrorAction Stop
-
+        $response = Invoke-ApiRequest -Endpoint '/peek'
         $data = $response.Content | ConvertFrom-Json
-        if ($data.status -eq "ok") {
-            Write-Output $data.text
-        } else {
-            Write-Error "Error: Failed to get clipboard entry"
-            exit 1
-        }
+        Write-Output $data.text
     } catch {
-        Write-Error "Error: Failed to get clipboard entry`n$_"
+        Write-Error "Failed to get clipboard entry: $_"
         exit 1
     }
 }
 
 function Get-ClipboardList {
     try {
-        $response = Invoke-WebRequest -Uri "$ServerUrl/list" `
-            -Method Get `
-            -UseBasicParsing `
-            -ErrorAction Stop
-
+        $response = Invoke-ApiRequest -Endpoint '/list'
         $data = $response.Content | ConvertFrom-Json
-        if ($data.status -eq "ok") {
-            Write-Host "Clipboard entries ($($data.count) total):" -ForegroundColor Cyan
-            $index = 0
-            foreach ($entry in $data.entries) {
-                Write-Host "$($index + 1). $entry"
-                $index++
-            }
-        } else {
-            Write-Error "Error: Failed to list entries"
-            exit 1
+
+        Write-Host "Clipboard entries ($($data.count) total):" -ForegroundColor Cyan
+        $data.entries | ForEach-Object -Begin { $i = 0 } {
+            Write-Host "$([String]::Format('{0, 3}', $i + 1)). $_"
+            $i++
         }
     } catch {
-        Write-Error "Error: Failed to list entries`n$_"
+        Write-Error "Failed to list entries: $_"
         exit 1
     }
 }
@@ -160,36 +157,34 @@ function Get-ClipboardEntry {
     param([int]$Index)
 
     try {
-        $response = Invoke-WebRequest -Uri "$ServerUrl/entry/$Index" `
-            -Method Get `
-            -UseBasicParsing `
-            -ErrorAction Stop
-
+        $response = Invoke-ApiRequest -Endpoint "/entry/$Index"
         $data = $response.Content | ConvertFrom-Json
-        if ($data.status -eq "ok") {
-            Write-Output $data.text
-        } else {
-            Write-Error "Error: Failed to get entry at index $Index"
-            exit 1
-        }
+        Write-Output $data.text
     } catch {
-        Write-Error "Error: Failed to get entry at index $Index`n$_"
+        Write-Error "Failed to get entry at index $Index`: $_"
+        exit 1
+    }
+}
+
+function Push-Text {
+    param([string]$Text)
+
+    try {
+        $body = @{ text = $Text }
+        $response = Invoke-ApiRequest -Method Post -Endpoint '/push' -Body $body
+        Write-Host "✓ Text pushed to clipboard" -ForegroundColor Green
+    } catch {
+        Write-Error "Failed to push text: $_"
         exit 1
     }
 }
 
 function Clear-Clipboard {
     try {
-        $response = Invoke-WebRequest -Uri "$ServerUrl/clear" `
-            -Method Delete `
-            -UseBasicParsing `
-            -ErrorAction Stop
-
-        if ($response.StatusCode -eq 200) {
-            Write-Host "✓ Clipboard cleared" -ForegroundColor Green
-        }
+        $response = Invoke-ApiRequest -Method Delete -Endpoint '/clear'
+        Write-Host "✓ Clipboard cleared" -ForegroundColor Green
     } catch {
-        Write-Error "Error: Failed to clear clipboard`n$_"
+        Write-Error "Failed to clear clipboard: $_"
         exit 1
     }
 }
@@ -198,13 +193,20 @@ function Clear-Clipboard {
 Load-Config
 
 if ($Help) {
-    Show-Help
+    Get-Help $MyInvocation.MyCommand.Name
     exit 0
 }
 
-# Check if input is being piped
-if (-not [console]::IsInputRedirected) {
-    # Interactive mode - process parameters
+# Check for piped input
+if (-not [console]::IsInputRedirected -and -not [string]::IsNullOrWhiteSpace($InputText)) {
+    Push-Text -Text $InputText
+} elseif ([console]::IsInputRedirected) {
+    $InputText = [Console]::In.ReadToEnd()
+    if (-not [string]::IsNullOrEmpty($InputText)) {
+        Push-Text -Text $InputText
+    }
+} else {
+    # Interactive mode
     if ($List) {
         Get-ClipboardList
     } elseif ($Entry -ge 0) {
@@ -214,14 +216,5 @@ if (-not [console]::IsInputRedirected) {
     } else {
         # Default: get latest entry
         Get-LatestEntry
-    }
-} else {
-    # Piped input mode - read and push
-    if ([string]::IsNullOrEmpty($InputText)) {
-        $InputText = [Console]::In.ReadToEnd()
-    }
-
-    if (-not [string]::IsNullOrEmpty($InputText)) {
-        Push-Text -Text $InputText
     }
 }

@@ -9,6 +9,7 @@ set -euo pipefail
 # Default values
 PLASTER_CONFIG="${HOME}/.plaster/config.yaml"
 SERVER_URL="http://localhost:9321"
+API_KEY=""
 HELP_TEXT="Usage: plaster [OPTION]
 
 A FILO clipboard service client.
@@ -29,16 +30,58 @@ EXAMPLES:
   plaster --clear                 # Clear clipboard
 "
 
+# Function to generate a new API key from server
+generate_api_key() {
+    local response
+    response=$(curl -s -X POST "$SERVER_URL/auth/generate" \
+        -H "Content-Type: application/json" 2>&1)
+
+    if echo "$response" | jq -e '.api_key' > /dev/null 2>&1; then
+        echo "$response" | jq -r '.api_key'
+    else
+        echo "Error: Failed to generate API key" >&2
+        exit 1
+    fi
+}
+
 # Function to load configuration
 load_config() {
     if [[ ! -f "$PLASTER_CONFIG" ]]; then
-        echo "Error: Config file not found at $PLASTER_CONFIG"
-        echo "Make sure you've started the plaster server first."
-        exit 1
+        # Create config directory
+        mkdir -p "$(dirname "$PLASTER_CONFIG")"
+
+        # Generate new API key
+        echo "Generating new API key..." >&2
+        API_KEY=$(generate_api_key)
+
+        # Create config file
+        cat > "$PLASTER_CONFIG" << EOF
+# Plaster Configuration File
+# Auto-generated on first use
+
+server_url: "$SERVER_URL"
+api_key: "$API_KEY"
+port: 9321
+max_entries: 100
+persistence: true
+backup_file: "~/.plaster/backup.json"
+max_entry_size_mb: 10
+max_total_size_mb: 500
+rate_limit_requests: 100
+rate_limit_window_seconds: 60
+EOF
+        echo "✓ Configuration created at $PLASTER_CONFIG" >&2
+        echo "✓ API Key: $API_KEY" >&2
     fi
 
-    # Extract server_url from YAML
+    # Extract values from YAML
     SERVER_URL=$(grep "server_url:" "$PLASTER_CONFIG" | head -1 | sed 's/.*: //' | tr -d ' "' || echo "http://localhost:9321")
+    API_KEY=$(grep "api_key:" "$PLASTER_CONFIG" | head -1 | sed 's/.*: //' | tr -d ' "' || echo "")
+
+    if [[ -z "$API_KEY" ]]; then
+        echo "Error: No API key found in config. Please regenerate config." >&2
+        exit 1
+    fi
 }
 
 # Function to check if stdin is being piped
@@ -57,13 +100,14 @@ push_text() {
     local response
     response=$(curl -s -X POST "$SERVER_URL/push" \
         -H "Content-Type: application/json" \
+        -H "X-API-Key: $API_KEY" \
         -d "{\"text\": $(echo "$text" | jq -Rs .)}" 2>&1)
 
     if echo "$response" | grep -q "status.*ok"; then
-        echo "✓ Text pushed to clipboard"
+        echo "✓ Text pushed to clipboard" >&2
     else
-        echo "Error: Failed to push text"
-        echo "$response"
+        echo "Error: Failed to push text" >&2
+        echo "$response" >&2
         exit 1
     fi
 }
@@ -71,12 +115,14 @@ push_text() {
 # Function to get latest entry
 get_latest() {
     local response
-    response=$(curl -s -X GET "$SERVER_URL/peek" 2>&1)
+    response=$(curl -s -X GET "$SERVER_URL/peek" \
+        -H "X-API-Key: $API_KEY" 2>&1)
 
     if echo "$response" | grep -q '"status".*"ok"'; then
         echo "$response" | jq -r '.text'
     else
-        echo "Error: Failed to get clipboard entry"
+        echo "Error: Failed to get clipboard entry" >&2
+        echo "$response" >&2
         exit 1
     fi
 }
@@ -84,15 +130,17 @@ get_latest() {
 # Function to list all entries
 list_entries() {
     local response
-    response=$(curl -s -X GET "$SERVER_URL/list" 2>&1)
+    response=$(curl -s -X GET "$SERVER_URL/list" \
+        -H "X-API-Key: $API_KEY" 2>&1)
 
     if echo "$response" | grep -q '"status".*"ok"'; then
         local count
         count=$(echo "$response" | jq -r '.count')
-        echo "Clipboard entries ($count total):"
+        echo "Clipboard entries ($count total):" >&2
         echo "$response" | jq -r '.entries[] | ., ""' | nl
     else
-        echo "Error: Failed to list entries"
+        echo "Error: Failed to list entries" >&2
+        echo "$response" >&2
         exit 1
     fi
 }
@@ -101,12 +149,14 @@ list_entries() {
 get_entry() {
     local index=$1
     local response
-    response=$(curl -s -X GET "$SERVER_URL/entry/$index" 2>&1)
+    response=$(curl -s -X GET "$SERVER_URL/entry/$index" \
+        -H "X-API-Key: $API_KEY" 2>&1)
 
     if echo "$response" | grep -q '"status".*"ok"'; then
         echo "$response" | jq -r '.text'
     else
-        echo "Error: Failed to get entry at index $index"
+        echo "Error: Failed to get entry at index $index" >&2
+        echo "$response" >&2
         exit 1
     fi
 }
@@ -114,12 +164,14 @@ get_entry() {
 # Function to clear clipboard
 clear_clipboard() {
     local response
-    response=$(curl -s -X DELETE "$SERVER_URL/clear" 2>&1)
+    response=$(curl -s -X DELETE "$SERVER_URL/clear" \
+        -H "X-API-Key: $API_KEY" 2>&1)
 
     if echo "$response" | grep -q '"status".*"ok"'; then
-        echo "✓ Clipboard cleared"
+        echo "✓ Clipboard cleared" >&2
     else
-        echo "Error: Failed to clear clipboard"
+        echo "Error: Failed to clear clipboard" >&2
+        echo "$response" >&2
         exit 1
     fi
 }
@@ -151,7 +203,7 @@ main() {
                 ;;
             -n|--entry)
                 if [[ $# -lt 2 ]]; then
-                    echo "Error: -n/--entry requires an index argument"
+                    echo "Error: -n/--entry requires an index argument" >&2
                     exit 1
                 fi
                 get_entry "$2"
@@ -161,7 +213,7 @@ main() {
                 ;;
             --config)
                 if [[ $# -lt 2 ]]; then
-                    echo "Error: --config requires a path argument"
+                    echo "Error: --config requires a path argument" >&2
                     exit 1
                 fi
                 PLASTER_CONFIG="$2"
@@ -173,7 +225,7 @@ main() {
                 fi
                 ;;
             *)
-                echo "Error: Unknown option '$1'"
+                echo "Error: Unknown option '$1'" >&2
                 show_help
                 exit 1
                 ;;
