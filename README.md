@@ -209,6 +209,26 @@ curl -X POST http://localhost:9321/push \
 
 ## Installation
 
+### Setup Configuration (Recommended)
+
+Before using the client, configure your server URL and API key using the interactive installation scripts:
+
+**Linux/macOS:**
+```bash
+bash install.sh
+```
+
+**Windows (PowerShell):**
+```powershell
+.\install.ps1
+```
+
+The scripts will:
+- Prompt for your server URL (e.g., `http://localhost:9321`)
+- Prompt for your API key
+- Create `~/.plaster/config.yaml` with your settings
+- Set secure file permissions
+
 ### Manual (No Docker)
 
 ```bash

@@ -311,14 +311,14 @@ async def check_api_key(request: Request, call_next):
     api_key = request.headers.get("X-API-Key")
 
     if not api_key:
-        return HTTPException(status_code=401, detail="Missing X-API-Key header")
+        raise HTTPException(status_code=401, detail="Missing X-API-Key header")
 
     if not key_manager.validate_key(api_key):
-        return HTTPException(status_code=401, detail="Invalid API key")
+        raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Check rate limit
     if not rate_limiter.is_allowed(api_key):
-        return HTTPException(status_code=429, detail="Rate limit exceeded")
+        raise HTTPException(status_code=429, detail="Rate limit exceeded")
 
     # Update last used
     key_manager.update_last_used(api_key)
