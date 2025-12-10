@@ -18,7 +18,7 @@ A FILO (First In, Last Out) clipboard service with API key authentication, beaut
 ## Quick Start (Docker)
 
 ```bash
-git clone https://github.com/yourusername/plaster.git
+git clone https://github.com/s4d0l1n/plaster.git
 cd plaster
 docker-compose up -d
 ```
@@ -29,12 +29,12 @@ Server running at `http://localhost:9321`
 
 ```bash
 # Linux/macOS
-curl -o ~/.local/bin/plaster https://raw.githubusercontent.com/yourusername/plaster/main/plaster
+curl -o ~/.local/bin/plaster https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster
 chmod +x ~/.local/bin/plaster
 echo 'hello' | plaster  # Creates ~/.plaster/config.yaml with API key
 
 # Windows PowerShell
-(Invoke-WebRequest -Uri "https://raw.githubusercontent.com/yourusername/plaster/main/plaster.ps1" -OutFile "$env:USERPROFILE\.plaster\plaster.ps1")
+(Invoke-WebRequest -Uri "https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster.ps1" -OutFile "$env:USERPROFILE\.plaster\plaster.ps1")
 'hello' | & "$env:USERPROFILE\.plaster\plaster.ps1"
 ```
 
@@ -213,7 +213,7 @@ curl -X POST http://localhost:9321/push \
 
 ```bash
 # Clone & install
-git clone https://github.com/yourusername/plaster.git
+git clone https://github.com/s4d0l1n/plaster.git
 cd plaster
 pip install -r requirements.txt
 
@@ -363,7 +363,7 @@ MIT
 ## Support
 
 - Check logs: `docker-compose logs plaster` or `journalctl -u plaster -f`
-- Issues: https://github.com/yourusername/plaster/issues
+- Issues: https://github.com/s4d0l1n/plaster/issues
 - Docs: See code comments in `plaster_server.py`
 
 ---
