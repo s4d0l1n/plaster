@@ -20,7 +20,7 @@ A FILO (First In, Last Out) clipboard service with API key authentication, beaut
 ```bash
 git clone https://github.com/s4d0l1n/plaster.git
 cd plaster
-docker-compose up -d
+docker compose up -d
 ```
 
 Server running at `http://localhost:9321`
@@ -350,7 +350,7 @@ plaster/
 ├── plaster.ps1            # PowerShell client with auto-key generation
 ├── config.yaml            # Template config
 ├── Dockerfile             # Container definition
-├── docker-compose.yaml    # Full stack
+├── docker compose.yaml    # Full stack
 ├── requirements.txt       # Python deps
 ├── .gitignore
 └── README.md
@@ -362,7 +362,7 @@ MIT
 
 ## Support
 
-- Check logs: `docker-compose logs plaster` or `journalctl -u plaster -f`
+- Check logs: `docker compose logs plaster` or `journalctl -u plaster -f`
 - Issues: https://github.com/s4d0l1n/plaster/issues
 - Docs: See code comments in `plaster_server.py`
 
