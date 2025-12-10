@@ -23,7 +23,10 @@ param(
     [switch]$List,
     [switch]$Clear,
     [switch]$Help,
+    [switch]$Setup,
+    [switch]$NewApi,
 
+    [string]$NewServerUrl,
     [int]$Entry = -1,
 
     [string]$Config = (Join-Path $env:USERPROFILE ".plaster" "config.yaml")
@@ -102,34 +105,9 @@ function Regenerate-ApiKey {
 
 function Load-Config {
     if (-not (Test-Path $Config)) {
-        Write-Host "Generating new API key..." -ForegroundColor Cyan
-        $script:ApiKey = New-ApiKey
-
-        # Create directory
-        $configDir = Split-Path $Config
-        if (-not (Test-Path $configDir)) {
-            New-Item -ItemType Directory -Path $configDir -Force | Out-Null
-        }
-
-        # Create config
-        $configContent = @"
-# Plaster Configuration File
-# Auto-generated on first use
-
-server_url: "$script:ServerUrl"
-api_key: "$script:ApiKey"
-port: 9321
-max_entries: 100
-persistence: true
-backup_file: "~/.plaster/backup.json"
-max_entry_size_mb: 10
-max_total_size_mb: 500
-rate_limit_requests: 100
-rate_limit_window_seconds: 60
-"@
-        Set-Content -Path $Config -Value $configContent
-        Write-Host "✓ Configuration created at $Config" -ForegroundColor Green
-        Write-Host "✓ API Key: $script:ApiKey" -ForegroundColor Green
+        Write-Host "Error: Config file not found at $Config" -ForegroundColor Red
+        Write-Host "Run './plaster.ps1 -Setup' to initialize." -ForegroundColor Yellow
+        exit 1
     }
 
     # Parse YAML
@@ -146,9 +124,96 @@ rate_limit_window_seconds: 60
     }
 
     if ([string]::IsNullOrEmpty($script:ApiKey)) {
-        Write-Error "No API key found in config"
+        Write-Host "Error: No API key found in config. Run './plaster.ps1 -NewApi' to generate one." -ForegroundColor Red
         exit 1
     }
+}
+
+function Setup-Config {
+    Write-Host ""
+    Write-Host "╔═════════════════════════════════════════╗" -ForegroundColor Cyan
+    Write-Host "║     Plaster Initial Setup               ║" -ForegroundColor Cyan
+    Write-Host "╚═════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host ""
+
+    # Create config directory
+    $configDir = Split-Path $Config
+    if (-not (Test-Path $configDir)) {
+        New-Item -ItemType Directory -Path $configDir -Force | Out-Null
+    }
+
+    # Prompt for server URL
+    while ($true) {
+        $serverInput = Read-Host "Server URL (e.g., http://localhost:9321)"
+        if ([string]::IsNullOrWhiteSpace($serverInput)) {
+            Write-Host "Error: Server URL cannot be empty" -ForegroundColor Red
+            continue
+        }
+        $script:ServerUrl = $serverInput
+        break
+    }
+
+    Write-Host ""
+    Write-Host "Generating API key from server..." -ForegroundColor Cyan
+    $script:ApiKey = New-ApiKey
+
+    # Create config
+    $configContent = @"
+# Plaster Configuration File
+
+server_url: "$script:ServerUrl"
+api_key: "$script:ApiKey"
+port: 9321
+max_entries: 100
+persistence: true
+backup_file: "~/.plaster/backup.json"
+max_entry_size_mb: 10
+max_total_size_mb: 500
+rate_limit_requests: 100
+rate_limit_window_seconds: 60
+"@
+    Set-Content -Path $Config -Value $configContent
+
+    Write-Host ""
+    Write-Host "✓ Configuration saved to $Config" -ForegroundColor Green
+    Write-Host "✓ Server URL: $script:ServerUrl" -ForegroundColor Green
+    Write-Host "✓ API Key: $script:ApiKey" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Setup complete! You can now use Plaster:" -ForegroundColor Green
+    Write-Host "  'my text' | .\plaster.ps1    # Push text"
+    Write-Host "  .\plaster.ps1                # Get latest entry"
+    Write-Host "  .\plaster.ps1 -List          # List all entries"
+}
+
+function Generate-NewApiKey {
+    Load-Config
+
+    Write-Host "Generating new API key from $script:ServerUrl..." -ForegroundColor Cyan
+    $newKey = New-ApiKey
+    $script:ApiKey = $newKey
+
+    # Update config file
+    $content = Get-Content $Config -Raw
+    $newContent = $content -replace 'api_key:.*', "api_key: `"$newKey`""
+    Set-Content -Path $Config -Value $newContent
+
+    Write-Host "✓ New API key generated: $newKey" -ForegroundColor Green
+}
+
+function Change-ServerUrl {
+    param([string]$NewUrl)
+
+    if (-not (Test-Path $Config)) {
+        Write-Host "Error: Config file not found. Run './plaster.ps1 -Setup' first." -ForegroundColor Red
+        exit 1
+    }
+
+    # Update config file
+    $content = Get-Content $Config -Raw
+    $newContent = $content -replace 'server_url:.*', "server_url: `"$NewUrl`""
+    Set-Content -Path $Config -Value $newContent
+
+    Write-Host "✓ Server URL updated to: $NewUrl" -ForegroundColor Green
 }
 
 function Get-LatestEntry {
@@ -215,12 +280,29 @@ function Clear-Clipboard {
 }
 
 # Main logic
-Load-Config
-
 if ($Help) {
     Get-Help $MyInvocation.MyCommand.Name
     exit 0
 }
+
+# Handle setup commands first (don't need config loaded)
+if ($Setup) {
+    Setup-Config
+    exit 0
+}
+
+if ($NewApi) {
+    Generate-NewApiKey
+    exit 0
+}
+
+if (-not [string]::IsNullOrEmpty($NewServerUrl)) {
+    Change-ServerUrl -NewUrl $NewServerUrl
+    exit 0
+}
+
+# Load config for all other operations
+Load-Config
 
 # Check for piped input
 if (-not [console]::IsInputRedirected -and -not [string]::IsNullOrWhiteSpace($InputText)) {

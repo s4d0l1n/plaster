@@ -25,20 +25,20 @@ docker compose up -d
 
 Server running at `http://localhost:9321`
 
-**First client use (auto-generates API key):**
+**Setup client:**
 
 ```bash
 # Linux/macOS
-curl -o ~/.local/bin/plaster https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster
-chmod +x ~/.local/bin/plaster
-echo 'hello' | plaster  # Creates ~/.plaster/config.yaml with API key
+curl -o ~/plaster https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster
+chmod +x ~/plaster
+~/plaster --setup          # Interactive setup (enter server URL, get API key)
 
 # Windows PowerShell
-(Invoke-WebRequest -Uri "https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster.ps1" -OutFile "$env:USERPROFILE\.plaster\plaster.ps1")
-'hello' | & "$env:USERPROFILE\.plaster\plaster.ps1"
+(Invoke-WebRequest -Uri "https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster.ps1" -OutFile "$env:USERPROFILE\plaster.ps1")
+& "$env:USERPROFILE\plaster.ps1" -Setup     # Interactive setup
 ```
 
-That's it! API key is auto-generated and saved.
+That's it! Config is saved and you can start using Plaster.
 
 ## How It Works
 
@@ -87,40 +87,58 @@ Access `http://localhost:9321` after providing API key (displayed when first acc
 ### CLI (Bash/macOS/Linux)
 
 ```bash
-# First run - generates key
+# Initial setup (required first time)
+plaster --setup
+
+# Push text to clipboard
 echo 'text' | plaster
 
 # Get latest entry
 plaster
 
-# List all
+# List all entries
 plaster --list
 
 # Get specific entry (0-indexed)
 plaster -n 0
 plaster -n 3
 
-# Clear all
+# Clear all entries
 plaster --clear
+
+# Generate new API key
+plaster --new-api
+
+# Change server URL
+plaster --new-server-url http://new-server:9321
 ```
 
 ### CLI (PowerShell/Windows)
 
 ```powershell
-# First run - generates key
-'text' | & plaster.ps1
+# Initial setup (required first time)
+.\plaster.ps1 -Setup
 
-# Get latest
-& plaster.ps1
+# Push text to clipboard
+'text' | & .\plaster.ps1
 
-# List all
-& plaster.ps1 -List
+# Get latest entry
+& .\plaster.ps1
 
-# Get entry
-& plaster.ps1 -Entry 0
+# List all entries
+& .\plaster.ps1 -List
 
-# Clear all
-& plaster.ps1 -Clear
+# Get specific entry (0-indexed)
+& .\plaster.ps1 -Entry 0
+
+# Clear all entries
+& .\plaster.ps1 -Clear
+
+# Generate new API key
+& .\plaster.ps1 -NewApi
+
+# Change server URL
+& .\plaster.ps1 -NewServerUrl http://new-server:9321
 ```
 
 ## Configuration
@@ -209,25 +227,32 @@ curl -X POST http://localhost:9321/push \
 
 ## Installation
 
-### Setup Configuration (Recommended)
+### Client Setup (Recommended)
 
-Before using the client, configure your server URL and API key using the interactive installation scripts:
+The Plaster client scripts handle setup directly. Just run the setup command:
 
 **Linux/macOS:**
 ```bash
-bash install.sh
+plaster --setup
 ```
 
 **Windows (PowerShell):**
 ```powershell
-.\install.ps1
+.\plaster.ps1 -Setup
 ```
 
-The scripts will:
-- Prompt for your server URL (e.g., `http://localhost:9321`)
-- Prompt for your API key
+The setup wizard will:
+- Ask for your server URL (e.g., `http://localhost:9321`)
+- Call the server to generate an API key automatically
 - Create `~/.plaster/config.yaml` with your settings
 - Set secure file permissions
+
+**Other client commands:**
+```bash
+plaster --new-api                      # Generate a new API key
+plaster --new-server-url <url>         # Change the server URL
+plaster --help                         # Show all available commands
+```
 
 ### Manual (No Docker)
 

@@ -300,11 +300,11 @@ app.add_middleware(
 # Authentication middleware
 @app.middleware("http")
 async def check_api_key(request: Request, call_next):
-    """Check API key for all requests except health and key generation"""
+    """Check API key for all requests except health, key generation, and initial setup"""
     path = request.url.path
 
-    # Skip auth for health check and static docs
-    if path in ["/health", "/docs", "/openapi.json"]:
+    # Skip auth for health check, static docs, key generation, and root path (initial setup)
+    if path in ["/health", "/docs", "/openapi.json", "/auth/generate", "/"]:
         return await call_next(request)
 
     # Get API key from header
@@ -327,6 +327,289 @@ async def check_api_key(request: Request, call_next):
     request.state.api_key = api_key
 
     return await call_next(request)
+
+def get_setup_page() -> str:
+    """Generate the setup/login page"""
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Plaster - Clipboard Service</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .container {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                max-width: 600px;
+                width: 100%;
+                overflow: hidden;
+            }
+
+            .header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 32px;
+                margin-bottom: 8px;
+                font-weight: 700;
+            }
+
+            .header p {
+                opacity: 0.95;
+                font-size: 14px;
+                letter-spacing: 0.5px;
+            }
+
+            .content {
+                padding: 40px 30px;
+            }
+
+            .section {
+                margin-bottom: 30px;
+            }
+
+            .section h2 {
+                font-size: 18px;
+                color: #333;
+                margin-bottom: 15px;
+                font-weight: 600;
+            }
+
+            .input-group {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            #apiKeyInput {
+                flex: 1;
+                padding: 12px 16px;
+                border: 2px solid #e0e0e0;
+                border-radius: 10px;
+                font-size: 14px;
+                font-family: 'Menlo', monospace;
+                transition: all 0.3s ease;
+            }
+
+            #apiKeyInput:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            button {
+                padding: 12px 24px;
+                border: none;
+                border-radius: 10px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                flex: 0 0 auto;
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            }
+
+            .btn-primary:active {
+                transform: translateY(0);
+            }
+
+            .instructions {
+                background: #f8f9fa;
+                border-left: 4px solid #667eea;
+                padding: 15px;
+                border-radius: 8px;
+                line-height: 1.6;
+            }
+
+            .instructions h3 {
+                color: #333;
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+
+            .instructions ol {
+                margin-left: 20px;
+                color: #666;
+                font-size: 13px;
+            }
+
+            .instructions li {
+                margin-bottom: 8px;
+            }
+
+            .code-block {
+                background: #f0f0f0;
+                padding: 10px;
+                border-radius: 6px;
+                font-family: 'Menlo', monospace;
+                font-size: 12px;
+                margin-top: 8px;
+                overflow-x: auto;
+                color: #333;
+            }
+
+            .toast {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: #51cf66;
+                color: white;
+                padding: 14px 20px;
+                border-radius: 10px;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+                opacity: 0;
+                transform: translateY(20px);
+                transition: all 0.3s ease;
+                z-index: 1000;
+            }
+
+            .toast.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .toast.error {
+                background: #ff6b6b;
+            }
+
+            @media (max-width: 600px) {
+                .header {
+                    padding: 30px 20px;
+                }
+
+                .header h1 {
+                    font-size: 24px;
+                }
+
+                .content {
+                    padding: 25px 20px;
+                }
+
+                .input-group {
+                    flex-direction: column;
+                }
+
+                button {
+                    width: 100%;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>📋 Plaster</h1>
+                <p>Your FILO Clipboard Service</p>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <h2>Access Clipboard</h2>
+                    <div class="input-group">
+                        <input type="text" id="apiKeyInput" placeholder="Enter your API key..." />
+                        <button class="btn-primary" onclick="loadClipboard()">Load</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="instructions">
+                        <h3>Getting Started:</h3>
+                        <ol>
+                            <li>Download the Plaster client (plaster for Linux/macOS, plaster.ps1 for Windows)</li>
+                            <li>Run the setup command:
+                                <div class="code-block">
+                                    # Linux/macOS<br>
+                                    plaster --setup<br>
+                                    <br>
+                                    # Windows<br>
+                                    .\plaster.ps1 -Setup
+                                </div>
+                            </li>
+                            <li>Enter your server URL and get an API key automatically</li>
+                            <li>Start using Plaster from the command line:
+                                <div class="code-block">
+                                    echo 'my text' | plaster<br>
+                                    plaster --list<br>
+                                    plaster --new-api
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="toast" id="toast"></div>
+
+        <script>
+            function loadClipboard() {
+                const apiKey = document.getElementById('apiKeyInput').value.trim();
+                if (!apiKey) {
+                    showToast('Please enter an API key', 'error');
+                    return;
+                }
+                // Redirect to the main page with the API key
+                window.location.href = '/?api_key=' + encodeURIComponent(apiKey);
+            }
+
+            function showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.className = 'toast show';
+                if (type === 'error') {
+                    toast.classList.add('error');
+                } else {
+                    toast.classList.remove('error');
+                }
+
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            // Allow Enter key to load clipboard
+            document.getElementById('apiKeyInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    loadClipboard();
+                }
+            });
+        </script>
+    </body>
+    </html>
+    """
 
 def get_html_page(api_key: str) -> str:
     """Generate the HTML page with embedded CSS and JavaScript"""
@@ -416,6 +699,21 @@ def get_html_page(api_key: str) -> str:
                 color: white;
             }}
 
+            .api-key-input {{
+                flex: 1;
+                padding: 10px 15px;
+                border: none;
+                border-radius: 8px;
+                font-family: 'Menlo', monospace;
+                font-size: 12px;
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+            }}
+
+            .api-key-input::placeholder {{
+                color: rgba(255, 255, 255, 0.6);
+            }}
+
             .btn-copy-key {{
                 background: rgba(255, 255, 255, 0.2);
                 color: white;
@@ -437,6 +735,24 @@ def get_html_page(api_key: str) -> str:
                 background: #51cf66;
             }}
 
+            .btn-switch {{
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 11px;
+                font-weight: 600;
+                white-space: nowrap;
+                transition: all 0.2s;
+                margin-left: 5px;
+            }}
+
+            .btn-switch:hover {{
+                background: rgba(255, 255, 255, 0.3);
+            }}
+
             .btn-rotate {{
                 background: #ff6b6b;
                 color: white;
@@ -453,6 +769,24 @@ def get_html_page(api_key: str) -> str:
 
             .btn-rotate:hover {{
                 background: #ee5a52;
+            }}
+
+            .btn-load-key {{
+                background: #4c6ef5;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 12px;
+                font-weight: 600;
+                transition: all 0.2s;
+                margin-top: 10px;
+                width: 100%;
+            }}
+
+            .btn-load-key:hover {{
+                background: #3d5ce5;
             }}
 
             .content {{
@@ -473,13 +807,8 @@ def get_html_page(api_key: str) -> str:
                 letter-spacing: 0.5px;
             }}
 
-            .input-group {{
-                display: flex;
-                gap: 10px;
-            }}
-
             #textInput {{
-                flex: 1;
+                width: 100%;
                 padding: 14px 16px;
                 border: 2px solid #e0e0e0;
                 border-radius: 10px;
@@ -668,6 +997,10 @@ def get_html_page(api_key: str) -> str:
                 transform: translateY(0);
             }}
 
+            .toast.error {{
+                background: #ff6b6b;
+            }}
+
             ::-webkit-scrollbar {{
                 width: 6px;
             }}
@@ -720,12 +1053,17 @@ def get_html_page(api_key: str) -> str:
                 <p>Your FILO Clipboard Service</p>
 
                 <div class="api-key-section">
-                    <span class="api-key-label">Your API Key</span>
+                    <span class="api-key-label" id="keyLabel">Your API Key</span>
                     <div class="api-key-container">
                         <span class="api-key-value" id="apiKeyDisplay">{api_key}</span>
                         <button class="btn-copy-key" onclick="copyApiKey()">Copy</button>
+                        <button class="btn-switch" onclick="toggleKeyInput()">Switch</button>
                     </div>
-                    <button class="btn-rotate" onclick="rotateKey()">Generate New Key</button>
+                    <div id="keyInputContainer" style="display: none;">
+                        <input type="text" class="api-key-input" id="customKeyInput" placeholder="Enter API key..." />
+                        <button class="btn-load-key" onclick="loadCustomKey()">Load Key</button>
+                    </div>
+                    <button class="btn-rotate" id="rotateBtn" onclick="rotateKey()">Generate New Key</button>
                 </div>
             </div>
 
@@ -753,12 +1091,57 @@ def get_html_page(api_key: str) -> str:
 
         <script>
             const API_BASE = window.location.origin;
-            const API_KEY = '{api_key}';
+            let currentApiKey = '{api_key}';
+            let isOwnKey = true;
+
+            function getCurrentApiKey() {{
+                return currentApiKey;
+            }}
+
+            function toggleKeyInput() {{
+                const container = document.getElementById('keyInputContainer');
+                const display = document.getElementById('apiKeyDisplay');
+                container.style.display = container.style.display === 'none' ? 'block' : 'none';
+                if (container.style.display === 'block') {{
+                    document.getElementById('customKeyInput').focus();
+                    document.getElementById('customKeyInput').value = '';
+                }}
+            }}
+
+            function loadCustomKey() {{
+                const customKey = document.getElementById('customKeyInput').value.trim();
+                if (!customKey) {{
+                    showToast('Please enter an API key', 'error');
+                    return;
+                }}
+                currentApiKey = customKey;
+                isOwnKey = false;
+                updateKeyDisplay();
+                toggleKeyInput();
+                loadEntries();
+                showToast('Loaded custom API key');
+            }}
+
+            function updateKeyDisplay() {{
+                const label = document.getElementById('keyLabel');
+                const display = document.getElementById('apiKeyDisplay');
+                const rotateBtn = document.getElementById('rotateBtn');
+
+                if (isOwnKey) {{
+                    label.textContent = 'Your API Key';
+                    display.textContent = '{api_key}';
+                    rotateBtn.style.display = 'block';
+                }} else {{
+                    label.textContent = 'Viewing API Key';
+                    display.textContent = currentApiKey;
+                    rotateBtn.style.display = 'none';
+                }}
+            }}
 
             async function loadEntries() {{
                 try {{
                     const response = await fetch(API_BASE + '/list', {{
-                        headers: {{'X-API-Key': API_KEY}}
+                        headers: {{'X-API-Key': getCurrentApiKey()}}
                     }});
                     const data = await response.json();
 
@@ -805,7 +1188,7 @@ def get_html_page(api_key: str) -> str:
                         method: 'POST',
                         headers: {{
                             'Content-Type': 'application/json',
-                            'X-API-Key': API_KEY
+                            'X-API-Key': getCurrentApiKey()
                         }},
                         body: JSON.stringify({{ text: text }})
                     }});
@@ -827,7 +1210,7 @@ def get_html_page(api_key: str) -> str:
             async function copyToClipboard(index, button) {{
                 try {{
                     const response = await fetch(API_BASE + `/entry/${{index}}`, {{
-                        headers: {{'X-API-Key': API_KEY}}
+                        headers: {{'X-API-Key': getCurrentApiKey()}}
                     }});
                     const data = await response.json();
 
@@ -858,7 +1241,7 @@ def get_html_page(api_key: str) -> str:
                 try {{
                     const response = await fetch(API_BASE + '/clear', {{
                         method: 'DELETE',
-                        headers: {{'X-API-Key': API_KEY}}
+                        headers: {{'X-API-Key': getCurrentApiKey()}}
                     }});
 
                     if (response.ok) {{
@@ -881,7 +1264,7 @@ def get_html_page(api_key: str) -> str:
                 try {{
                     const response = await fetch(API_BASE + '/auth/rotate', {{
                         method: 'POST',
-                        headers: {{'X-API-Key': API_KEY}}
+                        headers: {{'X-API-Key': getCurrentApiKey()}}
                     }});
 
                     if (response.ok) {{
@@ -906,6 +1289,11 @@ def get_html_page(api_key: str) -> str:
                 const toast = document.getElementById('toast');
                 toast.textContent = message;
                 toast.className = 'toast show';
+                if (type === 'error') {{
+                    toast.classList.add('error');
+                }} else {{
+                    toast.classList.remove('error');
+                }}
 
                 setTimeout(() => {{
                     toast.classList.remove('show');
@@ -935,6 +1323,13 @@ def get_html_page(api_key: str) -> str:
                     pushText();
                 }}
             }});
+
+            // Allow Enter to load custom key
+            document.getElementById('customKeyInput').addEventListener('keydown', (e) => {{
+                if (e.key === 'Enter') {{
+                    loadCustomKey();
+                }}
+            }});
         </script>
     </body>
     </html>
@@ -948,7 +1343,13 @@ async def health_check():
 @app.get("/", response_class=HTMLResponse)
 async def serve_ui(request: Request):
     """Serve the web UI"""
-    api_key = request.state.api_key
+    # Get API key from request state (set by middleware if authenticated)
+    api_key = getattr(request.state, 'api_key', None)
+
+    if not api_key:
+        # No API key provided - show setup instructions
+        return get_setup_page()
+
     return get_html_page(api_key)
 
 @app.post("/auth/generate")

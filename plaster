@@ -15,19 +15,25 @@ HELP_TEXT="Usage: plaster [OPTION]
 A FILO clipboard service client.
 
 OPTIONS:
-  (no args)              Get the latest clipboard entry
-  -l, --list             List all clipboard entries (first 50 chars each)
-  -n, --entry <index>    Get specific clipboard entry by index
-  -c, --clear            Clear all clipboard entries
-  --config <path>        Use custom config file path
-  -h, --help             Show this help message
+  (no args)                 Get the latest clipboard entry
+  -l, --list                List all clipboard entries (first 50 chars each)
+  -n, --entry <index>       Get specific clipboard entry by index
+  -c, --clear               Clear all clipboard entries
+  --setup                   Interactive setup (configure server URL and get API key)
+  --new-api                 Generate a new API key
+  --new-server-url <url>    Change the server URL
+  --config <path>           Use custom config file path
+  -h, --help                Show this help message
 
 EXAMPLES:
-  echo 'my text' | plaster        # Push text to clipboard
-  plaster                         # Get latest entry
-  plaster --list                  # List all entries
-  plaster -n 3                    # Get 3rd entry
-  plaster --clear                 # Clear clipboard
+  plaster --setup                    # Initial setup (server URL + API key)
+  echo 'my text' | plaster           # Push text to clipboard
+  plaster                            # Get latest entry
+  plaster --list                     # List all entries
+  plaster -n 3                       # Get 3rd entry
+  plaster --clear                    # Clear clipboard
+  plaster --new-api                  # Generate new API key
+  plaster --new-server-url <url>     # Change server URL
 "
 
 # Function to generate a new API key from server
@@ -60,17 +66,48 @@ regenerate_api_key() {
 # Function to load configuration
 load_config() {
     if [[ ! -f "$PLASTER_CONFIG" ]]; then
-        # Create config directory
-        mkdir -p "$(dirname "$PLASTER_CONFIG")"
+        echo "Error: Config file not found at $PLASTER_CONFIG" >&2
+        echo "Run 'plaster --setup' to initialize." >&2
+        exit 1
+    fi
 
-        # Generate new API key
-        echo "Generating new API key..." >&2
-        API_KEY=$(generate_api_key)
+    # Extract values from YAML
+    SERVER_URL=$(grep "server_url:" "$PLASTER_CONFIG" | head -1 | sed 's/.*: //' | tr -d ' "' || echo "http://localhost:9321")
+    API_KEY=$(grep "api_key:" "$PLASTER_CONFIG" | head -1 | sed 's/.*: //' | tr -d ' "' || echo "")
 
-        # Create config file
-        cat > "$PLASTER_CONFIG" << EOF
+    if [[ -z "$API_KEY" ]]; then
+        echo "Error: No API key found in config. Run 'plaster --new-api' to generate one." >&2
+        exit 1
+    fi
+}
+
+# Function to setup configuration interactively
+setup_config() {
+    echo "╔═════════════════════════════════════════╗"
+    echo "║     Plaster Initial Setup               ║"
+    echo "╚═════════════════════════════════════════╝"
+    echo ""
+
+    # Create config directory
+    mkdir -p "$(dirname "$PLASTER_CONFIG")"
+
+    # Prompt for server URL
+    while true; do
+        read -p "Server URL (e.g., http://localhost:9321): " SERVER_URL
+        if [[ -z "$SERVER_URL" ]]; then
+            echo "Error: Server URL cannot be empty"
+            continue
+        fi
+        break
+    done
+
+    echo ""
+    echo "Generating API key from server..."
+    API_KEY=$(generate_api_key)
+
+    # Create config file
+    cat > "$PLASTER_CONFIG" << EOF
 # Plaster Configuration File
-# Auto-generated on first use
 
 server_url: "$SERVER_URL"
 api_key: "$API_KEY"
@@ -83,18 +120,49 @@ max_total_size_mb: 500
 rate_limit_requests: 100
 rate_limit_window_seconds: 60
 EOF
-        echo "✓ Configuration created at $PLASTER_CONFIG" >&2
-        echo "✓ API Key: $API_KEY" >&2
-    fi
 
-    # Extract values from YAML
-    SERVER_URL=$(grep "server_url:" "$PLASTER_CONFIG" | head -1 | sed 's/.*: //' | tr -d ' "' || echo "http://localhost:9321")
-    API_KEY=$(grep "api_key:" "$PLASTER_CONFIG" | head -1 | sed 's/.*: //' | tr -d ' "' || echo "")
+    chmod 600 "$PLASTER_CONFIG"
 
-    if [[ -z "$API_KEY" ]]; then
-        echo "Error: No API key found in config. Please regenerate config." >&2
+    echo ""
+    echo "✓ Configuration saved to $PLASTER_CONFIG"
+    echo "✓ Server URL: $SERVER_URL"
+    echo "✓ API Key: $API_KEY"
+    echo ""
+    echo "Setup complete! You can now use Plaster:"
+    echo "  echo 'my text' | plaster    # Push text"
+    echo "  plaster                     # Get latest entry"
+    echo "  plaster --list              # List all entries"
+}
+
+# Function to generate new API key
+generate_new_api_key() {
+    load_config
+
+    echo "Generating new API key from $SERVER_URL..."
+    local new_key
+    new_key=$(generate_api_key)
+
+    # Update config file
+    sed -i.bak "s/api_key:.*/api_key: \"$new_key\"/" "$PLASTER_CONFIG"
+    rm -f "$PLASTER_CONFIG.bak"
+
+    echo "✓ New API key generated: $new_key"
+}
+
+# Function to change server URL
+change_server_url() {
+    local new_url="$1"
+
+    if [[ ! -f "$PLASTER_CONFIG" ]]; then
+        echo "Error: Config file not found. Run 'plaster --setup' first." >&2
         exit 1
     fi
+
+    # Update config file
+    sed -i.bak "s|server_url:.*|server_url: \"$new_url\"|" "$PLASTER_CONFIG"
+    rm -f "$PLASTER_CONFIG.bak"
+
+    echo "✓ Server URL updated to: $new_url"
 }
 
 # Function to check if stdin is being piped
@@ -236,27 +304,39 @@ clear_clipboard() {
 
 # Main logic
 main() {
-    load_config
-
-    # Check if text is being piped in
-    if has_stdin; then
-        # Read all stdin and push it
-        local input
-        input=$(cat)
-        push_text "$input"
-        return
-    fi
-
     # Parse command-line arguments
     if [[ $# -eq 0 ]]; then
-        # No arguments - get latest entry
-        get_latest
+        # No arguments - load config and get latest entry
+        load_config
+
+        # Check if text is being piped in
+        if has_stdin; then
+            local input
+            input=$(cat)
+            push_text "$input"
+        else
+            get_latest
+        fi
     else
         case "$1" in
             -h|--help)
                 show_help
                 ;;
+            --setup)
+                setup_config
+                ;;
+            --new-api)
+                generate_new_api_key
+                ;;
+            --new-server-url)
+                if [[ $# -lt 2 ]]; then
+                    echo "Error: --new-server-url requires a URL argument" >&2
+                    exit 1
+                fi
+                change_server_url "$2"
+                ;;
             -l|--list)
+                load_config
                 list_entries
                 ;;
             -n|--entry)
@@ -264,9 +344,11 @@ main() {
                     echo "Error: -n/--entry requires an index argument" >&2
                     exit 1
                 fi
+                load_config
                 get_entry "$2"
                 ;;
             -c|--clear)
+                load_config
                 clear_clipboard
                 ;;
             --config)
@@ -275,12 +357,10 @@ main() {
                     exit 1
                 fi
                 PLASTER_CONFIG="$2"
-                load_config
                 shift 2
-                # Continue processing with remaining args
-                if [[ $# -eq 0 ]]; then
-                    get_latest
-                fi
+                # Recursively call main with remaining args
+                main "$@"
+                return
                 ;;
             *)
                 echo "Error: Unknown option '$1'" >&2
