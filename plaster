@@ -380,8 +380,9 @@ main() {
             input=$(cat)
             push_text "$input"
         else
-            # No arguments and no stdin - show help
-            show_help
+            # No arguments and no stdin - get latest entry
+            load_config
+            get_latest
         fi
     else
         case "$1" in

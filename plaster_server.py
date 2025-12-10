@@ -1051,6 +1051,7 @@ def get_html_page(api_key: str) -> str:
             <div class="header">
                 <h1>📋 Plaster</h1>
                 <p>Your FILO Clipboard Service</p>
+                <p style="opacity: 0.8; font-size: 12px; margin-top: 10px;">A FILO (First In, Last Out) clipboard - newest entries accessed first</p>
 
                 <div class="api-key-section">
                     <span class="api-key-label" id="keyLabel">Your API Key</span>
@@ -1083,6 +1084,22 @@ def get_html_page(api_key: str) -> str:
                         <span class="list-count" id="entryCount">0 entries</span>
                     </div>
                     <div class="entries-list" id="entriesList"></div>
+                </div>
+
+                <div class="list-section" style="margin-top: 50px; border-top: 1px solid #e0e0e0; padding-top: 30px;">
+                    <div class="list-title" style="margin-bottom: 15px;">CLI Usage</div>
+                    <div class="instructions">
+                        <p style="margin-bottom: 10px; color: #666; font-size: 13px;">Use the command-line client for quick access:</p>
+                        <pre style="background: #f0f0f0; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; color: #333;">plaster              # Get latest entry (LIFO)
+plaster --list       # List all entries
+plaster -n 1         # Get 1st entry (1-indexed)
+plaster -n 3         # Get 3rd entry
+echo 'text' | plaster    # Push text
+plaster --clear      # Clear all entries
+plaster --api        # Show current API key
+plaster --url        # Show current server URL
+plaster --new-api    # Generate new API key</pre>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1345,6 +1362,10 @@ async def serve_ui(request: Request):
     """Serve the web UI"""
     # Get API key from request state (set by middleware if authenticated)
     api_key = getattr(request.state, 'api_key', None)
+
+    # If no key in state, check query parameter
+    if not api_key:
+        api_key = request.query_params.get('api_key')
 
     if not api_key:
         # No API key provided - show setup instructions

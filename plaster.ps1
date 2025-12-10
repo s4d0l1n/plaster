@@ -404,15 +404,6 @@ if ($ShowUrl) {
     exit 0
 }
 
-# Check if no arguments and no piped input - show help
-$hasArguments = $PSBoundParameters.Count -gt 0
-$hasPipedInput = [console]::IsInputRedirected -or -not [string]::IsNullOrWhiteSpace($InputText)
-
-if (-not $hasArguments -and -not $hasPipedInput) {
-    Get-Help $MyInvocation.MyCommand.Name
-    exit 0
-}
-
 # Load config for all other operations
 Load-Config
 
@@ -425,15 +416,20 @@ if (-not [console]::IsInputRedirected -and -not [string]::IsNullOrWhiteSpace($In
         Push-Text -Text $InputText
     }
 } else {
-    # Interactive mode
-    if ($List) {
+    # Interactive mode - check if no arguments provided
+    $hasArguments = $PSBoundParameters.Count -gt 0
+
+    if (-not $hasArguments) {
+        # No arguments - get latest entry
+        Get-LatestEntry
+    } elseif ($List) {
         Get-ClipboardList
     } elseif ($Entry -ge 0) {
         Get-ClipboardEntry -Index $Entry
     } elseif ($Clear) {
         Clear-Clipboard
     } else {
-        # Default: get latest entry
-        Get-LatestEntry
+        # Show help if no recognized argument
+        Get-Help $MyInvocation.MyCommand.Name
     }
 }
