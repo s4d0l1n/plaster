@@ -17,19 +17,28 @@ A FILO clipboard service client.
 OPTIONS:
   (no args)                 Get the latest clipboard entry
   -l, --list                List all clipboard entries (first 50 chars each)
-  -n, --entry <index>       Get specific clipboard entry by index
+  -n, --entry <index>       Get specific clipboard entry by index (1-based)
   -c, --clear               Clear all clipboard entries
   --setup                   Interactive setup (configure server URL and get API key)
   --new-api                 Generate a new API key
   --new-server-url <url>    Change the server URL
+  --api                     Display current API key
+  --url                     Display current server URL
+  --install                 Install plaster to /usr/local/bin (requires sudo)
+  --uninstall               Uninstall plaster from /usr/local/bin (requires sudo)
   --config <path>           Use custom config file path
   -h, --help                Show this help message
 
 EXAMPLES:
+  plaster --install                  # Install to /usr/local/bin
+  plaster --uninstall                # Remove from /usr/local/bin
   plaster --setup                    # Initial setup (server URL + API key)
+  plaster --api                      # Show current API key
+  plaster --url                      # Show current server URL
   echo 'my text' | plaster           # Push text to clipboard
   plaster                            # Get latest entry
   plaster --list                     # List all entries
+  plaster -n 1                       # Get 1st entry
   plaster -n 3                       # Get 3rd entry
   plaster --clear                    # Clear clipboard
   plaster --new-api                  # Generate new API key
@@ -175,6 +184,55 @@ show_help() {
     echo "$HELP_TEXT"
 }
 
+# Function to install plaster
+install_plaster() {
+    local install_path="/usr/local/bin/plaster"
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local script_path="$script_dir/plaster"
+
+    echo "Installing Plaster to $install_path..."
+
+    if [[ ! -f "$script_path" ]]; then
+        echo "Error: Could not find plaster script at $script_path" >&2
+        exit 1
+    fi
+
+    sudo cp "$script_path" "$install_path"
+    sudo chmod +x "$install_path"
+
+    echo "✓ Plaster installed successfully to $install_path"
+    echo "You can now run 'plaster' from anywhere!"
+}
+
+# Function to uninstall plaster
+uninstall_plaster() {
+    local install_path="/usr/local/bin/plaster"
+
+    echo "Uninstalling Plaster from $install_path..."
+
+    if [[ ! -f "$install_path" ]]; then
+        echo "Error: Plaster is not installed at $install_path" >&2
+        exit 1
+    fi
+
+    sudo rm "$install_path"
+
+    echo "✓ Plaster uninstalled successfully"
+}
+
+# Function to display current API key
+show_api_key() {
+    load_config
+    echo "$API_KEY"
+}
+
+# Function to display current server URL
+show_server_url() {
+    load_config
+    echo "$SERVER_URL"
+}
+
 # Function to push text
 push_text() {
     local text="$1"
@@ -273,15 +331,23 @@ list_entries() {
 
 # Function to get specific entry
 get_entry() {
-    local index=$1
+    local user_index=$1
+    # Convert from 1-based (user input) to 0-based (server)
+    local server_index=$((user_index - 1))
+
+    if [[ $server_index -lt 0 ]]; then
+        echo "Error: Entry index must be 1 or greater" >&2
+        exit 1
+    fi
+
     local response
-    response=$(curl -s -X GET "$SERVER_URL/entry/$index" \
+    response=$(curl -s -X GET "$SERVER_URL/entry/$server_index" \
         -H "X-API-Key: $API_KEY" 2>&1)
 
     if echo "$response" | grep -q '"status".*"ok"'; then
         echo "$response" | jq -r '.text'
     else
-        echo "Error: Failed to get entry at index $index" >&2
+        echo "Error: Failed to get entry at index $user_index" >&2
         echo "$response" >&2
         exit 1
     fi
@@ -306,21 +372,29 @@ clear_clipboard() {
 main() {
     # Parse command-line arguments
     if [[ $# -eq 0 ]]; then
-        # No arguments - load config and get latest entry
-        load_config
-
-        # Check if text is being piped in
+        # No arguments - check if stdin is being piped
         if has_stdin; then
+            # Text is being piped - load config and push it
+            load_config
             local input
             input=$(cat)
             push_text "$input"
         else
-            get_latest
+            # No arguments and no stdin - show help
+            show_help
         fi
     else
         case "$1" in
             -h|--help)
                 show_help
+                ;;
+            --install)
+                install_plaster
+                exit 0
+                ;;
+            --uninstall)
+                uninstall_plaster
+                exit 0
                 ;;
             --setup)
                 setup_config
@@ -334,6 +408,12 @@ main() {
                     exit 1
                 fi
                 change_server_url "$2"
+                ;;
+            --api)
+                show_api_key
+                ;;
+            --url)
+                show_server_url
                 ;;
             -l|--list)
                 load_config

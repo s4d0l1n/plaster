@@ -330,7 +330,7 @@ async def check_api_key(request: Request, call_next):
 
 def get_setup_page() -> str:
     """Generate the setup/login page"""
-    return """
+    return r"""
     <!DOCTYPE html>
     <html lang="en">
     <head>

@@ -8,11 +8,14 @@
     A PowerShell client for the Plaster clipboard service with automatic API key generation.
 
 .EXAMPLES
-    PS> 'my text' | plaster.ps1        # Push text to clipboard
-    PS> plaster.ps1                    # Get latest entry
-    PS> plaster.ps1 -List              # List all entries
-    PS> plaster.ps1 -Entry 3           # Get 3rd entry
-    PS> plaster.ps1 -Clear             # Clear clipboard
+    PS> 'my text' | .\plaster.ps1      # Push text to clipboard
+    PS> .\plaster.ps1                  # Get latest entry
+    PS> .\plaster.ps1 -List            # List all entries
+    PS> .\plaster.ps1 -Entry 1         # Get 1st entry
+    PS> .\plaster.ps1 -Entry 3         # Get 3rd entry
+    PS> .\plaster.ps1 -Clear           # Clear clipboard
+    PS> .\plaster.ps1 -Setup           # Initial setup
+    PS> .\plaster.ps1 -NewApi          # Generate new API key
 #>
 
 [CmdletBinding()]
@@ -25,6 +28,10 @@ param(
     [switch]$Help,
     [switch]$Setup,
     [switch]$NewApi,
+    [switch]$Install,
+    [switch]$Uninstall,
+    [switch]$ShowApi,
+    [switch]$ShowUrl,
 
     [string]$NewServerUrl,
     [int]$Entry = -1,
@@ -216,6 +223,73 @@ function Change-ServerUrl {
     Write-Host "✓ Server URL updated to: $NewUrl" -ForegroundColor Green
 }
 
+function Install-Plaster {
+    $installPath = Join-Path $env:ProgramFiles "plaster" "plaster.ps1"
+    $installDir = Split-Path $installPath
+
+    Write-Host "Installing Plaster to $installDir..." -ForegroundColor Cyan
+
+    # Check if running as admin
+    $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator")
+    if (-not $isAdmin) {
+        Write-Host "Error: Installation requires administrator privileges" -ForegroundColor Red
+        Write-Host "Please run: Start-Process powershell -ArgumentList `"'-Command', '& `"$PSCommandPath`" -Install'`" -Verb RunAs" -ForegroundColor Yellow
+        exit 1
+    }
+
+    # Create directory if it doesn't exist
+    if (-not (Test-Path $installDir)) {
+        New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+    }
+
+    # Copy script
+    Copy-Item -Path $PSCommandPath -Destination $installPath -Force
+
+    # Create wrapper script in System32 for direct access
+    $wrapperPath = Join-Path $env:SystemRoot "System32" "plaster.ps1"
+    Copy-Item -Path $PSCommandPath -Destination $wrapperPath -Force
+
+    Write-Host "✓ Plaster installed successfully to $installDir" -ForegroundColor Green
+    Write-Host "You can now run 'plaster -Setup' from anywhere (or use 'plaster.ps1 -Setup' in PowerShell)" -ForegroundColor Green
+}
+
+function Uninstall-Plaster {
+    $installPath = Join-Path $env:ProgramFiles "plaster" "plaster.ps1"
+    $installDir = Split-Path $installPath
+    $wrapperPath = Join-Path $env:SystemRoot "System32" "plaster.ps1"
+
+    Write-Host "Uninstalling Plaster from $installDir..." -ForegroundColor Cyan
+
+    # Check if running as admin
+    $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator")
+    if (-not $isAdmin) {
+        Write-Host "Error: Uninstallation requires administrator privileges" -ForegroundColor Red
+        Write-Host "Please run: Start-Process powershell -ArgumentList `"'-Command', '& `"$PSCommandPath`" -Uninstall'`" -Verb RunAs" -ForegroundColor Yellow
+        exit 1
+    }
+
+    if (-not (Test-Path $installPath)) {
+        Write-Host "Error: Plaster is not installed at $installPath" -ForegroundColor Red
+        exit 1
+    }
+
+    Remove-Item -Path $installPath -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path $wrapperPath -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path $installDir -Force -ErrorAction SilentlyContinue
+
+    Write-Host "✓ Plaster uninstalled successfully" -ForegroundColor Green
+}
+
+function Show-ApiKey {
+    Load-Config
+    Write-Output $script:ApiKey
+}
+
+function Show-ServerUrl {
+    Load-Config
+    Write-Output $script:ServerUrl
+}
+
 function Get-LatestEntry {
     try {
         $response = Invoke-ApiRequest -Endpoint '/peek'
@@ -246,8 +320,16 @@ function Get-ClipboardList {
 function Get-ClipboardEntry {
     param([int]$Index)
 
+    # Convert from 1-based (user input) to 0-based (server)
+    $serverIndex = $Index - 1
+
+    if ($serverIndex -lt 0) {
+        Write-Host "Error: Entry index must be 1 or greater" -ForegroundColor Red
+        exit 1
+    }
+
     try {
-        $response = Invoke-ApiRequest -Endpoint "/entry/$Index"
+        $response = Invoke-ApiRequest -Endpoint "/entry/$serverIndex"
         $data = $response.Content | ConvertFrom-Json
         Write-Output $data.text
     } catch {
@@ -285,7 +367,18 @@ if ($Help) {
     exit 0
 }
 
-# Handle setup commands first (don't need config loaded)
+# Handle installation commands first
+if ($Install) {
+    Install-Plaster
+    exit 0
+}
+
+if ($Uninstall) {
+    Uninstall-Plaster
+    exit 0
+}
+
+# Handle setup commands (don't need config loaded)
 if ($Setup) {
     Setup-Config
     exit 0
@@ -298,6 +391,25 @@ if ($NewApi) {
 
 if (-not [string]::IsNullOrEmpty($NewServerUrl)) {
     Change-ServerUrl -NewUrl $NewServerUrl
+    exit 0
+}
+
+if ($ShowApi) {
+    Show-ApiKey
+    exit 0
+}
+
+if ($ShowUrl) {
+    Show-ServerUrl
+    exit 0
+}
+
+# Check if no arguments and no piped input - show help
+$hasArguments = $PSBoundParameters.Count -gt 0
+$hasPipedInput = [console]::IsInputRedirected -or -not [string]::IsNullOrWhiteSpace($InputText)
+
+if (-not $hasArguments -and -not $hasPipedInput) {
+    Get-Help $MyInvocation.MyCommand.Name
     exit 0
 }
 

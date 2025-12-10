@@ -99,9 +99,9 @@ plaster
 # List all entries
 plaster --list
 
-# Get specific entry (0-indexed)
-plaster -n 0
-plaster -n 3
+# Get specific entry (1-indexed)
+plaster -n 1    # Get 1st entry
+plaster -n 3    # Get 3rd entry
 
 # Clear all entries
 plaster --clear
@@ -128,8 +128,9 @@ plaster --new-server-url http://new-server:9321
 # List all entries
 & .\plaster.ps1 -List
 
-# Get specific entry (0-indexed)
-& .\plaster.ps1 -Entry 0
+# Get specific entry (1-indexed)
+& .\plaster.ps1 -Entry 1    # Get 1st entry
+& .\plaster.ps1 -Entry 3    # Get 3rd entry
 
 # Clear all entries
 & .\plaster.ps1 -Clear
@@ -227,9 +228,42 @@ curl -X POST http://localhost:9321/push \
 
 ## Installation
 
-### Client Setup (Recommended)
+### Download & Install Client
 
-The Plaster client scripts handle setup directly. Just run the setup command:
+**Linux/macOS:**
+```bash
+# Download the script
+curl -o ~/plaster https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster
+
+# Make it executable
+chmod +x ~/plaster
+
+# Install to /usr/local/bin (one command!)
+~/plaster --install
+```
+
+After installation, you can run `plaster` from anywhere. To uninstall:
+```bash
+plaster --uninstall
+```
+
+**Windows (PowerShell):**
+```powershell
+# Download the script
+(Invoke-WebRequest -Uri "https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster.ps1" -OutFile "$env:USERPROFILE\plaster.ps1")
+
+# Install to Program Files (requires admin)
+& "$env:USERPROFILE\plaster.ps1" -Install
+```
+
+After installation, you can run `plaster.ps1` from anywhere. To uninstall:
+```powershell
+plaster.ps1 -Uninstall
+```
+
+### Client Setup
+
+After installing, run the setup command:
 
 **Linux/macOS:**
 ```bash
@@ -238,7 +272,7 @@ plaster --setup
 
 **Windows (PowerShell):**
 ```powershell
-.\plaster.ps1 -Setup
+plaster -Setup
 ```
 
 The setup wizard will:
@@ -251,6 +285,8 @@ The setup wizard will:
 ```bash
 plaster --new-api                      # Generate a new API key
 plaster --new-server-url <url>         # Change the server URL
+plaster --api                          # Display current API key
+plaster --url                          # Display current server URL
 plaster --help                         # Show all available commands
 ```
 
