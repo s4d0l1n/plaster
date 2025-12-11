@@ -16,6 +16,7 @@
     PS> .\plaster.ps1 -Clear           # Clear clipboard
     PS> .\plaster.ps1 -Setup           # Initial setup
     PS> .\plaster.ps1 -NewApi          # Generate new API key
+    PS> .\plaster.ps1 -NewApi -NewApiKey "plaster_xyz"  # Set API key to plaster_xyz
 #>
 
 [CmdletBinding()]
@@ -28,6 +29,7 @@ param(
     [switch]$Help,
     [switch]$Setup,
     [switch]$NewApi,
+    [string]$NewApiKey,
     [switch]$Install,
     [switch]$Uninstall,
     [switch]$ShowApi,
@@ -92,7 +94,10 @@ function New-ApiKey {
         $data = $response.Content | ConvertFrom-Json
         return $data.api_key
     } catch {
-        Write-Error "Failed to generate API key: $_"
+        $statusCode = $_.Exception.Response.StatusCode.Value
+        $errorMsg = $_.Exception.Message
+        Write-Error "Failed to generate API key (HTTP $statusCode): $errorMsg"
+        Write-Error "Server response: $($_.ErrorDetails.Message)"
         exit 1
     }
 }
@@ -108,6 +113,26 @@ function Regenerate-ApiKey {
     Set-Content -Path $Config -Value $newContent
 
     Write-Host "✓ New API key generated" -ForegroundColor Green
+}
+
+function Set-NewApiKey {
+    param([string]$ProvidedKey)
+
+    Load-Config
+
+    if ([string]::IsNullOrWhiteSpace($ProvidedKey)) {
+        Write-Host "Generating new API key from $script:ServerUrl..." -ForegroundColor Cyan
+        $newKey = New-ApiKey
+        Write-Host "✓ New API key generated: $newKey" -ForegroundColor Green
+    } else {
+        $newKey = $ProvidedKey
+        Write-Host "✓ API key set to: $newKey" -ForegroundColor Green
+    }
+
+    # Update config file
+    $content = Get-Content $Config -Raw
+    $newContent = $content -replace 'api_key:.*', "api_key: `"$newKey`""
+    Set-Content -Path $Config -Value $newContent
 }
 
 function Load-Config {
@@ -190,21 +215,6 @@ rate_limit_window_seconds: 60
     Write-Host "  'my text' | .\plaster.ps1    # Push text"
     Write-Host "  .\plaster.ps1                # Get latest entry"
     Write-Host "  .\plaster.ps1 -List          # List all entries"
-}
-
-function Generate-NewApiKey {
-    Load-Config
-
-    Write-Host "Generating new API key from $script:ServerUrl..." -ForegroundColor Cyan
-    $newKey = New-ApiKey
-    $script:ApiKey = $newKey
-
-    # Update config file
-    $content = Get-Content $Config -Raw
-    $newContent = $content -replace 'api_key:.*', "api_key: `"$newKey`""
-    Set-Content -Path $Config -Value $newContent
-
-    Write-Host "✓ New API key generated: $newKey" -ForegroundColor Green
 }
 
 function Change-ServerUrl {
@@ -385,7 +395,7 @@ if ($Setup) {
 }
 
 if ($NewApi) {
-    Generate-NewApiKey
+    Set-NewApiKey -ProvidedKey $NewApiKey
     exit 0
 }
 

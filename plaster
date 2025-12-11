@@ -20,7 +20,7 @@ OPTIONS:
   -n, --entry <index>       Get specific clipboard entry by index (1-based)
   -c, --clear               Clear all clipboard entries
   --setup                   Interactive setup (configure server URL and get API key)
-  --new-api                 Generate a new API key
+  --new-api [KEY]           Generate a new API key, or set to KEY if provided
   --new-server-url <url>    Change the server URL
   --api                     Display current API key
   --url                     Display current server URL
@@ -42,6 +42,7 @@ EXAMPLES:
   plaster -n 3                       # Get 3rd entry
   plaster --clear                    # Clear clipboard
   plaster --new-api                  # Generate new API key
+  plaster --new-api plaster_xyz      # Set API key to plaster_xyz
   plaster --new-server-url <url>     # Change server URL
 "
 
@@ -154,19 +155,24 @@ EOF
     echo "  plaster --list              # List all entries"
 }
 
-# Function to generate new API key
+# Function to generate or set new API key
 generate_new_api_key() {
+    local provided_key="$1"
     load_config
 
-    echo "Generating new API key from $SERVER_URL..."
     local new_key
-    new_key=$(generate_api_key)
+    if [[ -z "$provided_key" ]]; then
+        echo "Generating new API key from $SERVER_URL..."
+        new_key=$(generate_api_key)
+        echo "✓ New API key generated: $new_key"
+    else
+        new_key="$provided_key"
+        echo "✓ API key set to: $new_key"
+    fi
 
     # Update config file
     sed -i.bak "s/api_key:.*/api_key: \"$new_key\"/" "$PLASTER_CONFIG"
     rm -f "$PLASTER_CONFIG.bak"
-
-    echo "✓ New API key generated: $new_key"
 }
 
 # Function to change server URL
@@ -412,7 +418,11 @@ main() {
                 setup_config
                 ;;
             --new-api)
-                generate_new_api_key
+                if [[ $# -gt 1 ]]; then
+                    generate_new_api_key "$2"
+                else
+                    generate_new_api_key ""
+                fi
                 ;;
             --new-server-url)
                 if [[ $# -lt 2 ]]; then
