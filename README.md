@@ -32,7 +32,8 @@ Server running at `http://localhost:9321`
 curl -o ~/plaster https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster
 chmod +x ~/plaster
 ~/plaster --setup          # Interactive setup (enter server URL, get API key)
-
+```
+```powershell
 # Windows PowerShell
 (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster.ps1" -OutFile "$env:USERPROFILE\plaster.ps1")
 & "$env:USERPROFILE\plaster.ps1" -Setup     # Interactive setup
