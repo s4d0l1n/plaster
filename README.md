@@ -1,21 +1,20 @@
-# Plaster - Multi-Tenant Clipboard Service
+# Plaster - FILO Clipboard Service
 
-A FILO (First In, Last Out) clipboard service with API key authentication, beautiful web UI, and cross-platform CLI clients. Each API key gets its own isolated clipboard with size limits and rate limiting.
+A simple, cross-platform clipboard service with a beautiful web UI and CLI clients. Each API key gets its own isolated clipboard with size limits and rate limiting.
 
 ## Features
 
-- 📋 **FILO Stack**: Newest entries accessed first
-- 🎨 **Beautiful Web UI**: Modern responsive interface with API key management
-- 🔐 **API Key Authentication**: Auto-generated keys, multi-tenant support
-- 🏠 **Isolated Clipboards**: Each key has separate clipboard storage
-- ⏱️ **Rate Limiting**: 100 requests per 60 seconds per key (configurable)
-- 📏 **Size Limits**: 10MB per entry, 500MB total per clipboard (configurable)
-- 💾 **Persistence**: Per-key backup files survive restarts
-- 🌐 **REST API**: Full JSON API with Swagger docs
-- 🖥️ **Cross-Platform**: Linux/macOS bash + Windows PowerShell clients
-- 🐳 **Docker**: Production-ready Docker Compose setup
+- 📋 **FILO Stack**: Newest entries accessed first (Last In, First Out)
+- 🎨 **Web UI**: Beautiful, responsive interface at `http://localhost:9321`
+- 🔐 **API Key Auth**: Auto-generated keys, multi-tenant support
+- 🏠 **Isolated**: Each key has its own separate clipboard
+- 💾 **Persistent**: Survives restarts
+- 🖥️ **Cross-Platform**: Works on Linux, macOS, and Windows
+- 🐳 **Docker**: Easy one-command deployment
 
-## Quick Start (Docker)
+## Quick Start
+
+### Start the Server (Docker)
 
 ```bash
 git clone https://github.com/s4d0l1n/plaster.git
@@ -23,76 +22,46 @@ cd plaster
 docker compose up -d
 ```
 
-Server running at `http://localhost:9321`
+Server is now running at `http://localhost:9321`
 
-**Setup client:**
+### Setup Client
 
+**Linux/macOS (Bash):**
 ```bash
-# Linux/macOS
 curl -o ~/plaster https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster
 chmod +x ~/plaster
-~/plaster --setup          # Interactive setup (enter server URL, get API key)
+~/plaster --setup
 ```
+
+**Windows (PowerShell):**
 ```powershell
-# Windows PowerShell
 (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster.ps1" -OutFile "$env:USERPROFILE\plaster.ps1")
-& "$env:USERPROFILE\plaster.ps1" -Setup     # Interactive setup
+& "$env:USERPROFILE\plaster.ps1" -Setup
 ```
 
-That's it! Config is saved and you can start using Plaster.
+The setup will ask for your server URL and automatically generate an API key.
 
-## How It Works
-
-### Multi-Tenant Architecture
-
-```
-┌─────────────────────────────────────┐
-│  User A (API Key: plaster_xxx)      │
-│  ├─ Clipboard A (isolated)          │
-│  ├─ Rate Limit: 100 req/min         │
-│  └─ Backups: ~/.plaster/backups/    │
-│                                     │
-│  User B (API Key: plaster_yyy)      │
-│  ├─ Clipboard B (isolated)          │
-│  ├─ Rate Limit: 100 req/min         │
-│  └─ Backups: ~/.plaster/backups/    │
-└─────────────────────────────────────┘
-         ↑ All requests need X-API-Key header
-         │
-    FastAPI Server
-```
-
-### API Key Generation
-
-1. **First client run**: Client calls `POST /auth/generate` → Server generates `plaster_<random>`
-2. **Key stored**: Saved to `~/.plaster/config.yaml`
-3. **All requests**: Include `X-API-Key: plaster_xxx` header
-4. **Rate limited**: Per-key tracking (100 req/60sec default)
-5. **Rotation**: Web UI "Generate New Key" copies clipboard to new key
+---
 
 ## Usage
 
 ### Web UI
 
-Access `http://localhost:9321` after providing API key (displayed when first accessing)
+Visit `http://localhost:9321` in your browser
 
 **Features:**
-- View/edit API key (copy button)
-- Generate new key (rotates to fresh key)
-- Text input to push entries
-- List all entries (50-char preview)
-- Copy button for each entry
-- Clear all with confirmation
-- Live auto-refresh
+- View and copy your API key
+- Add text entries
+- View all entries with copy buttons
+- Generate new API keys
+- Clear all entries
 
-### CLI (Bash/macOS/Linux)
+### Bash Client (Linux/macOS)
 
 ```bash
-# Initial setup (required first time)
-plaster --setup
-
 # Push text to clipboard
-echo 'text' | plaster
+echo 'my text' | plaster
+cat file.txt | plaster
 
 # Get latest entry
 plaster
@@ -101,27 +70,31 @@ plaster
 plaster --list
 
 # Get specific entry (1-indexed)
-plaster -n 1    # Get 1st entry
-plaster -n 3    # Get 3rd entry
+plaster -n 1    # First entry
+plaster -n 3    # Third entry
 
 # Clear all entries
 plaster --clear
 
-# Generate new API key
-plaster --new-api
+# Manage API keys
+plaster --new-api                          # Generate new API key
+plaster --new-api plaster_key_here         # Use specific API key
+plaster --api                              # Show current API key
 
-# Change server URL
-plaster --new-server-url http://new-server:9321
+# Manage server
+plaster --new-server-url http://example.com:9321
+plaster --url                              # Show current server URL
+
+# Help
+plaster --help
 ```
 
-### CLI (PowerShell/Windows)
+### PowerShell Client (Windows)
 
 ```powershell
-# Initial setup (required first time)
-.\plaster.ps1 -Setup
-
 # Push text to clipboard
-'text' | & .\plaster.ps1
+'my text' | & .\plaster.ps1
+Get-Content file.txt | & .\plaster.ps1
 
 # Get latest entry
 & .\plaster.ps1
@@ -130,324 +103,194 @@ plaster --new-server-url http://new-server:9321
 & .\plaster.ps1 -List
 
 # Get specific entry (1-indexed)
-& .\plaster.ps1 -Entry 1    # Get 1st entry
-& .\plaster.ps1 -Entry 3    # Get 3rd entry
+& .\plaster.ps1 -Entry 1    # First entry
+& .\plaster.ps1 -Entry 3    # Third entry
 
 # Clear all entries
 & .\plaster.ps1 -Clear
 
-# Generate new API key
-& .\plaster.ps1 -NewApi
+# Manage API keys
+& .\plaster.ps1 -NewApi                                # Generate new API key
+& .\plaster.ps1 -NewApi -NewApiKey "plaster_key_here" # Use specific API key
+& .\plaster.ps1 -ShowApi                               # Show current API key
 
-# Change server URL
-& .\plaster.ps1 -NewServerUrl http://new-server:9321
+# Manage server
+& .\plaster.ps1 -NewServerUrl http://example.com:9321
+& .\plaster.ps1 -ShowUrl                               # Show current server URL
+
+# Help
+& .\plaster.ps1 -Help
 ```
+
+---
+
+## Command Reference
+
+### Bash Script (`plaster`)
+
+| Command | Description |
+|---------|-------------|
+| `plaster` | Get latest entry |
+| `echo 'text' \| plaster` | Push text to clipboard |
+| `plaster --list` / `-l` | List all entries |
+| `plaster -n <index>` | Get specific entry (1-indexed) |
+| `plaster --clear` / `-c` | Clear all entries |
+| `plaster --new-api [KEY]` | Generate new key or set to KEY |
+| `plaster --new-server-url <url>` | Change server URL |
+| `plaster --api` | Show current API key |
+| `plaster --url` | Show current server URL |
+| `plaster --setup` | Initial setup (interactive) |
+| `plaster --install` | Install to /usr/local/bin |
+| `plaster --uninstall` | Uninstall from /usr/local/bin |
+| `plaster --help` / `-h` | Show help |
+
+### PowerShell Script (`plaster.ps1`)
+
+| Command | Description |
+|---------|-------------|
+| `.\plaster.ps1` | Get latest entry |
+| `'text' \| .\plaster.ps1` | Push text to clipboard |
+| `.\plaster.ps1 -List` | List all entries |
+| `.\plaster.ps1 -Entry <index>` | Get specific entry (1-indexed) |
+| `.\plaster.ps1 -Clear` | Clear all entries |
+| `.\plaster.ps1 -NewApi` | Generate new API key |
+| `.\plaster.ps1 -NewApi -NewApiKey "KEY"` | Set API key to KEY |
+| `.\plaster.ps1 -NewServerUrl <url>` | Change server URL |
+| `.\plaster.ps1 -ShowApi` | Show current API key |
+| `.\plaster.ps1 -ShowUrl` | Show current server URL |
+| `.\plaster.ps1 -Setup` | Initial setup (interactive) |
+| `.\plaster.ps1 -Install` | Install to Program Files |
+| `.\plaster.ps1 -Uninstall` | Uninstall from Program Files |
+| `.\plaster.ps1 -Help` | Show help |
+
+---
 
 ## Configuration
 
-Created automatically at `~/.plaster/config.yaml`:
+Config file: `~/.plaster/config.yaml`
 
-```yaml
-server_url: "http://localhost:9321"
-api_key: "plaster_abc123..."  # Auto-generated
-port: 9321
-max_entries: 100
-persistence: true
-backup_file: "~/.plaster/backups/"
-max_entry_size_mb: 10         # Per entry (10MB default)
-max_total_size_mb: 500        # Total per clipboard (500MB default)
-rate_limit_requests: 100      # Per minute per key
-rate_limit_window_seconds: 60
-idle_timeout_days: 7          # Delete unused keys after 7 days
-cleanup_interval_hours: 24    # Check for expired keys every 24 hours
+Created automatically during `--setup`, contains:
+- Server URL
+- API key
+- Preferences (size limits, rate limit, etc.)
+
+To reconfigure:
+```bash
+plaster --setup          # Bash
+.\plaster.ps1 -Setup    # PowerShell
 ```
 
-### Idle Timeout & Auto-Cleanup
-
-**How it works:**
-
-1. **Idle timeout**: After 7 days of inactivity (default), API keys are automatically deleted
-2. **Cleanup task**: Server checks for expired keys every 24 hours (background thread)
-3. **When expired**: All clipboard data and backup files for that key are deleted
-4. **Client behavior**: If client tries expired key → Gets 401 → **Automatically generates new key**
-
-**No manual action needed!** Clients seamlessly regenerate keys when needed.
-
-**Example flow:**
-- Day 1: User generates key → works normally
-- Day 7: No activity → key still valid
-- Day 8: Cleanup runs → deletes old key + clipboard
-- User tries plaster command → 401 error → **auto-generates new key**
-- User continues using Plaster with new key!
-
-**Customize timeouts** in config.yaml:
-```yaml
-idle_timeout_days: 30         # Keep keys for 30 days instead
-cleanup_interval_hours: 6     # Check every 6 hours instead of 24
-```
-
-**Docker Compose config:**
-
-```yaml
-services:
-  plaster:
-    environment:
-      # Adjust limits per your needs
-      MAX_ENTRY_SIZE: 10
-      MAX_TOTAL_SIZE: 500
-      RATE_LIMIT: 100
-```
+---
 
 ## REST API
 
-All endpoints require `X-API-Key: plaster_xxx` header
-
-### Core Endpoints
-
-```
-POST   /push                 # Push entry (body: {"text": "..."})
-GET    /peek                 # Get latest (non-destructive)
-GET    /pop                  # Get and remove latest
-GET    /list                 # List all (50-char preview)
-GET    /entry/{index}        # Get specific by index
-DELETE /clear                # Clear all
-
-POST   /auth/generate        # Generate new API key (first time)
-POST   /auth/rotate          # Rotate to new key (preserves clipboard)
-```
-
-### Example
+All endpoints require `X-API-Key: your_api_key` header.
 
 ```bash
-API_KEY="plaster_abc123..."
-curl -H "X-API-Key: $API_KEY" http://localhost:9321/peek
+# Get latest entry
+curl -H "X-API-Key: plaster_xxx" http://localhost:9321/peek
+
+# Push entry
 curl -X POST http://localhost:9321/push \
-  -H "X-API-Key: $API_KEY" \
+  -H "X-API-Key: plaster_xxx" \
   -H "Content-Type: application/json" \
   -d '{"text":"hello"}'
+
+# List entries
+curl -H "X-API-Key: plaster_xxx" http://localhost:9321/list
+
+# Get entry by index
+curl -H "X-API-Key: plaster_xxx" http://localhost:9321/entry/0
+
+# Remove and get latest
+curl -H "X-API-Key: plaster_xxx" http://localhost:9321/pop
+
+# Clear all
+curl -X DELETE http://localhost:9321/clear \
+  -H "X-API-Key: plaster_xxx"
+
+# Generate new API key
+curl -X POST http://localhost:9321/auth/generate
+
+# Rotate API key (preserves clipboard)
+curl -X POST http://localhost:9321/auth/rotate \
+  -H "X-API-Key: plaster_xxx"
+
+# Health check
+curl http://localhost:9321/health
 ```
 
-## Installation
-
-### Download & Install Client
-
-**Linux/macOS:**
-```bash
-# Download the script
-curl -o ~/plaster https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster
-
-# Make it executable
-chmod +x ~/plaster
-
-# Install to /usr/local/bin (one command!)
-~/plaster --install
-```
-
-After installation, you can run `plaster` from anywhere. To uninstall:
-```bash
-plaster --uninstall
-```
-
-**Windows (PowerShell):**
-```powershell
-# Download the script
-(Invoke-WebRequest -Uri "https://raw.githubusercontent.com/s4d0l1n/plaster/main/plaster.ps1" -OutFile "$env:USERPROFILE\plaster.ps1")
-
-# Install to Program Files (requires admin)
-& "$env:USERPROFILE\plaster.ps1" -Install
-```
-
-After installation, you can run `plaster.ps1` from anywhere. To uninstall:
-```powershell
-plaster.ps1 -Uninstall
-```
-
-### Client Setup
-
-After installing, run the setup command:
-
-**Linux/macOS:**
-```bash
-plaster --setup
-```
-
-**Windows (PowerShell):**
-```powershell
-plaster -Setup
-```
-
-The setup wizard will:
-- Ask for your server URL (e.g., `http://localhost:9321`)
-- Call the server to generate an API key automatically
-- Create `~/.plaster/config.yaml` with your settings
-- Set secure file permissions
-
-**Other client commands:**
-```bash
-plaster --new-api                      # Generate a new API key
-plaster --new-server-url <url>         # Change the server URL
-plaster --api                          # Display current API key
-plaster --url                          # Display current server URL
-plaster --help                         # Show all available commands
-```
-
-### Manual (No Docker)
-
-```bash
-# Clone & install
-git clone https://github.com/s4d0l1n/plaster.git
-cd plaster
-pip install -r requirements.txt
-
-# Start server
-python plaster_server.py
-
-# In another terminal - install client
-cp plaster ~/.local/bin/
-chmod +x ~/.local/bin/plaster
-```
-
-### systemd Service (Linux)
-
-Create `/etc/systemd/system/plaster.service`:
-
-```ini
-[Unit]
-Description=Plaster Clipboard Service
-After=network.target
-
-[Service]
-Type=simple
-User=your_user
-ExecStart=/usr/bin/python3 /path/to/plaster_server.py
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Then:
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now plaster
-sudo journalctl -u plaster -f
-```
-
-## Security Notes
-
-- **Size limits**: Prevent memory exhaustion (10MB per entry, 500MB total)
-- **Rate limiting**: Per-key limits prevent abuse (100 req/min)
-- **Multi-tenant**: API keys are cryptographically random (`secrets.token_hex(16)`)
-- **Isolation**: Each clipboard is separate - no cross-key leaks
-- **XSS Protection**: Web UI escapes all HTML entities
-- **Persistence**: Each key gets own backup file for security
+---
 
 ## Troubleshooting
 
-### API Key Issues
-
+**Can't connect to server:**
 ```bash
-# If key missing, regenerate
-rm ~/.plaster/config.yaml
-echo 'test' | plaster  # Auto-generates new key
+curl http://localhost:9321/health
+docker compose logs plaster
+```
 
-# View current key
+**Forgot API key:**
+```bash
 grep api_key ~/.plaster/config.yaml
 ```
 
-### Connection Errors
+**Generate new API key:**
+```bash
+plaster --new-api
+.\plaster.ps1 -NewApi
+```
+
+**Rate limit exceeded (429 error):**
+Wait 60 seconds and try again. Default limit is 100 requests per 60 seconds.
+
+---
+
+## Security Notes
+
+- API keys are cryptographically random
+- Each clipboard is isolated per API key
+- Size limits prevent memory exhaustion (10MB per entry, 500MB total)
+- Rate limiting prevents abuse
+- Web UI escapes HTML to prevent XSS
+
+---
+
+## Installation (Manual)
+
+Without Docker:
 
 ```bash
-# Check server running
-curl http://localhost:9321/health
-
-# Check key being sent
-plaster -h  # Should show config location
+git clone https://github.com/s4d0l1n/plaster.git
+cd plaster
+pip install -r requirements.txt
+python plaster_server.py
 ```
 
-### Rate Limit Hit
+Server runs on port 9321 by default.
+
+---
+
+## Files
 
 ```
-429 Too Many Requests
+~/.plaster/
+├── config.yaml          # Your config with API key
+├── keys.json           # Server-side key registry
+└── backups/            # Per-key clipboard backups
+    ├── plaster_xxx.json
+    └── plaster_yyy.json
 ```
 
-Wait 60 seconds, or adjust `rate_limit_requests` in config.yaml
-
-## Architecture
-
-**Files created:**
-
-- `~/.plaster/config.yaml` - Config with API key
-- `~/.plaster/keys.json` - Server-side key registry
-- `~/.plaster/backups/*.json` - Per-key clipboard backups
-
-**Server processes:**
-
-1. APIKeyManager - Generates/validates/tracks keys
-2. RateLimiter - Per-key request tracking
-3. Clipboard - FILO stack per key
-4. FastAPI handlers - HTTP endpoints
-5. Middleware - Auth checking
-
-## Development
-
-### Testing
-
-```bash
-# Start server
-python plaster_server.py &
-
-# Test API
-curl -H "X-API-Key: test" http://localhost:9321/health
-# Error: Invalid API key (expected)
-
-# Generate test key
-curl -X POST http://localhost:9321/auth/generate
-# {"status":"ok","api_key":"plaster_xxx"}
-
-# Test with key
-TEST_KEY="plaster_xxx"
-echo "hello" | curl -X POST http://localhost:9321/push \
-  -H "X-API-Key: $TEST_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"text":"hello"}'
-
-curl -H "X-API-Key: $TEST_KEY" http://localhost:9321/peek
-```
-
-### Building Docker Image
-
-```bash
-docker build -t plaster:latest .
-docker run -d -p 9321:9321 -v plaster_data:/root/.plaster plaster:latest
-```
-
-## Project Files
-
-```
-plaster/
-├── plaster_server.py      # FastAPI server + multi-tenant logic
-├── plaster                # Bash client with auto-key generation
-├── plaster.ps1            # PowerShell client with auto-key generation
-├── config.yaml            # Template config
-├── Dockerfile             # Container definition
-├── docker compose.yaml    # Full stack
-├── requirements.txt       # Python deps
-├── .gitignore
-└── README.md
-```
+---
 
 ## License
 
 MIT
 
-## Support
-
-- Check logs: `docker compose logs plaster` or `journalctl -u plaster -f`
-- Issues: https://github.com/s4d0l1n/plaster/issues
-- Docs: See code comments in `plaster_server.py`
-
 ---
 
-**Version 2.0** - Multi-tenant API key authentication release
+**Need help?** Check the logs:
+```bash
+docker compose logs plaster -f
+```
