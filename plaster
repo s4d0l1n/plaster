@@ -151,6 +151,9 @@ EOF
     echo "  echo 'my text' | plaster    # Push text"
     echo "  plaster                     # Get latest entry"
     echo "  plaster --list              # List all entries"
+    echo ""
+    echo "To make 'plaster' available from anywhere, install it:"
+    echo "  plaster --install           # Install to /usr/local/bin"
 }
 
 # Function to generate or set new API key

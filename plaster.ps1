@@ -219,6 +219,9 @@ api_key: "$script:ApiKey"
     Write-Host "  'my text' | .\plaster.ps1    # Push text"
     Write-Host "  .\plaster.ps1                # Get latest entry"
     Write-Host "  .\plaster.ps1 -List          # List all entries"
+    Write-Host ""
+    Write-Host "To make 'plaster' available from anywhere, install it:" -ForegroundColor Cyan
+    Write-Host "  .\plaster.ps1 -Install       # Install to Program Files (requires admin)"
 }
 
 function Change-ServerUrl {
