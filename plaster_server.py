@@ -770,7 +770,7 @@ def get_setup_page() -> str:
     """
 
 def get_html_page(api_key: str) -> str:
-    """Generate the HTML page with retro/old school computer theme"""
+    """Generate the HTML page with DOS shell theme"""
     return f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -789,86 +789,74 @@ def get_html_page(api_key: str) -> str:
 
             body {{
                 font-family: 'Courier Prime', monospace;
-                background: #001a33;
-                background-image:
-                    repeating-linear-gradient(
-                        0deg,
-                        rgba(0, 255, 0, 0.03) 0px,
-                        rgba(0, 255, 0, 0.03) 1px,
-                        transparent 1px,
-                        transparent 2px
-                    );
+                background: #000000;
                 min-height: 100vh;
-                padding: 20px;
+                padding: 10px;
                 display: flex;
-                justify-content: center;
-                align-items: center;
+                flex-direction: column;
                 color: #00ff00;
-                text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
             }}
 
             .container {{
-                background: #0a0e27;
-                border: 3px solid #00ff00;
-                box-shadow:
-                    0 0 20px rgba(0, 255, 0, 0.4),
-                    inset 0 0 20px rgba(0, 255, 0, 0.1);
-                max-width: 800px;
+                background: #000000;
+                border: 2px solid #00ff00;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+                max-width: 100%;
                 width: 100%;
                 overflow: hidden;
                 position: relative;
-            }}
-
-            .container::before {{
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                pointer-events: none;
-                background:
-                    repeating-linear-gradient(
-                        0deg,
-                        rgba(0, 255, 0, 0.05) 0px,
-                        rgba(0, 255, 0, 0.05) 1px,
-                        transparent 1px,
-                        transparent 2px
-                    );
+                flex: 1;
+                display: flex;
+                flex-direction: column;
             }}
 
             .header {{
-                background: #002244;
+                background: #000000;
                 color: #00ff00;
-                padding: 30px 30px;
-                text-align: center;
-                border-bottom: 2px solid #00ff00;
+                padding: 10px;
+                border-bottom: 1px solid #00ff00;
                 position: relative;
                 z-index: 1;
+                font-size: 11px;
+                letter-spacing: 1px;
+            }}
+
+            .header-line {{
+                margin-bottom: 3px;
             }}
 
             .header h1 {{
-                font-size: 32px;
-                margin-bottom: 8px;
+                font-size: 12px;
+                margin-bottom: 0;
                 font-weight: 700;
-                letter-spacing: 3px;
+                letter-spacing: 1px;
                 text-transform: uppercase;
-                text-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
             }}
 
             .header p {{
                 opacity: 0.9;
-                font-size: 12px;
-                letter-spacing: 2px;
+                font-size: 10px;
+                letter-spacing: 1px;
                 text-transform: uppercase;
+                margin: 0;
+            }}
+
+            .content {{
+                padding: 10px;
+                overflow-y: auto;
+                flex: 1;
+                font-size: 11px;
+                line-height: 1.6;
             }}
 
             .api-key-section {{
-                background: #1a1f3a;
-                padding: 20px;
+                background: #000000;
+                padding: 10px;
                 border: 1px solid #00ff00;
-                border-radius: 2px;
-                margin-top: 20px;
+                border-radius: 0px;
+                margin-top: 10px;
                 box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
             }}
 
@@ -886,10 +874,10 @@ def get_html_page(api_key: str) -> str:
                 display: flex;
                 gap: 8px;
                 align-items: center;
-                background: #0d0d1f;
+                background: #000000;
                 padding: 10px 12px;
                 border: 1px solid #00ff00;
-                border-radius: 2px;
+                border-radius: 0px;
                 font-family: 'Courier Prime', monospace;
                 font-size: 11px;
                 word-break: break-all;
@@ -905,10 +893,10 @@ def get_html_page(api_key: str) -> str:
                 flex: 1;
                 padding: 8px 10px;
                 border: 1px solid #00ff00;
-                border-radius: 2px;
+                border-radius: 0px;
                 font-family: 'Courier Prime', monospace;
                 font-size: 11px;
-                background: #0d0d1f;
+                background: #000000;
                 color: #00ff00;
                 text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }}
@@ -921,10 +909,10 @@ def get_html_page(api_key: str) -> str:
             .btn-switch,
             .btn-rotate,
             .btn-load-key {{
-                background: #002244;
+                background: #000000;
                 color: #00ff00;
                 border: 1px solid #00ff00;
-                border-radius: 2px;
+                border-radius: 0px;
                 padding: 6px 10px;
                 cursor: pointer;
                 font-size: 10px;
@@ -942,14 +930,14 @@ def get_html_page(api_key: str) -> str:
             .btn-rotate:hover,
             .btn-load-key:hover {{
                 background: #00ff00;
-                color: #001a33;
+                color: #000000;
                 box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
                 text-shadow: none;
             }}
 
             .btn-copy-key.copied {{
                 background: #00ff00;
-                color: #001a33;
+                color: #000000;
             }}
 
             .content {{
@@ -977,10 +965,10 @@ def get_html_page(api_key: str) -> str:
                 width: 100%;
                 padding: 10px 12px;
                 border: 1px solid #00ff00;
-                border-radius: 2px;
+                border-radius: 0px;
                 font-size: 12px;
                 font-family: 'Courier Prime', monospace;
-                background: #0d0d1f;
+                background: #000000;
                 color: #00ff00;
                 transition: all 0.15s ease;
                 resize: none;
@@ -1001,19 +989,19 @@ def get_html_page(api_key: str) -> str:
             }}
 
             button {{
-                padding: 8px 16px;
+                padding: 6px 12px;
                 border: 1px solid #00ff00;
-                border-radius: 2px;
-                font-size: 11px;
+                border-radius: 0px;
+                font-size: 10px;
                 font-weight: 700;
                 font-family: 'Courier Prime', monospace;
                 cursor: pointer;
-                transition: all 0.15s ease;
+                transition: all 0.1s ease;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                background: #002244;
+                background: #000000;
                 color: #00ff00;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
             }}
 
             .btn-primary {{
@@ -1022,13 +1010,13 @@ def get_html_page(api_key: str) -> str:
 
             .btn-primary:hover {{
                 background: #00ff00;
-                color: #001a33;
-                box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+                color: #000000;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
                 text-shadow: none;
             }}
 
             .btn-danger {{
-                background: #440000;
+                background: #000000;
                 color: #ff6666;
                 border-color: #ff6666;
                 text-shadow: 0 0 5px rgba(255, 102, 102, 0.3);
@@ -1042,24 +1030,24 @@ def get_html_page(api_key: str) -> str:
             }}
 
             .btn-copy {{
-                background: #002244;
+                background: #000000;
                 color: #00ff00;
                 padding: 6px 10px;
                 font-size: 10px;
-                border-radius: 2px;
+                border-radius: 0px;
                 flex-shrink: 0;
                 border: 1px solid #00ff00;
             }}
 
             .btn-copy:hover {{
                 background: #00ff00;
-                color: #001a33;
+                color: #000000;
                 box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
             }}
 
             .btn-copy.copied {{
                 background: #00ff00;
-                color: #001a33;
+                color: #000000;
             }}
 
             .list-section {{
@@ -1085,11 +1073,11 @@ def get_html_page(api_key: str) -> str:
             }}
 
             .list-count {{
-                background: #002244;
+                background: #000000;
                 color: #00ff00;
                 padding: 4px 10px;
-                border: 1px solid #00884422;
-                border-radius: 2px;
+                border: 1px solid #00ff00;
+                border-radius: 0px;
                 font-size: 11px;
                 font-weight: 700;
                 text-shadow: 0 0 5px rgba(0, 255, 0, 0.2);
@@ -1110,15 +1098,15 @@ def get_html_page(api_key: str) -> str:
                 align-items: center;
                 gap: 8px;
                 padding: 10px 12px;
-                background: #0d0d1f;
-                border: 1px solid #00884422;
+                background: #000000;
+                border: 1px solid #00ff00;
                 border-left: 3px solid #00ff00;
-                border-radius: 2px;
+                border-radius: 0px;
                 transition: all 0.15s ease;
             }}
 
             .entry-item:hover {{
-                background: #1a1f3a;
+                background: #000000;
                 border-left-color: #00ff00;
                 box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
             }}
@@ -1168,11 +1156,11 @@ def get_html_page(api_key: str) -> str:
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
-                background: #002244;
+                background: #000000;
                 color: #00ff00;
                 border: 1px solid #00ff00;
                 padding: 12px 16px;
-                border-radius: 2px;
+                border-radius: 0px;
                 box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
                 opacity: 0;
                 transform: translateY(20px);
@@ -1201,14 +1189,14 @@ def get_html_page(api_key: str) -> str:
             }}
 
             ::-webkit-scrollbar-track {{
-                background: #0d0d1f;
-                border: 1px solid #00884422;
+                background: #000000;
+                border: 1px solid #00ff00;
             }}
 
             ::-webkit-scrollbar-thumb {{
-                background: #002244;
+                background: #00ff00;
                 border: 1px solid #00ff00;
-                border-radius: 2px;
+                border-radius: 0px;
             }}
 
             ::-webkit-scrollbar-thumb:hover {{
@@ -1246,9 +1234,10 @@ def get_html_page(api_key: str) -> str:
     <body>
         <div class="container">
             <div class="header">
-                <h1>📋 Plaster</h1>
-                <p>Your FILO Clipboard Service</p>
-                <p style="opacity: 0.8; font-size: 12px; margin-top: 10px;">A FILO (First In, Last Out) clipboard - newest entries accessed first</p>
+                <div class="header-line">╔════════════════════════════════════════╗</div>
+                <div class="header-line">║  ▓▓  PLASTER - CLIPBOARD SERVICE  ▓▓  ║</div>
+                <div class="header-line">║  C:\\clipboard>                         ║</div>
+                <div class="header-line">╚════════════════════════════════════════╝</div>
 
                 <div class="api-key-section">
                     <span class="api-key-label" id="keyLabel">Your API Key</span>
@@ -1283,19 +1272,10 @@ def get_html_page(api_key: str) -> str:
                     <div class="entries-list" id="entriesList"></div>
                 </div>
 
-                <div class="list-section" style="margin-top: 50px; border-top: 1px solid #e0e0e0; padding-top: 30px;">
-                    <div class="list-title" style="margin-bottom: 15px;">CLI Usage</div>
-                    <div class="instructions">
-                        <p style="margin-bottom: 10px; color: #666; font-size: 13px;">Use the command-line client for quick access:</p>
-                        <pre style="background: #f0f0f0; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; color: #333;">plaster              # Get latest entry (LIFO)
-plaster --list       # List all entries
-plaster -n 1         # Get 1st entry (1-indexed)
-plaster -n 3         # Get 3rd entry
-echo 'text' | plaster    # Push text
-plaster --clear      # Clear all entries
-plaster --api        # Show current API key
-plaster --url        # Show current server URL
-plaster --new-api    # Generate new API key</pre>
+                <div class="list-section" style="margin-top: 50px; border-top: 1px solid #00ff00; padding-top: 30px;">
+                    <div class="list-title" style="margin-bottom: 15px;">Documentation</div>
+                    <div style="font-size: 11px; color: #00ff00;">
+                        <p style="margin-bottom: 10px;">For CLI usage and more information, see the <a href="https://github.com/anthropics/claude-code/blob/main/README.md" style="color: #00ff00; text-decoration: underline;">README</a></p>
                     </div>
                 </div>
             </div>
