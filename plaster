@@ -48,13 +48,24 @@ EXAMPLES:
 # Function to generate a new API key from server
 generate_api_key() {
     local response
-    response=$(curl -s -X POST "$SERVER_URL/auth/generate" \
+    local http_code
+    response=$(curl -s -w "\n%{http_code}" -X POST "$SERVER_URL/auth/generate" \
         -H "Content-Type: application/json" 2>&1)
+
+    http_code=$(echo "$response" | tail -n 1)
+    response=$(echo "$response" | sed '$d')
+
+    if [[ "$http_code" != "200" ]]; then
+        echo "Error: Failed to generate API key (HTTP $http_code)" >&2
+        echo "Server response: $response" >&2
+        exit 1
+    fi
 
     if echo "$response" | jq -e '.api_key' > /dev/null 2>&1; then
         echo "$response" | jq -r '.api_key'
     else
-        echo "Error: Failed to generate API key" >&2
+        echo "Error: Failed to parse API key from response" >&2
+        echo "Server response: $response" >&2
         exit 1
     fi
 }
