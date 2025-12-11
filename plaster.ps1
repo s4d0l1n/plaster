@@ -120,12 +120,12 @@ function Load-Config {
     # Parse YAML
     $content = Get-Content $Config -Raw
 
-    $match = $content -match 'server_url:\s*["\']?([^"\s]+)'
+    $match = $content -match 'server_url:\s*[''"]?(\S+)[''"]?'
     if ($match) {
         $script:ServerUrl = $matches[1]
     }
 
-    $match = $content -match 'api_key:\s*["\']?([^"\s]+)'
+    $match = $content -match 'api_key:\s*[''"]?(\S+)[''"]?'
     if ($match) {
         $script:ApiKey = $matches[1]
     }
