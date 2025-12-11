@@ -6,8 +6,17 @@
 
 set -euo pipefail
 
-# Default values
-PLASTER_CONFIG="${HOME}/.plaster/config.yaml"
+# Script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Default values - use script directory if not installed
+# If installed to /usr/local/bin, use ~/.plaster
+if [[ "$SCRIPT_DIR" == "/usr/local/bin" ]]; then
+    PLASTER_CONFIG="${HOME}/.plaster/config.yaml"
+else
+    PLASTER_CONFIG="${SCRIPT_DIR}/config.yaml"
+fi
+
 SERVER_URL="http://localhost:9321"
 API_KEY=""
 HELP_TEXT="Usage: plaster [OPTION]
@@ -225,27 +234,30 @@ show_help() {
 # Function to install plaster
 install_plaster() {
     local install_path="/usr/local/bin/plaster"
-    local script_dir
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local script_path="$script_dir/plaster"
+    local config_dir="${HOME}/.plaster"
 
     echo "Installing Plaster to $install_path..."
 
-    if [[ ! -f "$script_path" ]]; then
-        echo "Error: Could not find plaster script at $script_path" >&2
+    if [[ ! -f "$SCRIPT_DIR/plaster" ]]; then
+        echo "Error: Could not find plaster script at $SCRIPT_DIR/plaster" >&2
         exit 1
     fi
 
-    sudo cp "$script_path" "$install_path"
+    sudo cp "$SCRIPT_DIR/plaster" "$install_path"
     sudo chmod +x "$install_path"
 
+    # Create config directory for installed version
+    mkdir -p "$config_dir"
+
     echo "✓ Plaster installed successfully to $install_path"
+    echo "✓ Config directory: $config_dir"
     echo "You can now run 'plaster' from anywhere!"
 }
 
 # Function to uninstall plaster
 uninstall_plaster() {
     local install_path="/usr/local/bin/plaster"
+    local config_dir="${HOME}/.plaster"
 
     echo "Uninstalling Plaster from $install_path..."
 
@@ -255,6 +267,17 @@ uninstall_plaster() {
     fi
 
     sudo rm "$install_path"
+
+    # Ask to remove config directory
+    if [[ -d "$config_dir" ]]; then
+        read -p "Remove config directory $config_dir? (y/N): " -r remove_config
+        if [[ "$remove_config" =~ ^[Yy]$ ]]; then
+            rm -rf "$config_dir"
+            echo "✓ Config directory removed"
+        else
+            echo "Config directory preserved at $config_dir"
+        fi
+    fi
 
     echo "✓ Plaster uninstalled successfully"
 }

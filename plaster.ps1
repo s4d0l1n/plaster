@@ -38,12 +38,26 @@ param(
     [string]$NewServerUrl,
     [int]$Entry = -1,
 
-    [string]$Config = (Join-Path $env:USERPROFILE ".plaster" "config.yaml")
+    [string]$Config
 )
 
 $ErrorActionPreference = "Stop"
 $script:ServerUrl = "http://localhost:9321"
 $script:ApiKey = ""
+
+# Set config path based on location
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+if ($scriptDir -like "*Program Files*") {
+    # Installed version - use user home directory
+    if (-not $Config) {
+        $Config = Join-Path $env:USERPROFILE ".plaster" "config.yaml"
+    }
+} else {
+    # Local version - use script directory
+    if (-not $Config) {
+        $Config = Join-Path $scriptDir "config.yaml"
+    }
+}
 
 function Invoke-ApiRequest {
     param(
@@ -243,6 +257,7 @@ function Change-ServerUrl {
 function Install-Plaster {
     $installPath = Join-Path $env:ProgramFiles "plaster" "plaster.ps1"
     $installDir = Split-Path $installPath
+    $configDir = Join-Path $env:USERPROFILE ".plaster"
 
     Write-Host "Installing Plaster to $installDir..." -ForegroundColor Cyan
 
@@ -266,7 +281,13 @@ function Install-Plaster {
     $wrapperPath = Join-Path $env:SystemRoot "System32" "plaster.ps1"
     Copy-Item -Path $PSCommandPath -Destination $wrapperPath -Force
 
+    # Create config directory for installed version
+    if (-not (Test-Path $configDir)) {
+        New-Item -ItemType Directory -Path $configDir -Force | Out-Null
+    }
+
     Write-Host "✓ Plaster installed successfully to $installDir" -ForegroundColor Green
+    Write-Host "✓ Config directory: $configDir" -ForegroundColor Green
     Write-Host "You can now run 'plaster -Setup' from anywhere (or use 'plaster.ps1 -Setup' in PowerShell)" -ForegroundColor Green
 }
 
@@ -274,6 +295,7 @@ function Uninstall-Plaster {
     $installPath = Join-Path $env:ProgramFiles "plaster" "plaster.ps1"
     $installDir = Split-Path $installPath
     $wrapperPath = Join-Path $env:SystemRoot "System32" "plaster.ps1"
+    $configDir = Join-Path $env:USERPROFILE ".plaster"
 
     Write-Host "Uninstalling Plaster from $installDir..." -ForegroundColor Cyan
 
@@ -293,6 +315,17 @@ function Uninstall-Plaster {
     Remove-Item -Path $installPath -Force -ErrorAction SilentlyContinue
     Remove-Item -Path $wrapperPath -Force -ErrorAction SilentlyContinue
     Remove-Item -Path $installDir -Force -ErrorAction SilentlyContinue
+
+    # Ask to remove config directory
+    if (Test-Path $configDir) {
+        $response = Read-Host "Remove config directory $configDir`? (y/N)"
+        if ($response -eq 'y' -or $response -eq 'Y') {
+            Remove-Item -Path $configDir -Recurse -Force
+            Write-Host "✓ Config directory removed" -ForegroundColor Green
+        } else {
+            Write-Host "Config directory preserved at $configDir" -ForegroundColor Green
+        }
+    }
 
     Write-Host "✓ Plaster uninstalled successfully" -ForegroundColor Green
 }
