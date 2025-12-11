@@ -235,6 +235,8 @@ show_help() {
 install_plaster() {
     local install_path="/usr/local/bin/plaster"
     local config_dir="${HOME}/.plaster"
+    local old_config="${SCRIPT_DIR}/config.yaml"
+    local new_config="${config_dir}/config.yaml"
 
     echo "Installing Plaster to $install_path..."
 
@@ -248,6 +250,14 @@ install_plaster() {
 
     # Create config directory for installed version
     mkdir -p "$config_dir"
+
+    # Migrate config from script directory to ~/.plaster if it exists there
+    if [[ -f "$old_config" ]]; then
+        echo "Migrating config from $old_config to $new_config..."
+        cp "$old_config" "$new_config"
+        chmod 600 "$new_config"
+        echo "✓ Config migrated to $new_config"
+    fi
 
     echo "✓ Plaster installed successfully to $install_path"
     echo "✓ Config directory: $config_dir"

@@ -258,6 +258,8 @@ function Install-Plaster {
     $installPath = Join-Path $env:ProgramFiles "plaster" "plaster.ps1"
     $installDir = Split-Path $installPath
     $configDir = Join-Path $env:USERPROFILE ".plaster"
+    $oldConfig = Join-Path (Split-Path -Parent $PSCommandPath) "config.yaml"
+    $newConfig = Join-Path $configDir "config.yaml"
 
     Write-Host "Installing Plaster to $installDir..." -ForegroundColor Cyan
 
@@ -284,6 +286,13 @@ function Install-Plaster {
     # Create config directory for installed version
     if (-not (Test-Path $configDir)) {
         New-Item -ItemType Directory -Path $configDir -Force | Out-Null
+    }
+
+    # Migrate config from script directory to %USERPROFILE%\.plaster if it exists there
+    if ((Test-Path $oldConfig) -and -not (Test-Path $newConfig)) {
+        Write-Host "Migrating config from $(Split-Path -Parent $PSCommandPath) to $configDir..." -ForegroundColor Cyan
+        Copy-Item -Path $oldConfig -Destination $newConfig -Force
+        Write-Host "✓ Config migrated to $newConfig" -ForegroundColor Green
     }
 
     Write-Host "✓ Plaster installed successfully to $installDir" -ForegroundColor Green
