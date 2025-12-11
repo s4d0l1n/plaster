@@ -502,15 +502,17 @@ async def check_api_key(request: Request, call_next):
     return await call_next(request)
 
 def get_setup_page() -> str:
-    """Generate the setup/login page"""
+    """Generate the setup/login page with retro theme"""
     return r"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Plaster - Clipboard Service</title>
+        <title>PLASTER - Clipboard Service</title>
         <style>
+            @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
             * {
                 margin: 0;
                 padding: 0;
@@ -518,41 +520,59 @@ def get_setup_page() -> str:
             }
 
             body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                font-family: 'Courier Prime', monospace;
+                background: #001a33;
+                background-image:
+                    repeating-linear-gradient(
+                        0deg,
+                        rgba(0, 255, 0, 0.03) 0px,
+                        rgba(0, 255, 0, 0.03) 1px,
+                        transparent 1px,
+                        transparent 2px
+                    );
                 min-height: 100vh;
                 padding: 20px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
+                color: #00ff00;
+                text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
             }
 
             .container {
-                background: white;
-                border-radius: 20px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                background: #0a0e27;
+                border: 3px solid #00ff00;
+                box-shadow:
+                    0 0 20px rgba(0, 255, 0, 0.4),
+                    inset 0 0 20px rgba(0, 255, 0, 0.1);
                 max-width: 600px;
                 width: 100%;
                 overflow: hidden;
+                position: relative;
             }
 
             .header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background: #002244;
+                color: #00ff00;
                 padding: 40px 30px;
                 text-align: center;
+                border-bottom: 2px solid #00ff00;
             }
 
             .header h1 {
                 font-size: 32px;
                 margin-bottom: 8px;
                 font-weight: 700;
+                letter-spacing: 3px;
+                text-transform: uppercase;
+                text-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
             }
 
             .header p {
-                opacity: 0.95;
-                font-size: 14px;
-                letter-spacing: 0.5px;
+                opacity: 0.9;
+                font-size: 12px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
             }
 
             .content {
@@ -564,10 +584,13 @@ def get_setup_page() -> str:
             }
 
             .section h2 {
-                font-size: 18px;
-                color: #333;
+                font-size: 14px;
+                color: #00ff00;
                 margin-bottom: 15px;
-                font-weight: 600;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }
 
             .input-group {
@@ -578,95 +601,114 @@ def get_setup_page() -> str:
 
             #apiKeyInput {
                 flex: 1;
-                padding: 12px 16px;
-                border: 2px solid #e0e0e0;
-                border-radius: 10px;
-                font-size: 14px;
-                font-family: 'Menlo', monospace;
-                transition: all 0.3s ease;
+                padding: 10px 12px;
+                border: 1px solid #00ff00;
+                border-radius: 2px;
+                font-size: 12px;
+                font-family: 'Courier Prime', monospace;
+                background: #0d0d1f;
+                color: #00ff00;
+                transition: all 0.15s ease;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.1);
             }
 
             #apiKeyInput:focus {
                 outline: none;
-                border-color: #667eea;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                border-color: #00ff00;
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.4), inset 0 0 10px rgba(0, 255, 0, 0.1);
+            }
+
+            #apiKeyInput::placeholder {
+                color: #00884488;
             }
 
             button {
-                padding: 12px 24px;
-                border: none;
-                border-radius: 10px;
-                font-size: 14px;
-                font-weight: 600;
+                padding: 10px 16px;
+                border: 1px solid #00ff00;
+                border-radius: 2px;
+                font-size: 11px;
+                font-weight: 700;
+                font-family: 'Courier Prime', monospace;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: all 0.15s ease;
                 text-transform: uppercase;
-                letter-spacing: 0.5px;
+                letter-spacing: 1px;
+                background: #002244;
+                color: #00ff00;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }
 
             .btn-primary {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
                 flex: 0 0 auto;
             }
 
             .btn-primary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-            }
-
-            .btn-primary:active {
-                transform: translateY(0);
+                background: #00ff00;
+                color: #001a33;
+                box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+                text-shadow: none;
             }
 
             .instructions {
-                background: #f8f9fa;
-                border-left: 4px solid #667eea;
+                background: #0d0d1f;
+                border: 1px solid #00884422;
+                border-left: 3px solid #00ff00;
                 padding: 15px;
-                border-radius: 8px;
+                border-radius: 2px;
                 line-height: 1.6;
             }
 
             .instructions h3 {
-                color: #333;
-                font-size: 14px;
+                color: #00ff00;
+                font-size: 11px;
                 margin-bottom: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.2);
             }
 
             .instructions ol {
                 margin-left: 20px;
-                color: #666;
-                font-size: 13px;
+                color: #00ff00;
+                font-size: 11px;
             }
 
             .instructions li {
                 margin-bottom: 8px;
+                opacity: 0.95;
             }
 
             .code-block {
-                background: #f0f0f0;
+                background: #050509;
                 padding: 10px;
-                border-radius: 6px;
-                font-family: 'Menlo', monospace;
-                font-size: 12px;
+                border-radius: 2px;
+                border: 1px solid #00442288;
+                font-family: 'Courier Prime', monospace;
+                font-size: 10px;
                 margin-top: 8px;
                 overflow-x: auto;
-                color: #333;
+                color: #00ff00;
+                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
             }
 
             .toast {
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
-                background: #51cf66;
-                color: white;
+                background: #004400;
+                color: #00ff00;
                 padding: 14px 20px;
-                border-radius: 10px;
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+                border: 1px solid #00ff00;
+                border-radius: 2px;
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
                 opacity: 0;
                 transform: translateY(20px);
                 transition: all 0.3s ease;
                 z-index: 1000;
+                font-family: 'Courier Prime', monospace;
+                font-size: 12px;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }
 
             .toast.show {
@@ -675,7 +717,11 @@ def get_setup_page() -> str:
             }
 
             .toast.error {
-                background: #ff6b6b;
+                background: #440000;
+                color: #ff6666;
+                border-color: #ff6666;
+                box-shadow: 0 0 20px rgba(255, 102, 102, 0.3);
+                text-shadow: 0 0 5px rgba(255, 102, 102, 0.2);
             }
 
             @media (max-width: 600px) {
@@ -704,15 +750,15 @@ def get_setup_page() -> str:
     <body>
         <div class="container">
             <div class="header">
-                <h1>📋 Plaster</h1>
-                <p>Your FILO Clipboard Service</p>
+                <h1>PLASTER</h1>
+                <p>FILO Clipboard Service</p>
             </div>
 
             <div class="content">
                 <div class="section">
                     <h2>Access Clipboard</h2>
                     <div class="input-group">
-                        <input type="text" id="apiKeyInput" placeholder="Enter your API key..." />
+                        <input type="text" id="apiKeyInput" placeholder="Enter API key..." />
                         <button class="btn-primary" onclick="loadClipboard()">Load</button>
                     </div>
                 </div>
