@@ -8,6 +8,7 @@ import os
 import secrets
 import time
 import threading
+import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime
@@ -17,12 +18,90 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
+from cryptography.fernet import Fernet
 
 # Configuration management
 CONFIG_DIR = Path.home() / ".plaster"
 CONFIG_FILE = CONFIG_DIR / "config.yaml"
 BACKUP_DIR = CONFIG_DIR / "backups"
 KEYS_FILE = CONFIG_DIR / "keys.json"
+MASTER_KEY_FILE = CONFIG_DIR / "master.key"
+AUDIT_LOG_FILE = CONFIG_DIR / "audit.log"
+
+# Setup logging
+def setup_logging():
+    """Configure audit logging"""
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Create logger
+    logger = logging.getLogger("plaster")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False  # Prevent propagation to uvicorn logger
+
+    # File handler for audit log
+    try:
+        file_handler = logging.FileHandler(AUDIT_LOG_FILE)
+        file_handler.setLevel(logging.INFO)
+
+        # Log format: timestamp | level | message
+        formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        file_handler.setFormatter(formatter)
+
+        # Remove existing handlers to avoid duplicates
+        logger.handlers.clear()
+        logger.addHandler(file_handler)
+
+        # Set restrictive permissions on log file
+        try:
+            os.chmod(AUDIT_LOG_FILE, 0o600)
+        except (OSError, FileNotFoundError):
+            pass  # File doesn't exist yet, will be created with restrictive perms
+    except Exception as e:
+        print(f"Warning: Failed to setup file logging: {e}", flush=True)
+
+    return logger
+
+# Setup encryption
+class EncryptedStorage:
+    """Handles encryption/decryption of sensitive data at rest"""
+
+    def __init__(self, key_file: Path):
+        self.key_file = key_file
+        self.cipher = self._load_or_create_key()
+
+    def _load_or_create_key(self) -> Fernet:
+        """Load existing encryption key or create new one"""
+        if self.key_file.exists():
+            with open(self.key_file, 'rb') as f:
+                key = f.read()
+        else:
+            # Generate new encryption key
+            key = Fernet.generate_key()
+            self.key_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.key_file, 'wb') as f:
+                f.write(key)
+            # Protect the master key with restrictive permissions
+            os.chmod(self.key_file, 0o600)
+
+        return Fernet(key)
+
+    def encrypt(self, data: str) -> str:
+        """Encrypt data and return base64-encoded result"""
+        return self.cipher.encrypt(data.encode()).decode()
+
+    def decrypt(self, encrypted_data: str) -> str:
+        """Decrypt base64-encoded data"""
+        return self.cipher.decrypt(encrypted_data.encode()).decode()
+
+# Initialize logger and encryption
+logger = setup_logging()
+try:
+    encrypted_storage = EncryptedStorage(MASTER_KEY_FILE)
+    logger.info("Encryption system initialized successfully")
+except Exception as e:
+    print(f"CRITICAL: Failed to initialize encryption: {e}", flush=True)
+    import sys
+    sys.exit(1)
 
 # Default configuration
 DEFAULT_CONFIG = {
@@ -103,47 +182,83 @@ class Clipboard:
             self.save_to_backup()
 
     def save_to_backup(self) -> None:
-        """Save clipboard to disk"""
+        """Save encrypted clipboard to disk"""
         try:
             backup_dir = Path(self.backup_path)
             backup_dir.mkdir(parents=True, exist_ok=True)
             backup_file = backup_dir / f"{self.api_key}.json"
+
+            # Serialize stack to JSON
+            json_data = json.dumps(self.stack)
+
+            # Encrypt the data
+            encrypted_data = encrypted_storage.encrypt(json_data)
+
+            # Write encrypted data to file
             with open(backup_file, 'w') as f:
-                json.dump(self.stack, f)
+                f.write(encrypted_data)
+
+            # Protect with restrictive permissions
+            os.chmod(backup_file, 0o600)
         except Exception as e:
             print(f"Warning: Failed to save backup for {self.api_key}: {e}")
 
     def load_from_backup(self) -> None:
-        """Load clipboard from disk if it exists"""
+        """Load and decrypt clipboard from disk if it exists"""
         try:
             backup_dir = Path(self.backup_path)
             backup_file = backup_dir / f"{self.api_key}.json"
             if backup_file.exists():
                 with open(backup_file, 'r') as f:
-                    self.stack = json.load(f)
+                    encrypted_data = f.read()
+
+                # Decrypt the data
+                decrypted_data = encrypted_storage.decrypt(encrypted_data)
+                self.stack = json.loads(decrypted_data)
         except Exception as e:
             print(f"Warning: Failed to load backup for {self.api_key}: {e}")
             self.stack = []
 
 class APIKeyManager:
-    """Manages API keys and their metadata"""
+    """Manages API keys and their metadata with encryption"""
 
     def __init__(self, keys_file: str):
         self.keys_file = Path(keys_file)
         self.keys_data = self.load_keys()
 
     def load_keys(self) -> dict:
-        """Load keys from file"""
+        """Load and decrypt keys from file"""
         if self.keys_file.exists():
-            with open(self.keys_file, 'r') as f:
-                return json.load(f)
+            try:
+                with open(self.keys_file, 'r') as f:
+                    encrypted_data = f.read()
+
+                # Decrypt the file content
+                decrypted_data = encrypted_storage.decrypt(encrypted_data)
+                return json.loads(decrypted_data)
+            except Exception as e:
+                logger.warning(f"Failed to load keys file: {e}. Starting with empty keys.")
+                return {}
         return {}
 
     def save_keys(self) -> None:
-        """Save keys to file"""
+        """Encrypt and save keys to file"""
         self.keys_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.keys_file, 'w') as f:
-            json.dump(self.keys_data, f, indent=2)
+        try:
+            # Serialize keys to JSON
+            json_data = json.dumps(self.keys_data, indent=2)
+
+            # Encrypt the data
+            encrypted_data = encrypted_storage.encrypt(json_data)
+
+            # Write encrypted data to file
+            with open(self.keys_file, 'w') as f:
+                f.write(encrypted_data)
+
+            # Protect with restrictive permissions
+            os.chmod(self.keys_file, 0o600)
+        except Exception as e:
+            logger.error(f"Failed to save keys file: {e}")
 
     def generate_key(self) -> str:
         """Generate a new API key"""
@@ -153,6 +268,7 @@ class APIKeyManager:
             "last_used": None
         }
         self.save_keys()
+        logger.info(f"Generated new API key: {key[:16]}...")
         return key
 
     def validate_key(self, key: str) -> bool:
@@ -170,6 +286,7 @@ class APIKeyManager:
         if key in self.keys_data:
             del self.keys_data[key]
             self.save_keys()
+            logger.info(f"Deleted API key: {key[:16]}...")
             return True
         return False
 
@@ -319,13 +436,21 @@ def cleanup_expired_keys_task():
                 api_key_gen_limiter.remove_key(key)
 
             if expired_keys:
-                print(f"Cleaned up {len(expired_keys)} expired API keys")
+                logger.info(f"Cleanup task: Deleted {len(expired_keys)} idle API keys (idle > {idle_timeout_days} days)")
+                for key in expired_keys:
+                    logger.warning(f"Deleted idle key: {key[:16]}...")
         except Exception as e:
-            print(f"Error in cleanup task: {e}")
+            logger.error(f"Error in cleanup task: {e}")
 
 @app.on_event("startup")
 async def startup_event():
     """Start cleanup task on server startup"""
+    logger.info("="*60)
+    logger.info("Plaster server starting")
+    logger.info(f"Config: {CONFIG_FILE}")
+    logger.info(f"Encryption key: {MASTER_KEY_FILE}")
+    logger.info(f"Audit log: {AUDIT_LOG_FILE}")
+    logger.info("="*60)
     cleanup_thread = threading.Thread(target=cleanup_expired_keys_task, daemon=True)
     cleanup_thread.start()
 
@@ -343,6 +468,7 @@ app.add_middleware(
 async def check_api_key(request: Request, call_next):
     """Check API key for all requests except health, key generation, and initial setup"""
     path = request.url.path
+    client_ip = request.client.host if request.client else "unknown"
 
     # Skip auth for health check, static docs, key generation, and root path (initial setup)
     if path in ["/health", "/docs", "/openapi.json", "/auth/generate", "/"]:
@@ -352,17 +478,23 @@ async def check_api_key(request: Request, call_next):
     api_key = request.headers.get("X-API-Key")
 
     if not api_key:
+        logger.warning(f"Missing X-API-Key header from {client_ip} for {path}")
         raise HTTPException(status_code=401, detail="Missing X-API-Key header")
 
     if not key_manager.validate_key(api_key):
+        logger.warning(f"Invalid API key attempt from {client_ip} for {path}")
         raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Check rate limit
     if not rate_limiter.is_allowed(api_key):
+        logger.warning(f"Rate limit exceeded for {api_key[:16]}... from {client_ip}")
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
 
     # Update last used
     key_manager.update_last_used(api_key)
+
+    # Log successful authentication
+    logger.info(f"Authenticated {api_key[:16]}... from {client_ip} for {request.method} {path}")
 
     # Store key in request state for later use
     request.state.api_key = api_key
@@ -1438,6 +1570,8 @@ async def generate_key(request: Request):
     # Get client IP
     client_ip = request.client.host if request.client else "unknown"
 
+    logger.info(f"API key generation requested from {client_ip}")
+
     # Check if this IP is at limit and delete oldest key if needed
     oldest_key = api_key_gen_limiter.get_oldest_key_if_at_limit(client_ip)
     if oldest_key:
@@ -1451,6 +1585,7 @@ async def generate_key(request: Request):
         backup_file = Path(BACKUP_DIR) / f"{oldest_key}.json"
         if backup_file.exists():
             backup_file.unlink()
+        logger.warning(f"FILO deletion: Removed oldest key {oldest_key[:16]}... from {client_ip} (limit reached)")
 
     # Generate the new key
     key = key_manager.generate_key()
@@ -1459,6 +1594,7 @@ async def generate_key(request: Request):
     api_key_gen_limiter.record_key(client_ip, key)
 
     get_or_create_clipboard(key)
+    logger.info(f"Successfully generated new API key from {client_ip}")
     return {"status": "ok", "api_key": key}
 
 @app.post("/auth/rotate")
@@ -1466,6 +1602,8 @@ async def rotate_key(request: Request):
     """Rotate API key (generates new key, keeps old for backwards compatibility)"""
     old_key = request.state.api_key
     new_key = key_manager.generate_key()
+
+    logger.info(f"Rotated API key: {old_key[:16]}... -> {new_key[:16]}...")
 
     # Copy clipboard from old key to new key
     if old_key in clipboards:
@@ -1487,8 +1625,10 @@ async def push(request: Request, entry: TextEntry):
         max_entry_size = config.get("max_entry_size_mb", 10) * 1024 * 1024
         max_total_size = config.get("max_total_size_mb", 500) * 1024 * 1024
         clipboard.push(entry.text, max_entry_size, max_total_size)
+        logger.info(f"Pushed text entry ({len(entry.text)} bytes) for {api_key[:16]}...")
         return {"status": "ok", "message": f"Added text (length: {len(entry.text)})"}
     except ValueError as e:
+        logger.warning(f"Failed to push entry for {api_key[:16]}...: {e}")
         raise HTTPException(status_code=413, detail=str(e))
 
 @app.get("/pop")
@@ -1499,8 +1639,10 @@ async def pop(request: Request):
 
     try:
         entry = clipboard.pop()
+        logger.info(f"Popped entry ({len(entry)} bytes) for {api_key[:16]}...")
         return {"status": "ok", "text": entry}
     except ValueError as e:
+        logger.info(f"Pop failed for {api_key[:16]}... (clipboard empty)")
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/peek")
@@ -1511,8 +1653,10 @@ async def peek(request: Request):
 
     try:
         entry = clipboard.peek()
+        logger.info(f"Peeked entry ({len(entry)} bytes) for {api_key[:16]}...")
         return {"status": "ok", "text": entry}
     except ValueError as e:
+        logger.info(f"Peek failed for {api_key[:16]}... (clipboard empty)")
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/list")
@@ -1523,6 +1667,7 @@ async def list_entries(request: Request):
 
     entries = clipboard.get_all()
     previews = [entry[:50] + ("..." if len(entry) > 50 else "") for entry in entries]
+    logger.info(f"Listed {len(entries)} entries for {api_key[:16]}...")
     return {
         "status": "ok",
         "count": len(entries),
@@ -1537,8 +1682,10 @@ async def get_entry(request: Request, index: int):
 
     try:
         entry = clipboard.get_entry(index)
+        logger.info(f"Retrieved entry {index} ({len(entry)} bytes) for {api_key[:16]}...")
         return {"status": "ok", "index": index, "text": entry}
     except ValueError as e:
+        logger.warning(f"Failed to get entry {index} for {api_key[:16]}...: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.delete("/clear")
@@ -1548,6 +1695,7 @@ async def clear(request: Request):
     clipboard = get_or_create_clipboard(api_key)
 
     clipboard.clear()
+    logger.warning(f"Cleared all entries for {api_key[:16]}...")
     return {"status": "ok", "message": "Clipboard cleared"}
 
 if __name__ == "__main__":
