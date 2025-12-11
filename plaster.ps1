@@ -92,9 +92,20 @@ function New-ApiKey {
             -UseBasicParsing -ErrorAction Stop
 
         $data = $response.Content | ConvertFrom-Json
-        return $data.api_key
+        if ($data.api_key) {
+            return $data.api_key
+        } else {
+            Write-Error "Failed to parse API key from response"
+            Write-Error "Server response: $($response.Content)"
+            Write-Error "Response length: $($response.Content.Length) bytes"
+            exit 1
+        }
     } catch {
-        $statusCode = $_.Exception.Response.StatusCode.Value
+        try {
+            $statusCode = $_.Exception.Response.StatusCode.Value
+        } catch {
+            $statusCode = "Unknown"
+        }
         $errorMsg = $_.Exception.Message
         Write-Error "Failed to generate API key (HTTP $statusCode): $errorMsg"
         Write-Error "Server response: $($_.ErrorDetails.Message)"

@@ -67,7 +67,15 @@ generate_api_key() {
     else
         echo "Error: Failed to parse API key from response" >&2
         echo "Server response: $response" >&2
-        exit 1
+        echo "Response length: ${#response} bytes" >&2
+        echo "Response (hex dump): $(echo -n "$response" | od -A x -t x1z -v)" >&2
+        echo "Attempting to extract api_key manually..." >&2
+        # Try to extract api_key using grep if jq fails
+        if grep -q '"api_key"' <<< "$response"; then
+            echo "$response" | grep -o '"api_key":"[^"]*"' | cut -d'"' -f4
+        else
+            exit 1
+        fi
     fi
 }
 
