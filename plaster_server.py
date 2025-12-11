@@ -1111,6 +1111,21 @@ plaster --new-api    # Generate new API key</pre>
             let currentApiKey = '{api_key}';
             let isOwnKey = true;
 
+            // Check if API key was passed via query parameter
+            function initializeApiKey() {{
+                const params = new URLSearchParams(window.location.search);
+                const queryApiKey = params.get('api_key');
+
+                if (queryApiKey) {{
+                    currentApiKey = queryApiKey;
+                    isOwnKey = false;
+                    updateKeyDisplay();
+                    // Remove query parameter from URL
+                    window.history.replaceState({{}}, document.title, window.location.pathname);
+                    loadEntries();
+                }}
+            }}
+
             function getCurrentApiKey() {{
                 return currentApiKey;
             }}
@@ -1329,7 +1344,10 @@ plaster --new-api    # Generate new API key</pre>
             }}
 
             // Load entries on page load and set up auto-refresh
-            document.addEventListener('DOMContentLoaded', loadEntries);
+            document.addEventListener('DOMContentLoaded', () => {{
+                initializeApiKey();
+                loadEntries();
+            }});
 
             // Refresh entries every 2 seconds
             setInterval(loadEntries, 2000);
