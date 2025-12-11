@@ -1450,7 +1450,7 @@ plaster --new-api    # Generate new API key</pre>
                         }} else {{
                             entriesList.innerHTML = data.entries.map((entry, index) => `
                                 <div class="entry-item">
-                                    <span class="entry-index">#${{index}}</span>
+                                    <span class="entry-index">#${{index + 1}}</span>
                                     <span class="entry-text">${{escapeHtml(entry)}}</span>
                                     <button class="btn-copy" onclick="copyToClipboard(${{index}}, this)">Copy</button>
                                 </div>
