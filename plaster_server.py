@@ -502,7 +502,7 @@ async def check_api_key(request: Request, call_next):
     return await call_next(request)
 
 def get_setup_page() -> str:
-    """Generate the setup/login page with retro theme"""
+    """Generate the setup/login page with DOS shell retro theme"""
     return r"""
     <!DOCTYPE html>
     <html lang="en">
@@ -521,194 +521,146 @@ def get_setup_page() -> str:
 
             body {
                 font-family: 'Courier Prime', monospace;
-                background: #001a33;
-                background-image:
-                    repeating-linear-gradient(
-                        0deg,
-                        rgba(0, 255, 0, 0.03) 0px,
-                        rgba(0, 255, 0, 0.03) 1px,
-                        transparent 1px,
-                        transparent 2px
-                    );
+                background: #000000;
                 min-height: 100vh;
                 padding: 20px;
                 display: flex;
-                justify-content: center;
-                align-items: center;
+                flex-direction: column;
                 color: #00ff00;
-                text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }
 
             .container {
-                background: #0a0e27;
-                border: 3px solid #00ff00;
-                box-shadow:
-                    0 0 20px rgba(0, 255, 0, 0.4),
-                    inset 0 0 20px rgba(0, 255, 0, 0.1);
-                max-width: 600px;
+                background: #000000;
+                border: 2px solid #00ff00;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+                max-width: 800px;
                 width: 100%;
                 overflow: hidden;
                 position: relative;
+                margin: auto;
             }
 
             .header {
-                background: #002244;
+                background: #000000;
                 color: #00ff00;
-                padding: 40px 30px;
-                text-align: center;
-                border-bottom: 2px solid #00ff00;
-            }
-
-            .header h1 {
-                font-size: 32px;
-                margin-bottom: 8px;
-                font-weight: 700;
-                letter-spacing: 3px;
-                text-transform: uppercase;
-                text-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
-            }
-
-            .header p {
-                opacity: 0.9;
+                padding: 15px;
+                border-bottom: 1px solid #00ff00;
                 font-size: 12px;
                 letter-spacing: 2px;
-                text-transform: uppercase;
+            }
+
+            .header-line {
+                margin-bottom: 5px;
             }
 
             .content {
-                padding: 40px 30px;
+                padding: 20px;
+                line-height: 1.8;
             }
 
-            .section {
-                margin-bottom: 30px;
-            }
-
-            .section h2 {
-                font-size: 14px;
-                color: #00ff00;
+            .command-line {
                 margin-bottom: 15px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                font-size: 12px;
+            }
+
+            .prompt {
+                color: #00ff00;
             }
 
             .input-group {
                 display: flex;
                 gap: 10px;
-                margin-bottom: 15px;
+                margin: 20px 0;
             }
 
             #apiKeyInput {
                 flex: 1;
-                padding: 10px 12px;
+                padding: 8px 10px;
                 border: 1px solid #00ff00;
-                border-radius: 2px;
+                border-radius: 0px;
                 font-size: 12px;
                 font-family: 'Courier Prime', monospace;
-                background: #0d0d1f;
+                background: #000000;
                 color: #00ff00;
-                transition: all 0.15s ease;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.1);
+                transition: all 0.1s ease;
+                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
             }
 
             #apiKeyInput:focus {
                 outline: none;
                 border-color: #00ff00;
-                box-shadow: 0 0 20px rgba(0, 255, 0, 0.4), inset 0 0 10px rgba(0, 255, 0, 0.1);
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.3), inset 0 0 5px rgba(0, 255, 0, 0.1);
             }
 
             #apiKeyInput::placeholder {
-                color: #00884488;
+                color: #00664400;
             }
 
             button {
-                padding: 10px 16px;
+                padding: 8px 16px;
                 border: 1px solid #00ff00;
-                border-radius: 2px;
+                border-radius: 0px;
                 font-size: 11px;
                 font-weight: 700;
                 font-family: 'Courier Prime', monospace;
                 cursor: pointer;
-                transition: all 0.15s ease;
+                transition: all 0.1s ease;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                background: #002244;
+                background: #000000;
                 color: #00ff00;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
+            }
+
+            button:hover {
+                background: #00ff00;
+                color: #000000;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+                text-shadow: none;
             }
 
             .btn-primary {
                 flex: 0 0 auto;
             }
 
-            .btn-primary:hover {
-                background: #00ff00;
-                color: #001a33;
-                box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
-                text-shadow: none;
-            }
-
-            .instructions {
-                background: #0d0d1f;
-                border: 1px solid #00884422;
-                border-left: 3px solid #00ff00;
-                padding: 15px;
-                border-radius: 2px;
-                line-height: 1.6;
-            }
-
-            .instructions h3 {
-                color: #00ff00;
+            .help-text {
                 font-size: 11px;
-                margin-bottom: 10px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.2);
+                margin-top: 20px;
+                padding-top: 15px;
+                border-top: 1px solid #00ff00;
             }
 
-            .instructions ol {
-                margin-left: 20px;
-                color: #00ff00;
-                font-size: 11px;
-            }
-
-            .instructions li {
+            .help-line {
                 margin-bottom: 8px;
-                opacity: 0.95;
             }
 
-            .code-block {
-                background: #050509;
-                padding: 10px;
-                border-radius: 2px;
-                border: 1px solid #00442288;
-                font-family: 'Courier Prime', monospace;
-                font-size: 10px;
-                margin-top: 8px;
-                overflow-x: auto;
+            a {
                 color: #00ff00;
-                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
+                text-decoration: underline;
+                transition: all 0.1s ease;
+            }
+
+            a:hover {
+                text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
             }
 
             .toast {
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
-                background: #004400;
+                background: #000000;
                 color: #00ff00;
-                padding: 14px 20px;
+                padding: 12px 20px;
                 border: 1px solid #00ff00;
-                border-radius: 2px;
-                box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
                 opacity: 0;
                 transform: translateY(20px);
                 transition: all 0.3s ease;
                 z-index: 1000;
                 font-family: 'Courier Prime', monospace;
-                font-size: 12px;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                font-size: 11px;
+                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
             }
 
             .toast.show {
@@ -717,24 +669,20 @@ def get_setup_page() -> str:
             }
 
             .toast.error {
-                background: #440000;
+                background: #330000;
                 color: #ff6666;
                 border-color: #ff6666;
-                box-shadow: 0 0 20px rgba(255, 102, 102, 0.3);
-                text-shadow: 0 0 5px rgba(255, 102, 102, 0.2);
+                box-shadow: 0 0 10px rgba(255, 102, 102, 0.3);
+                text-shadow: 0 0 3px rgba(255, 102, 102, 0.2);
             }
 
             @media (max-width: 600px) {
                 .header {
-                    padding: 30px 20px;
-                }
-
-                .header h1 {
-                    font-size: 24px;
+                    padding: 12px;
                 }
 
                 .content {
-                    padding: 25px 20px;
+                    padding: 15px;
                 }
 
                 .input-group {
@@ -750,42 +698,35 @@ def get_setup_page() -> str:
     <body>
         <div class="container">
             <div class="header">
-                <h1>PLASTER</h1>
-                <p>FILO Clipboard Service</p>
+                <div class="header-line">Microsoft(R) Plaster Clipboard Service v1.0</div>
+                <div class="header-line">(C)2025 Plaster Contributors. All rights reserved.</div>
             </div>
 
             <div class="content">
-                <div class="section">
-                    <h2>Access Clipboard</h2>
-                    <div class="input-group">
-                        <input type="text" id="apiKeyInput" placeholder="Enter API key..." />
-                        <button class="btn-primary" onclick="loadClipboard()">Load</button>
+                <div class="command-line">
+                    <span class="prompt">C:\>_</span>
+                </div>
+
+                <div style="margin-top: 20px; margin-bottom: 20px;">
+                    <div class="command-line" style="margin-bottom: 10px;">
+                        <span class="prompt">PLASTER v1.0 - FILO Clipboard Service</span>
+                    </div>
+                    <div class="command-line">
+                        Enter your API key to access your clipboard:
                     </div>
                 </div>
 
-                <div class="section">
-                    <div class="instructions">
-                        <h3>Getting Started:</h3>
-                        <ol>
-                            <li>Download the Plaster client (plaster for Linux/macOS, plaster.ps1 for Windows)</li>
-                            <li>Run the setup command:
-                                <div class="code-block">
-                                    # Linux/macOS<br>
-                                    plaster --setup<br>
-                                    <br>
-                                    # Windows<br>
-                                    .\plaster.ps1 -Setup
-                                </div>
-                            </li>
-                            <li>Enter your server URL and get an API key automatically</li>
-                            <li>Start using Plaster from the command line:
-                                <div class="code-block">
-                                    echo 'my text' | plaster<br>
-                                    plaster --list<br>
-                                    plaster --new-api
-                                </div>
-                            </li>
-                        </ol>
+                <div class="input-group">
+                    <input type="text" id="apiKeyInput" placeholder="C:\PLASTER>" />
+                    <button class="btn-primary" onclick="loadClipboard()">Connect</button>
+                </div>
+
+                <div class="help-text">
+                    <div class="help-line">
+                        For help and documentation, see:
+                    </div>
+                    <div class="help-line">
+                        <a href="https://github.com/your-repo/blob/main/README.md" target="_blank">README.md</a>
                     </div>
                 </div>
             </div>
@@ -797,10 +738,9 @@ def get_setup_page() -> str:
             function loadClipboard() {
                 const apiKey = document.getElementById('apiKeyInput').value.trim();
                 if (!apiKey) {
-                    showToast('Please enter an API key', 'error');
+                    showToast('ERROR: API Key required', 'error');
                     return;
                 }
-                // Redirect to the main page with the API key
                 window.location.href = '/?api_key=' + encodeURIComponent(apiKey);
             }
 
@@ -819,7 +759,6 @@ def get_setup_page() -> str:
                 }, 3000);
             }
 
-            // Allow Enter key to load clipboard
             document.getElementById('apiKeyInput').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     loadClipboard();
