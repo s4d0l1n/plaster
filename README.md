@@ -217,6 +217,76 @@ plaster --uninstall          # Bash (prompts to remove ~/.plaster)
 
 ---
 
+## Server Configuration
+
+The server has its own configuration file at `~/.plaster/config.yaml` (on the server machine) with the following settings:
+
+### Limits & Performance
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `port` | 9321 | Server port |
+| `max_entries` | 100 | Max clipboard entries per API key |
+| `max_entry_size_mb` | 10 | Max size per clipboard entry (MB) |
+| `max_total_size_mb` | 500 | Max total clipboard size per API key (MB) |
+| `max_api_keys_per_ip` | 10 | Max API keys from one IP (oldest auto-deleted when exceeded) |
+
+### Data Management
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `entry_lifespan_days` | null | Delete entries older than N days (null = keep forever) |
+| `idle_timeout_days` | 7 | Delete API keys unused for N days |
+| `cleanup_interval_hours` | 24 | How often to check for expired items |
+| `persistence` | true | Backup clipboard to disk |
+
+### Rate Limiting
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `rate_limit_requests` | 100 | Max requests per window |
+| `rate_limit_window_seconds` | 60 | Time window for rate limiting |
+
+### API Key Generation
+
+**FILO-Style Automatic Cleanup:**
+
+The server automatically manages API keys using a FILO (First In, Last Out) approach:
+- Max 10 API keys can be generated from one IP address
+- When the limit is reached, the oldest key from that IP is automatically deleted
+- This prevents abuse while being transparent to users
+- Customize with `max_api_keys_per_ip` setting
+
+**Example:** If you generate an 11th API key from your IP, the 1st key is automatically deleted (along with its clipboard data).
+
+### Configuration Example
+
+```yaml
+# Server settings
+port: 9321
+max_entries: 100
+max_entry_size_mb: 10
+max_total_size_mb: 500
+
+# API key management
+max_api_keys_per_ip: 10  # FILO deletion when exceeded
+idle_timeout_days: 7
+cleanup_interval_hours: 24
+
+# Entry management
+entry_lifespan_days: null  # null = no age limit
+
+# Rate limiting
+rate_limit_requests: 100
+rate_limit_window_seconds: 60
+
+# Persistence
+persistence: true
+backup_file: "~/.plaster/backups"
+```
+
+---
+
 ## REST API
 
 All endpoints require `X-API-Key: your_api_key` header.
@@ -292,6 +362,20 @@ plaster --new-api              # Bash
 **Rate limit exceeded (429 error):**
 Wait 60 seconds and try again. Default limit is 100 requests per 60 seconds.
 
+**API key was deleted (Invalid API key):**
+This happens automatically if you generate more than 10 API keys from your IP (FILO cleanup).
+The oldest key is deleted to make room for the new one.
+Simply generate a new key with your current script/client:
+```bash
+plaster --new-api              # Bash
+.\plaster.ps1 -NewApi         # PowerShell
+```
+
+**Too many API key generation attempts:**
+The server limits API key generation to 10 per IP. If you're reaching this limit:
+- Older keys are automatically deleted (FILO style)
+- Customize `max_api_keys_per_ip` in server config if you need more
+
 **Config in wrong location:**
 Delete the incorrect `config.yaml` and run `--setup` again:
 ```bash
@@ -303,11 +387,14 @@ plaster --setup       # Bash
 
 ## Security Notes
 
-- API keys are cryptographically random
-- Each clipboard is isolated per API key
-- Size limits prevent memory exhaustion (10MB per entry, 500MB total)
-- Rate limiting prevents abuse
-- Web UI escapes HTML to prevent XSS
+- **API Keys**: Cryptographically random (format: `plaster_<32-char-hex>`)
+- **Isolation**: Each clipboard is isolated per API key
+- **Size Limits**: Prevent memory exhaustion (10MB per entry, 500MB total)
+- **Rate Limiting**: Per-key request limits (100 req/min default)
+- **API Key Limit**: Max 10 API keys per IP (oldest auto-deleted when exceeded)
+- **Idle Timeout**: Unused API keys deleted after 7 days
+- **Web UI**: HTML escaped to prevent XSS
+- **FILO Cleanup**: Old API keys automatically removed when limit reached, preventing unlimited key generation from single IP
 
 ---
 
