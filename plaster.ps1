@@ -311,11 +311,23 @@ function Show-ServerUrl {
     Write-Output $script:ServerUrl
 }
 
+function Copy-ToSystemClipboard {
+    param([string]$Text)
+
+    # Copy to Windows clipboard if available
+    try {
+        $Text | Set-Clipboard -ErrorAction SilentlyContinue
+    } catch {
+        # Silently fail if clipboard not available (headless/remote)
+    }
+}
+
 function Get-LatestEntry {
     try {
         $response = Invoke-ApiRequest -Endpoint '/peek'
         $data = $response.Content | ConvertFrom-Json
         Write-Output $data.text
+        Copy-ToSystemClipboard -Text $data.text
     } catch {
         Write-Error "Failed to get clipboard entry: $_"
         exit 1
@@ -353,6 +365,7 @@ function Get-ClipboardEntry {
         $response = Invoke-ApiRequest -Endpoint "/entry/$serverIndex"
         $data = $response.Content | ConvertFrom-Json
         Write-Output $data.text
+        Copy-ToSystemClipboard -Text $data.text
     } catch {
         Write-Error "Failed to get entry at index $Index`: $_"
         exit 1

@@ -201,6 +201,26 @@ has_stdin() {
     [[ ! -t 0 ]]
 }
 
+# Function to copy text to system clipboard
+copy_to_clipboard() {
+    local text="$1"
+
+    # Try different clipboard commands (macOS, Linux, Windows WSL)
+    if command -v pbcopy &> /dev/null; then
+        # macOS
+        echo -n "$text" | pbcopy
+    elif command -v xclip &> /dev/null; then
+        # Linux with xclip
+        echo -n "$text" | xclip -selection clipboard
+    elif command -v xsel &> /dev/null; then
+        # Linux with xsel
+        echo -n "$text" | xsel --clipboard --input
+    elif command -v clip.exe &> /dev/null; then
+        # Windows WSL
+        echo -n "$text" | clip.exe
+    fi
+}
+
 # Function to show help
 show_help() {
     echo "$HELP_TEXT"
@@ -322,10 +342,14 @@ api_call() {
 # Function to get latest entry
 get_latest() {
     local response
+    local text
     response=$(api_call GET /peek)
 
     if echo "$response" | grep -q '"status".*"ok"'; then
-        echo "$response" | jq -r '.text'
+        text=$(echo "$response" | jq -r '.text')
+        echo "$text"
+        # Copy to clipboard if not on headless client
+        copy_to_clipboard "$text"
     else
         echo "Error: Failed to get clipboard entry" >&2
         echo "$response" >&2
@@ -363,11 +387,15 @@ get_entry() {
     fi
 
     local response
+    local text
     response=$(curl -s -X GET "$SERVER_URL/entry/$server_index" \
         -H "X-API-Key: $API_KEY" 2>&1)
 
     if echo "$response" | grep -q '"status".*"ok"'; then
-        echo "$response" | jq -r '.text'
+        text=$(echo "$response" | jq -r '.text')
+        echo "$text"
+        # Copy to clipboard if not on headless client
+        copy_to_clipboard "$text"
     else
         echo "Error: Failed to get entry at index $user_index" >&2
         echo "$response" >&2
@@ -423,7 +451,7 @@ main() {
                 setup_config
                 ;;
             --new-api)
-                if [[ $# -gt 1 ]]; then
+                if [[ $# -gt 1 && "$2" != -* ]]; then
                     generate_new_api_key "$2"
                 else
                     generate_new_api_key ""
