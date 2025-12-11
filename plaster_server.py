@@ -785,15 +785,17 @@ def get_setup_page() -> str:
     """
 
 def get_html_page(api_key: str) -> str:
-    """Generate the HTML page with embedded CSS and JavaScript"""
+    """Generate the HTML page with retro/old school computer theme"""
     return f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Plaster - Clipboard Service</title>
+        <title>PLASTER - Clipboard Service</title>
         <style>
+            @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
             * {{
                 margin: 0;
                 padding: 0;
@@ -801,368 +803,399 @@ def get_html_page(api_key: str) -> str:
             }}
 
             body {{
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                font-family: 'Courier Prime', monospace;
+                background: #001a33;
+                background-image:
+                    repeating-linear-gradient(
+                        0deg,
+                        rgba(0, 255, 0, 0.03) 0px,
+                        rgba(0, 255, 0, 0.03) 1px,
+                        transparent 1px,
+                        transparent 2px
+                    );
                 min-height: 100vh;
                 padding: 20px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
+                color: #00ff00;
+                text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
             }}
 
             .container {{
-                background: white;
-                border-radius: 20px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-                max-width: 600px;
+                background: #0a0e27;
+                border: 3px solid #00ff00;
+                box-shadow:
+                    0 0 20px rgba(0, 255, 0, 0.4),
+                    inset 0 0 20px rgba(0, 255, 0, 0.1);
+                max-width: 800px;
                 width: 100%;
                 overflow: hidden;
+                position: relative;
+            }}
+
+            .container::before {{
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                pointer-events: none;
+                background:
+                    repeating-linear-gradient(
+                        0deg,
+                        rgba(0, 255, 0, 0.05) 0px,
+                        rgba(0, 255, 0, 0.05) 1px,
+                        transparent 1px,
+                        transparent 2px
+                    );
             }}
 
             .header {{
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 40px 30px;
+                background: #002244;
+                color: #00ff00;
+                padding: 30px 30px;
                 text-align: center;
+                border-bottom: 2px solid #00ff00;
+                position: relative;
+                z-index: 1;
             }}
 
             .header h1 {{
                 font-size: 32px;
                 margin-bottom: 8px;
                 font-weight: 700;
+                letter-spacing: 3px;
+                text-transform: uppercase;
+                text-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
             }}
 
             .header p {{
-                opacity: 0.95;
-                font-size: 14px;
-                letter-spacing: 0.5px;
+                opacity: 0.9;
+                font-size: 12px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
             }}
 
             .api-key-section {{
-                background: rgba(255, 255, 255, 0.1);
+                background: #1a1f3a;
                 padding: 20px;
-                border-radius: 10px;
+                border: 1px solid #00ff00;
+                border-radius: 2px;
                 margin-top: 20px;
-                backdrop-filter: blur(10px);
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
             }}
 
             .api-key-label {{
-                font-size: 12px;
+                font-size: 11px;
                 text-transform: uppercase;
-                opacity: 0.8;
-                letter-spacing: 1px;
-                margin-bottom: 8px;
+                color: #00ff00;
+                letter-spacing: 2px;
+                margin-bottom: 10px;
                 display: block;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }}
 
             .api-key-container {{
                 display: flex;
-                gap: 10px;
+                gap: 8px;
                 align-items: center;
-                background: rgba(255, 255, 255, 0.15);
-                padding: 10px 15px;
-                border-radius: 8px;
-                font-family: 'Menlo', monospace;
-                font-size: 12px;
+                background: #0d0d1f;
+                padding: 10px 12px;
+                border: 1px solid #00ff00;
+                border-radius: 2px;
+                font-family: 'Courier Prime', monospace;
+                font-size: 11px;
                 word-break: break-all;
             }}
 
             .api-key-value {{
                 flex: 1;
-                color: white;
+                color: #00ff00;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }}
 
             .api-key-input {{
                 flex: 1;
-                padding: 10px 15px;
-                border: none;
-                border-radius: 8px;
-                font-family: 'Menlo', monospace;
-                font-size: 12px;
-                background: rgba(255, 255, 255, 0.2);
-                color: white;
+                padding: 8px 10px;
+                border: 1px solid #00ff00;
+                border-radius: 2px;
+                font-family: 'Courier Prime', monospace;
+                font-size: 11px;
+                background: #0d0d1f;
+                color: #00ff00;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }}
 
             .api-key-input::placeholder {{
-                color: rgba(255, 255, 255, 0.6);
+                color: #00884422;
             }}
 
-            .btn-copy-key {{
-                background: rgba(255, 255, 255, 0.2);
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                border-radius: 6px;
+            .btn-copy-key,
+            .btn-switch,
+            .btn-rotate,
+            .btn-load-key {{
+                background: #002244;
+                color: #00ff00;
+                border: 1px solid #00ff00;
+                border-radius: 2px;
+                padding: 6px 10px;
                 cursor: pointer;
-                font-size: 11px;
-                font-weight: 600;
+                font-size: 10px;
+                font-weight: 700;
+                font-family: 'Courier Prime', monospace;
                 white-space: nowrap;
-                transition: all 0.2s;
+                transition: all 0.15s;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }}
 
-            .btn-copy-key:hover {{
-                background: rgba(255, 255, 255, 0.3);
+            .btn-copy-key:hover,
+            .btn-switch:hover,
+            .btn-rotate:hover,
+            .btn-load-key:hover {{
+                background: #00ff00;
+                color: #001a33;
+                box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+                text-shadow: none;
             }}
 
             .btn-copy-key.copied {{
-                background: #51cf66;
-            }}
-
-            .btn-switch {{
-                background: rgba(255, 255, 255, 0.2);
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 11px;
-                font-weight: 600;
-                white-space: nowrap;
-                transition: all 0.2s;
-                margin-left: 5px;
-            }}
-
-            .btn-switch:hover {{
-                background: rgba(255, 255, 255, 0.3);
-            }}
-
-            .btn-rotate {{
-                background: #ff6b6b;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 12px;
-                font-weight: 600;
-                transition: all 0.2s;
-                margin-top: 10px;
-                width: 100%;
-            }}
-
-            .btn-rotate:hover {{
-                background: #ee5a52;
-            }}
-
-            .btn-load-key {{
-                background: #4c6ef5;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 12px;
-                font-weight: 600;
-                transition: all 0.2s;
-                margin-top: 10px;
-                width: 100%;
-            }}
-
-            .btn-load-key:hover {{
-                background: #3d5ce5;
+                background: #00ff00;
+                color: #001a33;
             }}
 
             .content {{
-                padding: 40px 30px;
+                padding: 30px 30px;
+                position: relative;
+                z-index: 1;
             }}
 
             .input-section {{
-                margin-bottom: 30px;
+                margin-bottom: 25px;
             }}
 
             .input-label {{
                 display: block;
-                font-size: 14px;
-                font-weight: 600;
-                color: #333;
-                margin-bottom: 10px;
+                font-size: 11px;
+                font-weight: 700;
+                color: #00ff00;
+                margin-bottom: 8px;
                 text-transform: uppercase;
-                letter-spacing: 0.5px;
+                letter-spacing: 2px;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }}
 
             #textInput {{
                 width: 100%;
-                padding: 14px 16px;
-                border: 2px solid #e0e0e0;
-                border-radius: 10px;
-                font-size: 14px;
-                font-family: inherit;
-                transition: all 0.3s ease;
+                padding: 10px 12px;
+                border: 1px solid #00ff00;
+                border-radius: 2px;
+                font-size: 12px;
+                font-family: 'Courier Prime', monospace;
+                background: #0d0d1f;
+                color: #00ff00;
+                transition: all 0.15s ease;
                 resize: none;
                 min-height: 80px;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.1);
             }}
 
             #textInput:focus {{
                 outline: none;
-                border-color: #667eea;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                border-color: #00ff00;
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.4), inset 0 0 10px rgba(0, 255, 0, 0.1);
             }}
 
             .button-group {{
                 display: flex;
-                gap: 10px;
-                margin-top: 15px;
+                gap: 8px;
+                margin-top: 12px;
             }}
 
             button {{
-                padding: 12px 24px;
-                border: none;
-                border-radius: 10px;
-                font-size: 14px;
-                font-weight: 600;
+                padding: 8px 16px;
+                border: 1px solid #00ff00;
+                border-radius: 2px;
+                font-size: 11px;
+                font-weight: 700;
+                font-family: 'Courier Prime', monospace;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: all 0.15s ease;
                 text-transform: uppercase;
-                letter-spacing: 0.5px;
+                letter-spacing: 1px;
+                background: #002244;
+                color: #00ff00;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }}
 
             .btn-primary {{
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
                 flex: 1;
             }}
 
             .btn-primary:hover {{
-                transform: translateY(-2px);
-                box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-            }}
-
-            .btn-primary:active {{
-                transform: translateY(0);
+                background: #00ff00;
+                color: #001a33;
+                box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+                text-shadow: none;
             }}
 
             .btn-danger {{
-                background: #ff6b6b;
-                color: white;
+                background: #440000;
+                color: #ff6666;
+                border-color: #ff6666;
+                text-shadow: 0 0 5px rgba(255, 102, 102, 0.3);
             }}
 
             .btn-danger:hover {{
-                background: #ee5a52;
-                transform: translateY(-2px);
-                box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
-            }}
-
-            .btn-danger:active {{
-                transform: translateY(0);
+                background: #ff6666;
+                color: #440000;
+                box-shadow: 0 0 15px rgba(255, 102, 102, 0.6);
+                text-shadow: none;
             }}
 
             .btn-copy {{
-                background: #f0f0f0;
-                color: #333;
-                padding: 8px 12px;
-                font-size: 12px;
-                border-radius: 6px;
+                background: #002244;
+                color: #00ff00;
+                padding: 6px 10px;
+                font-size: 10px;
+                border-radius: 2px;
                 flex-shrink: 0;
+                border: 1px solid #00ff00;
             }}
 
             .btn-copy:hover {{
-                background: #667eea;
-                color: white;
-                transform: translateY(-2px);
+                background: #00ff00;
+                color: #001a33;
+                box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
             }}
 
             .btn-copy.copied {{
-                background: #51cf66;
-                color: white;
+                background: #00ff00;
+                color: #001a33;
             }}
 
             .list-section {{
-                margin-top: 40px;
+                margin-top: 30px;
             }}
 
             .list-header {{
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 20px;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #00884422;
             }}
 
             .list-title {{
-                font-size: 18px;
+                font-size: 13px;
                 font-weight: 700;
-                color: #333;
+                color: #00ff00;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }}
 
             .list-count {{
-                background: #f0f0f0;
-                color: #666;
-                padding: 6px 12px;
-                border-radius: 20px;
-                font-size: 13px;
-                font-weight: 600;
+                background: #002244;
+                color: #00ff00;
+                padding: 4px 10px;
+                border: 1px solid #00884422;
+                border-radius: 2px;
+                font-size: 11px;
+                font-weight: 700;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.2);
             }}
 
             .entries-list {{
                 display: flex;
                 flex-direction: column;
-                gap: 12px;
+                gap: 8px;
                 max-height: 400px;
                 overflow-y: auto;
+                overflow-x: hidden;
+                padding-right: 5px;
             }}
 
             .entry-item {{
                 display: flex;
                 align-items: center;
-                gap: 12px;
-                padding: 14px 16px;
-                background: #f8f9fa;
-                border-radius: 10px;
-                border-left: 4px solid #667eea;
-                transition: all 0.3s ease;
+                gap: 8px;
+                padding: 10px 12px;
+                background: #0d0d1f;
+                border: 1px solid #00884422;
+                border-left: 3px solid #00ff00;
+                border-radius: 2px;
+                transition: all 0.15s ease;
             }}
 
             .entry-item:hover {{
-                background: #f0f0f0;
-                transform: translateX(4px);
+                background: #1a1f3a;
+                border-left-color: #00ff00;
+                box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
             }}
 
             .entry-index {{
                 font-weight: 700;
-                color: #667eea;
-                font-size: 12px;
-                min-width: 24px;
+                color: #00ff00;
+                font-size: 10px;
+                min-width: 28px;
                 text-align: center;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                font-family: 'Courier Prime', monospace;
             }}
 
             .entry-text {{
                 flex: 1;
-                font-size: 14px;
-                color: #333;
+                font-size: 12px;
+                color: #00ff00;
                 word-break: break-word;
-                font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+                font-family: 'Courier Prime', monospace;
                 line-height: 1.4;
+                text-shadow: 0 0 3px rgba(0, 255, 0, 0.1);
+                max-height: 200px;
+                overflow: hidden;
             }}
 
             .empty-state {{
                 text-align: center;
-                padding: 40px 20px;
-                color: #999;
+                padding: 30px 20px;
+                color: #00884422;
             }}
 
             .empty-state-icon {{
                 font-size: 48px;
                 margin-bottom: 16px;
-                opacity: 0.5;
+                opacity: 0.4;
             }}
 
             .empty-state-text {{
-                font-size: 14px;
-                color: #999;
+                font-size: 12px;
+                color: #00884422;
+                text-transform: uppercase;
+                letter-spacing: 1px;
             }}
 
             .toast {{
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
-                background: #51cf66;
-                color: white;
-                padding: 14px 20px;
-                border-radius: 10px;
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+                background: #002244;
+                color: #00ff00;
+                border: 1px solid #00ff00;
+                padding: 12px 16px;
+                border-radius: 2px;
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
                 opacity: 0;
                 transform: translateY(20px);
                 transition: all 0.3s ease;
                 z-index: 1000;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                font-family: 'Courier Prime', monospace;
+                font-size: 12px;
             }}
 
             .toast.show {{
@@ -1171,24 +1204,30 @@ def get_html_page(api_key: str) -> str:
             }}
 
             .toast.error {{
-                background: #ff6b6b;
+                color: #ff6666;
+                border-color: #ff6666;
+                background: #440000;
+                box-shadow: 0 0 20px rgba(255, 102, 102, 0.3);
             }}
 
             ::-webkit-scrollbar {{
-                width: 6px;
+                width: 10px;
+                height: 10px;
             }}
 
             ::-webkit-scrollbar-track {{
-                background: #f1f1f1;
+                background: #0d0d1f;
+                border: 1px solid #00884422;
             }}
 
             ::-webkit-scrollbar-thumb {{
-                background: #667eea;
-                border-radius: 3px;
+                background: #002244;
+                border: 1px solid #00ff00;
+                border-radius: 2px;
             }}
 
             ::-webkit-scrollbar-thumb:hover {{
-                background: #764ba2;
+                background: #00ff00;
             }}
 
             @media (max-width: 600px) {{
