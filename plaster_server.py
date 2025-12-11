@@ -35,7 +35,9 @@ DEFAULT_CONFIG = {
     "max_total_size_mb": 500,
     "rate_limit_requests": 100,
     "rate_limit_window_seconds": 60,
+    "max_api_keys_per_ip": 10,
     "idle_timeout_days": 7,
+    "entry_lifespan_days": None,
     "cleanup_interval_hours": 24
 }
 
@@ -215,6 +217,33 @@ class RateLimiter:
         self.requests[key].append(now)
         return True
 
+class APIKeyGenerationLimiter:
+    """Limit API key generation per IP address"""
+
+    def __init__(self, max_keys_per_ip: int):
+        self.max_keys_per_ip = max_keys_per_ip
+        self.ips: Dict[str, List[str]] = {}  # ip -> list of api keys
+
+    def can_generate(self, ip: str) -> bool:
+        """Check if this IP can generate more API keys"""
+        if ip not in self.ips:
+            self.ips[ip] = []
+        return len(self.ips[ip]) < self.max_keys_per_ip
+
+    def record_key(self, ip: str, api_key: str) -> None:
+        """Record that this IP generated this key"""
+        if ip not in self.ips:
+            self.ips[ip] = []
+        self.ips[ip].append(api_key)
+
+    def remove_key(self, api_key: str) -> None:
+        """Remove a key from tracking when it's deleted"""
+        for ip in list(self.ips.keys()):
+            if api_key in self.ips[ip]:
+                self.ips[ip].remove(api_key)
+            if not self.ips[ip]:
+                del self.ips[ip]
+
 def load_config() -> dict:
     """Load configuration from ~/.plaster/config.yaml"""
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
@@ -237,6 +266,9 @@ key_manager = APIKeyManager(str(KEYS_FILE))
 rate_limiter = RateLimiter(
     config.get("rate_limit_requests", 100),
     config.get("rate_limit_window_seconds", 60)
+)
+api_key_gen_limiter = APIKeyGenerationLimiter(
+    config.get("max_api_keys_per_ip", 10)
 )
 
 # Clipboards storage (per API key)
@@ -276,6 +308,8 @@ def cleanup_expired_keys_task():
                 backup_file = Path(BACKUP_DIR) / f"{key}.json"
                 if backup_file.exists():
                     backup_file.unlink()
+                # Remove from API key generation limiter
+                api_key_gen_limiter.remove_key(key)
 
             if expired_keys:
                 print(f"Cleaned up {len(expired_keys)} expired API keys")
@@ -1392,9 +1426,24 @@ async def serve_ui(request: Request):
     return get_html_page(api_key)
 
 @app.post("/auth/generate")
-async def generate_key():
+async def generate_key(request: Request):
     """Generate a new API key (first time setup)"""
+    # Get client IP
+    client_ip = request.client.host if request.client else "unknown"
+
+    # Check if this IP can generate more keys
+    if not api_key_gen_limiter.can_generate(client_ip):
+        raise HTTPException(
+            status_code=429,
+            detail=f"Too many API keys generated from this IP. Max {api_key_gen_limiter.max_keys_per_ip} per IP."
+        )
+
+    # Generate the key
     key = key_manager.generate_key()
+
+    # Record this generation
+    api_key_gen_limiter.record_key(client_ip, key)
+
     get_or_create_clipboard(key)
     return {"status": "ok", "api_key": key}
 

@@ -1,19 +1,27 @@
-# Plaster Configuration File
-# Location: ~/.plaster/config.yaml
+# Plaster Server Configuration File
+# Location: ~/.plaster/config.yaml (server machine)
+# This file is for server-side settings only
 
-# Server URL - where the plaster service is running
-server_url: "http://localhost:9321"
-
-# Port for the service to listen on
+# Server settings
 port: 9321
 
-# Maximum number of clipboard entries to keep
+# Clipboard settings
 max_entries: 100
+max_entry_size_mb: 10
+max_total_size_mb: 500
+entry_lifespan_days: null  # null = entries never expire by age (only removed by user)
 
-# Data persistence settings
-# If true: keeps entries in memory AND backs them up to disk
-# If false: keeps entries in memory only (lost on restart)
+# Data persistence
 persistence: true
+backup_file: "~/.plaster/backups"
 
-# Path to backup file (only used if persistence is true)
-backup_file: "~/.plaster/backup.json"
+# Rate limiting for API requests
+rate_limit_requests: 100
+rate_limit_window_seconds: 60
+
+# API key generation limiting
+max_api_keys_per_ip: 10  # Max API keys that can be generated from one IP
+
+# API key management
+idle_timeout_days: 7     # Delete API keys unused for this many days
+cleanup_interval_hours: 24  # How often to check for expired keys
