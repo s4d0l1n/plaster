@@ -202,18 +202,11 @@ function Setup-Config {
 
     # Create config
     $configContent = @"
-# Plaster Configuration File
+# Plaster Client Configuration
+# Only contains client-side settings
 
 server_url: "$script:ServerUrl"
 api_key: "$script:ApiKey"
-port: 9321
-max_entries: 100
-persistence: true
-backup_file: "~/.plaster/backup.json"
-max_entry_size_mb: 10
-max_total_size_mb: 500
-rate_limit_requests: 100
-rate_limit_window_seconds: 60
 "@
     Set-Content -Path $Config -Value $configContent
 
