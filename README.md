@@ -41,6 +41,20 @@ chmod +x ~/plaster
 
 The setup will ask for your server URL and automatically generate an API key.
 
+**After setup**, you can optionally install the script system-wide:
+
+**Linux/macOS:**
+```bash
+~/plaster --install          # Install to /usr/local/bin
+# Then use 'plaster' from anywhere
+```
+
+**Windows (PowerShell):**
+```powershell
+& "$env:USERPROFILE\plaster.ps1" -Install    # Requires admin
+# Then use 'plaster -Setup' from PowerShell
+```
+
 ---
 
 ## Usage
@@ -63,13 +77,13 @@ Visit `http://localhost:9321` in your browser
 echo 'my text' | plaster
 cat file.txt | plaster
 
-# Get latest entry
+# Get latest entry (also copies to system clipboard)
 plaster
 
 # List all entries
 plaster --list
 
-# Get specific entry (1-indexed)
+# Get specific entry (1-indexed, also copies to system clipboard)
 plaster -n 1    # First entry
 plaster -n 3    # Third entry
 
@@ -89,6 +103,8 @@ plaster --url                              # Show current server URL
 plaster --help
 ```
 
+**Note:** When you run `plaster` or `plaster -n <index>`, the output is displayed in the terminal AND automatically copied to your system clipboard (on macOS, Linux with xclip/xsel, or Windows WSL with clip.exe). On headless systems without clipboard support, the text is still displayed normally.
+
 ### PowerShell Client (Windows)
 
 ```powershell
@@ -96,13 +112,13 @@ plaster --help
 'my text' | & .\plaster.ps1
 Get-Content file.txt | & .\plaster.ps1
 
-# Get latest entry
+# Get latest entry (also copies to Windows clipboard)
 & .\plaster.ps1
 
 # List all entries
 & .\plaster.ps1 -List
 
-# Get specific entry (1-indexed)
+# Get specific entry (1-indexed, also copies to Windows clipboard)
 & .\plaster.ps1 -Entry 1    # First entry
 & .\plaster.ps1 -Entry 3    # Third entry
 
@@ -121,6 +137,8 @@ Get-Content file.txt | & .\plaster.ps1
 # Help
 & .\plaster.ps1 -Help
 ```
+
+**Note:** When you run `.\plaster.ps1` or `.\plaster.ps1 -Entry <index>`, the output is displayed in PowerShell AND automatically copied to your Windows clipboard using `Set-Clipboard`. On headless/remote systems without clipboard support, the text is still displayed normally.
 
 ---
 
@@ -167,17 +185,34 @@ Get-Content file.txt | & .\plaster.ps1
 
 ## Configuration
 
-Config file: `~/.plaster/config.yaml`
-
-Created automatically during `--setup`, contains:
+Config files are created automatically during `--setup` and contain:
 - Server URL
 - API key
-- Preferences (size limits, rate limit, etc.)
 
-To reconfigure:
+**Config location depends on installation status:**
+
+### Local (Before Install)
+- **Bash:** `./config.yaml` (same directory as script)
+- **PowerShell:** `.\config.yaml` (same directory as script)
+
+This allows you to keep the script and config together for easy portability.
+
+### After Installation
+- **Bash (Linux/macOS):** `~/.plaster/config.yaml`
+- **PowerShell (Windows):** `$env:USERPROFILE\.plaster\config.yaml`
+
+This follows standard practice for installed applications.
+
+**To reconfigure:**
 ```bash
-plaster --setup          # Bash
-.\plaster.ps1 -Setup    # PowerShell
+plaster --setup              # Bash
+.\plaster.ps1 -Setup        # PowerShell
+```
+
+**To uninstall and optionally remove config:**
+```bash
+plaster --uninstall          # Bash (prompts to remove ~/.plaster)
+.\plaster.ps1 -Uninstall    # PowerShell (prompts to remove ~/.plaster)
 ```
 
 ---
@@ -231,18 +266,38 @@ docker compose logs plaster
 ```
 
 **Forgot API key:**
+
+If running locally (uninstalled):
 ```bash
+# Bash
+cat ./config.yaml
+# PowerShell
+Get-Content .\config.yaml
+```
+
+If installed system-wide:
+```bash
+# Bash
 grep api_key ~/.plaster/config.yaml
+# PowerShell
+Select-String "api_key" $env:USERPROFILE\.plaster\config.yaml
 ```
 
 **Generate new API key:**
 ```bash
-plaster --new-api
-.\plaster.ps1 -NewApi
+plaster --new-api              # Bash
+.\plaster.ps1 -NewApi         # PowerShell
 ```
 
 **Rate limit exceeded (429 error):**
 Wait 60 seconds and try again. Default limit is 100 requests per 60 seconds.
+
+**Config in wrong location:**
+Delete the incorrect `config.yaml` and run `--setup` again:
+```bash
+plaster --setup       # Bash
+.\plaster.ps1 -Setup # PowerShell
+```
 
 ---
 
@@ -273,11 +328,27 @@ Server runs on port 9321 by default.
 
 ## Files
 
+### Client Files
+
+**Local (uninstalled):**
+```
+./
+└── config.yaml          # Config with server URL and API key
+```
+
+**After installation:**
+```
+~/.plaster/              # User's plaster directory
+└── config.yaml          # Config with server URL and API key
+```
+
+### Server Files (on server machine)
+
 ```
 ~/.plaster/
-├── config.yaml          # Your config with API key
-├── keys.json           # Server-side key registry
-└── backups/            # Per-key clipboard backups
+├── config.yaml          # Server configuration
+├── keys.json            # Registered API keys
+└── backups/             # Per-key clipboard backups
     ├── plaster_xxx.json
     └── plaster_yyy.json
 ```
