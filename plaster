@@ -310,7 +310,7 @@ push_text() {
 api_call() {
     local method="$1"
     local endpoint="$2"
-    local data="$3"
+    local data="${3:-}"
     local response
     local http_code
 
