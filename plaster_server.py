@@ -218,20 +218,27 @@ class RateLimiter:
         return True
 
 class APIKeyGenerationLimiter:
-    """Limit API key generation per IP address"""
+    """Limit API key generation per IP address with FILO (oldest key deleted when limit reached)"""
 
     def __init__(self, max_keys_per_ip: int):
         self.max_keys_per_ip = max_keys_per_ip
-        self.ips: Dict[str, List[str]] = {}  # ip -> list of api keys
+        self.ips: Dict[str, List[str]] = {}  # ip -> list of api keys (oldest first)
 
-    def can_generate(self, ip: str) -> bool:
-        """Check if this IP can generate more API keys"""
+    def get_oldest_key_if_at_limit(self, ip: str) -> str:
+        """
+        Check if IP is at limit and return oldest key to delete.
+        Returns None if not at limit.
+        """
         if ip not in self.ips:
             self.ips[ip] = []
-        return len(self.ips[ip]) < self.max_keys_per_ip
+
+        if len(self.ips[ip]) >= self.max_keys_per_ip:
+            # Return oldest key (first in list)
+            return self.ips[ip][0]
+        return None
 
     def record_key(self, ip: str, api_key: str) -> None:
-        """Record that this IP generated this key"""
+        """Record that this IP generated this key (append to end)"""
         if ip not in self.ips:
             self.ips[ip] = []
         self.ips[ip].append(api_key)
@@ -1431,14 +1438,21 @@ async def generate_key(request: Request):
     # Get client IP
     client_ip = request.client.host if request.client else "unknown"
 
-    # Check if this IP can generate more keys
-    if not api_key_gen_limiter.can_generate(client_ip):
-        raise HTTPException(
-            status_code=429,
-            detail=f"Too many API keys generated from this IP. Max {api_key_gen_limiter.max_keys_per_ip} per IP."
-        )
+    # Check if this IP is at limit and delete oldest key if needed
+    oldest_key = api_key_gen_limiter.get_oldest_key_if_at_limit(client_ip)
+    if oldest_key:
+        # Delete the oldest key
+        key_manager.delete_key(oldest_key)
+        api_key_gen_limiter.remove_key(oldest_key)
+        # Delete clipboard data for this key
+        if oldest_key in clipboards:
+            del clipboards[oldest_key]
+        # Delete backup file
+        backup_file = Path(BACKUP_DIR) / f"{oldest_key}.json"
+        if backup_file.exists():
+            backup_file.unlink()
 
-    # Generate the key
+    # Generate the new key
     key = key_manager.generate_key()
 
     # Record this generation
