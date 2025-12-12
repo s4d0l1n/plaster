@@ -526,13 +526,13 @@ def get_setup_page() -> str:
                 padding: 20px;
                 display: flex;
                 flex-direction: column;
-                color: #ffffff;
+                color: #00ff88;
                 text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }
 
             .container {
                 background: #000000;
-                border: 2px solid #ffffff;
+                border: 2px solid #00ff88;
                 box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
                 max-width: 800px;
                 width: 100%;
@@ -543,9 +543,9 @@ def get_setup_page() -> str:
 
             .header {
                 background: #000000;
-                color: #ffffff;
+                color: #00ff88;
                 padding: 15px;
-                border-bottom: 1px solid #ffffff;
+                border-bottom: 1px solid #00ff88;
                 font-size: 12px;
                 letter-spacing: 2px;
             }
@@ -565,7 +565,7 @@ def get_setup_page() -> str:
             }
 
             .prompt {
-                color: #ffffff;
+                color: #00ff88;
             }
 
             .input-group {
@@ -577,19 +577,19 @@ def get_setup_page() -> str:
             #apiKeyInput {
                 flex: 1;
                 padding: 8px 10px;
-                border: 1px solid #ffffff;
+                border: 1px solid #00ff88;
                 border-radius: 0px;
                 font-size: 12px;
                 font-family: 'Courier Prime', monospace;
                 background: #000000;
-                color: #ffffff;
+                color: #00ff88;
                 transition: all 0.1s ease;
                 text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
             }
 
             #apiKeyInput:focus {
                 outline: none;
-                border-color: #ffffff;
+                border-color: #00ff88;
                 box-shadow: 0 0 10px rgba(0, 255, 0, 0.3), inset 0 0 5px rgba(0, 255, 0, 0.1);
             }
 
@@ -599,7 +599,7 @@ def get_setup_page() -> str:
 
             button {
                 padding: 8px 16px;
-                border: 1px solid #ffffff;
+                border: 1px solid #00ff88;
                 border-radius: 0px;
                 font-size: 11px;
                 font-weight: 700;
@@ -609,12 +609,12 @@ def get_setup_page() -> str:
                 text-transform: uppercase;
                 letter-spacing: 1px;
                 background: #000000;
-                color: #ffffff;
+                color: #00ff88;
                 text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
             }
 
             button:hover {
-                background: #ffffff;
+                background: #00ff88;
                 color: #000000;
                 box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
                 text-shadow: none;
@@ -628,7 +628,7 @@ def get_setup_page() -> str:
                 font-size: 11px;
                 margin-top: 20px;
                 padding-top: 15px;
-                border-top: 1px solid #ffffff;
+                border-top: 1px solid #00ff88;
             }
 
             .help-line {
@@ -636,7 +636,7 @@ def get_setup_page() -> str:
             }
 
             a {
-                color: #ffffff;
+                color: #00ff88;
                 text-decoration: underline;
                 transition: all 0.1s ease;
             }
@@ -650,9 +650,9 @@ def get_setup_page() -> str:
                 bottom: 20px;
                 right: 20px;
                 background: #000000;
-                color: #ffffff;
+                color: #00ff88;
                 padding: 12px 20px;
-                border: 1px solid #ffffff;
+                border: 1px solid #00ff88;
                 box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
                 opacity: 0;
                 transform: translateY(20px);
@@ -789,19 +789,19 @@ def get_html_page(api_key: str) -> str:
 
             body {{
                 font-family: 'Courier Prime', monospace;
-                background: #000000;
+                background: #1a1a2e;
                 min-height: 100vh;
                 padding: 10px;
                 display: flex;
                 flex-direction: column;
-                color: #ffffff;
-                text-shadow: none;
+                color: #00ff88;
+                text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
             }}
 
             .container {{
-                background: #000000;
-                border: 1px solid #ffffff;
-                box-shadow: none;
+                background: #0f0f23;
+                border: 3px solid #00ff88;
+                box-shadow: 0 0 20px rgba(0, 255, 136, 0.4), inset 0 0 20px rgba(0, 255, 136, 0.1);
                 max-width: 100%;
                 width: 100%;
                 overflow: hidden;
@@ -812,14 +812,15 @@ def get_html_page(api_key: str) -> str:
             }}
 
             .header {{
-                background: #000000;
-                color: #ffffff;
-                padding: 10px;
-                border-bottom: 1px solid #ffffff;
+                background: linear-gradient(180deg, #1a0033 0%, #0f0f23 100%);
+                color: #00ff88;
+                padding: 15px;
+                border-bottom: 3px dashed #ff00ff;
                 position: relative;
                 z-index: 1;
                 font-size: 11px;
-                letter-spacing: 1px;
+                letter-spacing: 2px;
+                text-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
             }}
 
             .header-line {{
@@ -854,7 +855,7 @@ def get_html_page(api_key: str) -> str:
             .api-key-section {{
                 background: #000000;
                 padding: 10px;
-                border: 1px solid #ffffff;
+                border: 1px solid #00ff88;
                 border-radius: 0px;
                 margin-top: 10px;
                 box-shadow: none;
@@ -863,7 +864,7 @@ def get_html_page(api_key: str) -> str:
             .api-key-label {{
                 font-size: 11px;
                 text-transform: uppercase;
-                color: #ffffff;
+                color: #00ff88;
                 letter-spacing: 2px;
                 margin-bottom: 10px;
                 display: block;
@@ -876,7 +877,7 @@ def get_html_page(api_key: str) -> str:
                 align-items: center;
                 background: #000000;
                 padding: 10px 12px;
-                border: 1px solid #ffffff;
+                border: 1px solid #00ff88;
                 border-radius: 0px;
                 font-family: 'Courier Prime', monospace;
                 font-size: 11px;
@@ -885,19 +886,19 @@ def get_html_page(api_key: str) -> str:
 
             .api-key-value {{
                 flex: 1;
-                color: #ffffff;
+                color: #00ff88;
                 text-shadow: none;
             }}
 
             .api-key-input {{
                 flex: 1;
                 padding: 8px 10px;
-                border: 1px solid #ffffff;
+                border: 1px solid #00ff88;
                 border-radius: 0px;
                 font-family: 'Courier Prime', monospace;
                 font-size: 11px;
                 background: #000000;
-                color: #ffffff;
+                color: #00ff88;
                 text-shadow: none;
             }}
 
@@ -910,8 +911,8 @@ def get_html_page(api_key: str) -> str:
             .btn-rotate,
             .btn-load-key {{
                 background: #000000;
-                color: #ffffff;
-                border: 1px solid #ffffff;
+                color: #00ff88;
+                border: 1px solid #00ff88;
                 border-radius: 0px;
                 padding: 6px 10px;
                 cursor: pointer;
@@ -929,14 +930,14 @@ def get_html_page(api_key: str) -> str:
             .btn-switch:hover,
             .btn-rotate:hover,
             .btn-load-key:hover {{
-                background: #ffffff;
+                background: #00ff88;
                 color: #000000;
                 box-shadow: none;
                 text-shadow: none;
             }}
 
             .btn-copy-key.copied {{
-                background: #ffffff;
+                background: #00ff88;
                 color: #000000;
             }}
 
@@ -954,7 +955,7 @@ def get_html_page(api_key: str) -> str:
                 display: block;
                 font-size: 11px;
                 font-weight: 700;
-                color: #ffffff;
+                color: #00ff88;
                 margin-bottom: 8px;
                 text-transform: uppercase;
                 letter-spacing: 2px;
@@ -964,12 +965,12 @@ def get_html_page(api_key: str) -> str:
             #textInput {{
                 width: 100%;
                 padding: 10px 12px;
-                border: 1px solid #ffffff;
+                border: 1px solid #00ff88;
                 border-radius: 0px;
                 font-size: 12px;
                 font-family: 'Courier Prime', monospace;
                 background: #000000;
-                color: #ffffff;
+                color: #00ff88;
                 transition: all 0.15s ease;
                 resize: none;
                 min-height: 80px;
@@ -978,7 +979,7 @@ def get_html_page(api_key: str) -> str:
 
             #textInput:focus {{
                 outline: none;
-                border-color: #ffffff;
+                border-color: #00ff88;
                 box-shadow: none;
             }}
 
@@ -990,7 +991,7 @@ def get_html_page(api_key: str) -> str:
 
             button {{
                 padding: 6px 12px;
-                border: 1px solid #ffffff;
+                border: 1px solid #00ff88;
                 border-radius: 0px;
                 font-size: 10px;
                 font-weight: 700;
@@ -1000,7 +1001,7 @@ def get_html_page(api_key: str) -> str:
                 text-transform: uppercase;
                 letter-spacing: 1px;
                 background: #000000;
-                color: #ffffff;
+                color: #00ff88;
                 text-shadow: none;
             }}
 
@@ -1009,44 +1010,44 @@ def get_html_page(api_key: str) -> str:
             }}
 
             .btn-primary:hover {{
-                background: #ffffff;
+                background: #00ff88;
                 color: #000000;
-                box-shadow: none;
-                text-shadow: none;
+                box-shadow: 0 0 15px rgba(0, 255, 136, 0.6), inset 0 0 10px rgba(0, 255, 136, 0.3);
+                text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
             }}
 
             .btn-danger {{
                 background: #000000;
-                color: #ff6666;
-                border-color: #ff6666;
-                text-shadow: none;
+                color: #ff4444;
+                border-color: #ff4444;
+                text-shadow: 0 0 5px rgba(255, 68, 68, 0.3);
             }}
 
             .btn-danger:hover {{
-                background: #ff6666;
-                color: #440000;
-                box-shadow: none;
+                background: #ff4444;
+                color: #000000;
+                box-shadow: 0 0 15px rgba(255, 68, 68, 0.6), inset 0 0 10px rgba(255, 68, 68, 0.3);
                 text-shadow: none;
             }}
 
             .btn-copy {{
                 background: #000000;
-                color: #ffffff;
+                color: #00ff88;
                 padding: 6px 10px;
                 font-size: 10px;
                 border-radius: 0px;
                 flex-shrink: 0;
-                border: 1px solid #ffffff;
+                border: 1px solid #00ff88;
             }}
 
             .btn-copy:hover {{
-                background: #ffffff;
+                background: #00ff88;
                 color: #000000;
-                box-shadow: none;
+                box-shadow: 0 0 15px rgba(0, 255, 136, 0.6), inset 0 0 10px rgba(0, 255, 136, 0.3);
             }}
 
             .btn-copy.copied {{
-                background: #ffffff;
+                background: #00ff88;
                 color: #000000;
             }}
 
@@ -1066,7 +1067,7 @@ def get_html_page(api_key: str) -> str:
             .list-title {{
                 font-size: 13px;
                 font-weight: 700;
-                color: #ffffff;
+                color: #00ff88;
                 text-transform: uppercase;
                 letter-spacing: 2px;
                 text-shadow: none;
@@ -1074,9 +1075,9 @@ def get_html_page(api_key: str) -> str:
 
             .list-count {{
                 background: #000000;
-                color: #ffffff;
+                color: #00ff88;
                 padding: 4px 10px;
-                border: 1px solid #ffffff;
+                border: 1px solid #00ff88;
                 border-radius: 0px;
                 font-size: 11px;
                 font-weight: 700;
@@ -1098,33 +1099,33 @@ def get_html_page(api_key: str) -> str:
                 align-items: center;
                 gap: 8px;
                 padding: 10px 12px;
-                background: #000000;
-                border: 1px solid #ffffff;
-                border-left: 3px solid #ffffff;
+                background: #0a0a15;
+                border: 2px solid #00ff88;
+                border-left: 4px solid #ffff00;
                 border-radius: 0px;
                 transition: all 0.15s ease;
             }}
 
             .entry-item:hover {{
-                background: #000000;
-                border-left-color: #ffffff;
-                box-shadow: none;
+                background: #1a1a2e;
+                border-left-color: #ffff00;
+                box-shadow: 0 0 15px rgba(0, 255, 136, 0.3), inset 0 0 10px rgba(255, 255, 0, 0.1);
             }}
 
             .entry-index {{
                 font-weight: 700;
-                color: #ffffff;
+                color: #ffff00;
                 font-size: 10px;
                 min-width: 28px;
                 text-align: center;
-                text-shadow: none;
+                text-shadow: 0 0 5px rgba(255, 255, 0, 0.4);
                 font-family: 'Courier Prime', monospace;
             }}
 
             .entry-text {{
                 flex: 1;
                 font-size: 12px;
-                color: #ffffff;
+                color: #00ff88;
                 word-break: break-word;
                 font-family: 'Courier Prime', monospace;
                 line-height: 1.4;
@@ -1157,8 +1158,8 @@ def get_html_page(api_key: str) -> str:
                 bottom: 20px;
                 right: 20px;
                 background: #000000;
-                color: #ffffff;
-                border: 1px solid #ffffff;
+                color: #00ff88;
+                border: 1px solid #00ff88;
                 padding: 12px 16px;
                 border-radius: 0px;
                 box-shadow: none;
@@ -1184,23 +1185,25 @@ def get_html_page(api_key: str) -> str:
             }}
 
             ::-webkit-scrollbar {{
-                width: 10px;
-                height: 10px;
+                width: 12px;
+                height: 12px;
             }}
 
             ::-webkit-scrollbar-track {{
-                background: #000000;
-                border: 1px solid #ffffff;
+                background: #0a0a15;
+                border: 2px solid #00ff88;
             }}
 
             ::-webkit-scrollbar-thumb {{
-                background: #ffffff;
-                border: 1px solid #ffffff;
-                border-radius: 0px;
+                background: linear-gradient(180deg, #ff00ff, #00ffff);
+                border: 2px solid #00ff88;
+                border-radius: 2px;
+                box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
             }}
 
             ::-webkit-scrollbar-thumb:hover {{
-                background: #ffffff;
+                background: linear-gradient(180deg, #ffff00, #ff00ff);
+                box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
             }}
 
             @media (max-width: 600px) {{
@@ -1271,10 +1274,10 @@ def get_html_page(api_key: str) -> str:
                     <div class="entries-list" id="entriesList"></div>
                 </div>
 
-                <div class="list-section" style="margin-top: 50px; border-top: 1px solid #ffffff; padding-top: 30px;">
+                <div class="list-section" style="margin-top: 50px; border-top: 1px solid #00ff88; padding-top: 30px;">
                     <div class="list-title" style="margin-bottom: 15px;">Documentation</div>
-                    <div style="font-size: 11px; color: #ffffff;">
-                        <p style="margin-bottom: 10px;">For CLI usage and more information, see the <a href="https://github.com/anthropics/claude-code/blob/main/README.md" style="color: #ffffff; text-decoration: underline;">README</a></p>
+                    <div style="font-size: 11px; color: #00ff88;">
+                        <p style="margin-bottom: 10px;">For CLI usage and more information, see the <a href="https://github.com/anthropics/claude-code/blob/main/README.md" style="color: #00ff88; text-decoration: underline;">README</a></p>
                     </div>
                 </div>
             </div>
