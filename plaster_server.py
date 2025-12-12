@@ -1019,7 +1019,7 @@ def get_html_page(api_key: str) -> str:
                 background: #000000;
                 color: #ff6666;
                 border-color: #ff6666;
-                text-shadow: 0 0 5px rgba(255, 102, 102, 0.3);
+                text-shadow: none;
             }}
 
             .btn-danger:hover {{
