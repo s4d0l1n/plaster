@@ -48,6 +48,35 @@ $ErrorActionPreference = "Stop"
 $script:ServerUrl = "http://localhost:9321"
 $script:ApiKey = ""
 
+# Function to check dependencies
+function Test-Dependencies {
+    $missingDeps = @()
+
+    # Check for curl
+    if (-not (Get-Command curl -ErrorAction SilentlyContinue)) {
+        $missingDeps += "curl"
+    }
+
+    # Check for ConvertFrom-Json (built-in, should always exist)
+    # PowerShell has built-in JSON support, no external dependency needed
+
+    if ($missingDeps.Count -gt 0) {
+        Write-Host "Error: Missing required dependencies: $($missingDeps -join ', ')" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Please install the following tools:" -ForegroundColor Red
+        foreach ($dep in $missingDeps) {
+            switch ($dep) {
+                "curl" {
+                    Write-Host "  - curl: HTTP client (required for API communication)"
+                    Write-Host "    Windows: choco install curl or scoop install curl"
+                    Write-Host "    Alternative: Use 'Invoke-WebRequest' cmdlet (built-in)"
+                }
+            }
+        }
+        exit 1
+    }
+}
+
 # Set config path based on location
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 if ($scriptDir -like "*Program Files*") {
@@ -175,6 +204,9 @@ function Set-NewApiKey {
 }
 
 function Load-Config {
+    # Check dependencies before loading config
+    Test-Dependencies
+
     if (-not (Test-Path $Config)) {
         Write-Host "Error: Config file not found at $Config" -ForegroundColor Red
         Write-Host "Run './plaster.ps1 -Setup' to initialize." -ForegroundColor Yellow
@@ -201,6 +233,9 @@ function Load-Config {
 }
 
 function Setup-Config {
+    # Check dependencies before starting setup
+    Test-Dependencies
+
     Write-Host ""
     Write-Host "╔═════════════════════════════════════════╗" -ForegroundColor Cyan
     Write-Host "║     Plaster Initial Setup               ║" -ForegroundColor Cyan
@@ -534,7 +569,14 @@ function Get-ClipboardList {
 
         Write-Host "Clipboard entries ($($data.count) total):" -ForegroundColor Cyan
         $data.entries | ForEach-Object -Begin { $i = 0 } {
-            Write-Host "$([String]::Format('{0, 3}', $i + 1)). $_"
+            # Show only first line, truncated to 50 chars with ellipsis
+            $firstLine = ($_ -split '\r?\n')[0]
+            if ($firstLine.Length -gt 50) {
+                $display = $firstLine.Substring(0, 50) + "..."
+            } else {
+                $display = $firstLine
+            }
+            Write-Host "$([String]::Format('{0, 3}', $i + 1)). $display"
             $i++
         }
     } catch {

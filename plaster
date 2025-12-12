@@ -19,6 +19,46 @@ fi
 
 SERVER_URL="http://localhost:9321"
 API_KEY=""
+
+# Function to check dependencies
+check_dependencies() {
+    local missing_deps=()
+
+    # Check for jq
+    if ! command -v jq &> /dev/null; then
+        missing_deps+=("jq")
+    fi
+
+    # Check for curl
+    if ! command -v curl &> /dev/null; then
+        missing_deps+=("curl")
+    fi
+
+    # If dependencies missing, show helpful message
+    if [[ ${#missing_deps[@]} -gt 0 ]]; then
+        echo "Error: Missing required dependencies: ${missing_deps[*]}" >&2
+        echo "" >&2
+        echo "Please install the following tools:" >&2
+        for dep in "${missing_deps[@]}"; do
+            case "$dep" in
+                jq)
+                    echo "  - jq: JSON query tool (required for parsing API responses)" >&2
+                    echo "    Ubuntu/Debian: sudo apt-get install jq" >&2
+                    echo "    macOS: brew install jq" >&2
+                    echo "    Windows: choco install jq or scoop install jq" >&2
+                    ;;
+                curl)
+                    echo "  - curl: HTTP client (required for API communication)" >&2
+                    echo "    Ubuntu/Debian: sudo apt-get install curl" >&2
+                    echo "    macOS: brew install curl" >&2
+                    echo "    Windows: choco install curl or scoop install curl" >&2
+                    ;;
+            esac
+        done
+        exit 1
+    fi
+}
+
 HELP_TEXT="Usage: plaster [OPTION]
 
 A FILO clipboard service client with multi-key support.
@@ -103,6 +143,9 @@ regenerate_api_key() {
 
 # Function to load configuration
 load_config() {
+    # Check dependencies before using script
+    check_dependencies
+
     if [[ ! -f "$PLASTER_CONFIG" ]]; then
         echo "Error: Config file not found at $PLASTER_CONFIG" >&2
         echo "Run 'plaster --setup' to initialize." >&2
@@ -248,6 +291,9 @@ select_api_key() {
 
 # Function to setup configuration interactively
 setup_config() {
+    # Check dependencies before starting setup
+    check_dependencies
+
     echo "╔═════════════════════════════════════════╗"
     echo "║     Plaster Initial Setup               ║"
     echo "╚═════════════════════════════════════════╝"
@@ -572,7 +618,8 @@ list_entries() {
         local count
         count=$(echo "$response" | jq -r '.count')
         echo "Clipboard entries ($count total):" >&2
-        echo "$response" | jq -r '.entries[] | ., ""' | nl
+        # Show only first line of each entry, truncated to 50 chars
+        echo "$response" | jq -r '.entries[] | split("\n")[0] | "\(.[0:50])\(if length > 50 then "..." else "" end)"' | nl
     else
         echo "Error: Failed to list entries" >&2
         echo "$response" >&2
