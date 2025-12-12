@@ -47,6 +47,7 @@ param(
 $ErrorActionPreference = "Stop"
 $script:ServerUrl = "http://localhost:9321"
 $script:ApiKey = ""
+$script:ClientVersion = "1.0.0"
 
 # Function to check dependencies
 function Test-Dependencies {
@@ -75,6 +76,29 @@ function Test-Dependencies {
         }
         exit 1
     }
+}
+
+# Function to check for updates (non-blocking)
+function Test-UpdateAvailable {
+    # Run in background job to not block operation
+    $job = Start-Job -ScriptBlock {
+        param($ServerUrl, $ClientVersion)
+        try {
+            $response = Invoke-WebRequest -Uri "$ServerUrl/version" -Method Get -UseBasicParsing -ErrorAction SilentlyContinue
+            $data = $response.Content | ConvertFrom-Json -ErrorAction SilentlyContinue
+            $serverVersion = $data.version
+
+            if ($serverVersion -and $serverVersion -ne $ClientVersion) {
+                Write-Host ""
+                Write-Host "ℹ️  Update available! Plaster $serverVersion is available (you have $ClientVersion)" -ForegroundColor Yellow
+            }
+        } catch {
+            # Silently fail - don't interrupt user operations
+        }
+    } -ArgumentList $script:ServerUrl, $script:ClientVersion
+
+    # Don't wait for the job
+    $job | Remove-Job -Force -ErrorAction SilentlyContinue
 }
 
 # Set config path based on location
@@ -230,6 +254,9 @@ function Load-Config {
         Write-Host "Error: No API key found in config. Run './plaster.ps1 -NewApi' to generate one." -ForegroundColor Red
         exit 1
     }
+
+    # Check for updates (non-blocking)
+    Test-UpdateAvailable
 }
 
 function Setup-Config {

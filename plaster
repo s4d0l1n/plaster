@@ -6,6 +6,9 @@
 
 set -euo pipefail
 
+# Client version
+CLIENT_VERSION="1.0.0"
+
 # Script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -57,6 +60,26 @@ check_dependencies() {
         done
         exit 1
     fi
+}
+
+# Function to check for updates (non-blocking)
+check_for_updates() {
+    # Run in background to not block normal operation
+    (
+        local server_version
+        server_version=$(curl -s -X GET "$SERVER_URL/version" 2>/dev/null | jq -r '.version // empty' 2>/dev/null) || return 0
+
+        if [[ -z "$server_version" ]]; then
+            return 0
+        fi
+
+        # Compare versions
+        if [[ "$server_version" != "$CLIENT_VERSION" ]]; then
+            echo "" >&2
+            echo "ℹ️  Update available! Plaster $server_version is available (you have $CLIENT_VERSION)" >&2
+        fi
+    ) &
+    disown 2>/dev/null || true
 }
 
 HELP_TEXT="Usage: plaster [OPTION]
@@ -160,6 +183,9 @@ load_config() {
         echo "Error: No API key found in config. Run 'plaster --new-api' to generate one." >&2
         exit 1
     fi
+
+    # Check for updates (non-blocking)
+    check_for_updates
 }
 
 # Function to save API key with label
@@ -531,10 +557,22 @@ push_text() {
     local text="$1"
     local response
     local http_code
+    local temp_payload
+
+    # Create temporary file for JSON payload to handle large data
+    temp_payload=$(mktemp) || {
+        echo "Error: Failed to create temporary file" >&2
+        exit 1
+    }
+    trap "rm -f '$temp_payload'" RETURN
+
+    # Write JSON payload to temporary file to avoid bash command substitution limits
+    echo "{\"text\": $(echo "$text" | jq -Rs .)}" > "$temp_payload"
+
     response=$(curl -s -w "\n%{http_code}" -X POST "$SERVER_URL/push" \
         -H "Content-Type: application/json" \
         -H "X-API-Key: $API_KEY" \
-        -d "{\"text\": $(echo "$text" | jq -Rs .)}" 2>&1)
+        -d @"$temp_payload" 2>&1)
 
     http_code=$(echo "$response" | tail -n 1)
     response=$(echo "$response" | sed '$d')

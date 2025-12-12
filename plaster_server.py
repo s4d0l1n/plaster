@@ -3,6 +3,9 @@
 Plaster - A multi-tenant clipboard service with API key authentication
 """
 
+# Server version
+SERVER_VERSION = "1.0.0"
+
 import json
 import os
 import secrets
@@ -471,8 +474,8 @@ async def check_api_key(request: Request, call_next):
     path = request.url.path
     client_ip = request.client.host if request.client else "unknown"
 
-    # Skip auth for health check, static docs, key generation, and root path (initial setup)
-    if path in ["/health", "/docs", "/openapi.json", "/auth/generate", "/"]:
+    # Skip auth for health check, static docs, key generation, version, and root path (initial setup)
+    if path in ["/health", "/docs", "/openapi.json", "/auth/generate", "/version", "/"]:
         return await call_next(request)
 
     # Get API key from header
@@ -1256,6 +1259,21 @@ def get_html_page(api_key: str) -> str:
                 box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
             }}
 
+            /* Boot animation for Plaster */
+            @keyframes plaster-boot {{
+                0% {{
+                    opacity: 0;
+                    transform: translateY(-100px);
+                }}
+                50% {{
+                    opacity: 1;
+                }}
+                100% {{
+                    opacity: 1;
+                    transform: translateY(0);
+                }}
+            }}
+
             /* Game Boy OS Layout */
             .gb-header {{
                 background: #2d5a3d;
@@ -1271,9 +1289,22 @@ def get_html_page(api_key: str) -> str:
                 font-size: 16px;
                 font-weight: 700;
                 color: #9eff6f;
-                text-transform: uppercase;
                 letter-spacing: 2px;
                 text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+                animation: plaster-boot 1.5s ease-out forwards;
+                display: flex;
+                align-items: baseline;
+                gap: 4px;
+            }}
+
+            .plaster-text {{
+                text-transform: capitalize;
+            }}
+
+            .registered {{
+                font-size: 12px;
+                position: relative;
+                top: -2px;
             }}
 
             .gb-status {{
@@ -1620,7 +1651,7 @@ def get_html_page(api_key: str) -> str:
     <body>
         <div class="container gb-screen">
             <div class="gb-header">
-                <div class="gb-title">PLASTER</div>
+                <div class="gb-title"><span class="plaster-text">Plaster</span><span class="registered">®</span></div>
                 <div class="gb-status" id="statusDisplay">Ready</div>
             </div>
 
@@ -1922,6 +1953,11 @@ def get_html_page(api_key: str) -> str:
 async def health_check():
     """Health check endpoint"""
     return {"status": "ok"}
+
+@app.get("/version")
+async def get_version():
+    """Get server version"""
+    return {"status": "ok", "version": SERVER_VERSION}
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_ui(request: Request):
