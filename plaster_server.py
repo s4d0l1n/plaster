@@ -526,13 +526,13 @@ def get_setup_page() -> str:
                 padding: 20px;
                 display: flex;
                 flex-direction: column;
-                color: #00ff00;
+                color: #ffffff;
                 text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
             }
 
             .container {
                 background: #000000;
-                border: 2px solid #00ff00;
+                border: 2px solid #ffffff;
                 box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
                 max-width: 800px;
                 width: 100%;
@@ -543,9 +543,9 @@ def get_setup_page() -> str:
 
             .header {
                 background: #000000;
-                color: #00ff00;
+                color: #ffffff;
                 padding: 15px;
-                border-bottom: 1px solid #00ff00;
+                border-bottom: 1px solid #ffffff;
                 font-size: 12px;
                 letter-spacing: 2px;
             }
@@ -565,7 +565,7 @@ def get_setup_page() -> str:
             }
 
             .prompt {
-                color: #00ff00;
+                color: #ffffff;
             }
 
             .input-group {
@@ -577,19 +577,19 @@ def get_setup_page() -> str:
             #apiKeyInput {
                 flex: 1;
                 padding: 8px 10px;
-                border: 1px solid #00ff00;
+                border: 1px solid #ffffff;
                 border-radius: 0px;
                 font-size: 12px;
                 font-family: 'Courier Prime', monospace;
                 background: #000000;
-                color: #00ff00;
+                color: #ffffff;
                 transition: all 0.1s ease;
                 text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
             }
 
             #apiKeyInput:focus {
                 outline: none;
-                border-color: #00ff00;
+                border-color: #ffffff;
                 box-shadow: 0 0 10px rgba(0, 255, 0, 0.3), inset 0 0 5px rgba(0, 255, 0, 0.1);
             }
 
@@ -599,7 +599,7 @@ def get_setup_page() -> str:
 
             button {
                 padding: 8px 16px;
-                border: 1px solid #00ff00;
+                border: 1px solid #ffffff;
                 border-radius: 0px;
                 font-size: 11px;
                 font-weight: 700;
@@ -609,12 +609,12 @@ def get_setup_page() -> str:
                 text-transform: uppercase;
                 letter-spacing: 1px;
                 background: #000000;
-                color: #00ff00;
+                color: #ffffff;
                 text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
             }
 
             button:hover {
-                background: #00ff00;
+                background: #ffffff;
                 color: #000000;
                 box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
                 text-shadow: none;
@@ -628,7 +628,7 @@ def get_setup_page() -> str:
                 font-size: 11px;
                 margin-top: 20px;
                 padding-top: 15px;
-                border-top: 1px solid #00ff00;
+                border-top: 1px solid #ffffff;
             }
 
             .help-line {
@@ -636,7 +636,7 @@ def get_setup_page() -> str:
             }
 
             a {
-                color: #00ff00;
+                color: #ffffff;
                 text-decoration: underline;
                 transition: all 0.1s ease;
             }
@@ -650,9 +650,9 @@ def get_setup_page() -> str:
                 bottom: 20px;
                 right: 20px;
                 background: #000000;
-                color: #00ff00;
+                color: #ffffff;
                 padding: 12px 20px;
-                border: 1px solid #00ff00;
+                border: 1px solid #ffffff;
                 box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
                 opacity: 0;
                 transform: translateY(20px);
@@ -794,13 +794,13 @@ def get_html_page(api_key: str) -> str:
                 padding: 10px;
                 display: flex;
                 flex-direction: column;
-                color: #00ff00;
+                color: #ffffff;
                 text-shadow: none;
             }}
 
             .container {{
                 background: #000000;
-                border: 1px solid #00ff00;
+                border: 1px solid #ffffff;
                 box-shadow: none;
                 max-width: 100%;
                 width: 100%;
@@ -813,9 +813,9 @@ def get_html_page(api_key: str) -> str:
 
             .header {{
                 background: #000000;
-                color: #00ff00;
+                color: #ffffff;
                 padding: 10px;
-                border-bottom: 1px solid #00ff00;
+                border-bottom: 1px solid #ffffff;
                 position: relative;
                 z-index: 1;
                 font-size: 11px;
@@ -854,7 +854,7 @@ def get_html_page(api_key: str) -> str:
             .api-key-section {{
                 background: #000000;
                 padding: 10px;
-                border: 1px solid #00ff00;
+                border: 1px solid #ffffff;
                 border-radius: 0px;
                 margin-top: 10px;
                 box-shadow: none;
@@ -863,7 +863,7 @@ def get_html_page(api_key: str) -> str:
             .api-key-label {{
                 font-size: 11px;
                 text-transform: uppercase;
-                color: #00ff00;
+                color: #ffffff;
                 letter-spacing: 2px;
                 margin-bottom: 10px;
                 display: block;
@@ -876,7 +876,7 @@ def get_html_page(api_key: str) -> str:
                 align-items: center;
                 background: #000000;
                 padding: 10px 12px;
-                border: 1px solid #00ff00;
+                border: 1px solid #ffffff;
                 border-radius: 0px;
                 font-family: 'Courier Prime', monospace;
                 font-size: 11px;
@@ -885,19 +885,19 @@ def get_html_page(api_key: str) -> str:
 
             .api-key-value {{
                 flex: 1;
-                color: #00ff00;
+                color: #ffffff;
                 text-shadow: none;
             }}
 
             .api-key-input {{
                 flex: 1;
                 padding: 8px 10px;
-                border: 1px solid #00ff00;
+                border: 1px solid #ffffff;
                 border-radius: 0px;
                 font-family: 'Courier Prime', monospace;
                 font-size: 11px;
                 background: #000000;
-                color: #00ff00;
+                color: #ffffff;
                 text-shadow: none;
             }}
 
@@ -910,8 +910,8 @@ def get_html_page(api_key: str) -> str:
             .btn-rotate,
             .btn-load-key {{
                 background: #000000;
-                color: #00ff00;
-                border: 1px solid #00ff00;
+                color: #ffffff;
+                border: 1px solid #ffffff;
                 border-radius: 0px;
                 padding: 6px 10px;
                 cursor: pointer;
@@ -929,14 +929,14 @@ def get_html_page(api_key: str) -> str:
             .btn-switch:hover,
             .btn-rotate:hover,
             .btn-load-key:hover {{
-                background: #00ff00;
+                background: #ffffff;
                 color: #000000;
                 box-shadow: none;
                 text-shadow: none;
             }}
 
             .btn-copy-key.copied {{
-                background: #00ff00;
+                background: #ffffff;
                 color: #000000;
             }}
 
@@ -954,7 +954,7 @@ def get_html_page(api_key: str) -> str:
                 display: block;
                 font-size: 11px;
                 font-weight: 700;
-                color: #00ff00;
+                color: #ffffff;
                 margin-bottom: 8px;
                 text-transform: uppercase;
                 letter-spacing: 2px;
@@ -964,12 +964,12 @@ def get_html_page(api_key: str) -> str:
             #textInput {{
                 width: 100%;
                 padding: 10px 12px;
-                border: 1px solid #00ff00;
+                border: 1px solid #ffffff;
                 border-radius: 0px;
                 font-size: 12px;
                 font-family: 'Courier Prime', monospace;
                 background: #000000;
-                color: #00ff00;
+                color: #ffffff;
                 transition: all 0.15s ease;
                 resize: none;
                 min-height: 80px;
@@ -978,7 +978,7 @@ def get_html_page(api_key: str) -> str:
 
             #textInput:focus {{
                 outline: none;
-                border-color: #00ff00;
+                border-color: #ffffff;
                 box-shadow: none;
             }}
 
@@ -990,7 +990,7 @@ def get_html_page(api_key: str) -> str:
 
             button {{
                 padding: 6px 12px;
-                border: 1px solid #00ff00;
+                border: 1px solid #ffffff;
                 border-radius: 0px;
                 font-size: 10px;
                 font-weight: 700;
@@ -1000,7 +1000,7 @@ def get_html_page(api_key: str) -> str:
                 text-transform: uppercase;
                 letter-spacing: 1px;
                 background: #000000;
-                color: #00ff00;
+                color: #ffffff;
                 text-shadow: none;
             }}
 
@@ -1009,7 +1009,7 @@ def get_html_page(api_key: str) -> str:
             }}
 
             .btn-primary:hover {{
-                background: #00ff00;
+                background: #ffffff;
                 color: #000000;
                 box-shadow: none;
                 text-shadow: none;
@@ -1031,22 +1031,22 @@ def get_html_page(api_key: str) -> str:
 
             .btn-copy {{
                 background: #000000;
-                color: #00ff00;
+                color: #ffffff;
                 padding: 6px 10px;
                 font-size: 10px;
                 border-radius: 0px;
                 flex-shrink: 0;
-                border: 1px solid #00ff00;
+                border: 1px solid #ffffff;
             }}
 
             .btn-copy:hover {{
-                background: #00ff00;
+                background: #ffffff;
                 color: #000000;
                 box-shadow: none;
             }}
 
             .btn-copy.copied {{
-                background: #00ff00;
+                background: #ffffff;
                 color: #000000;
             }}
 
@@ -1066,7 +1066,7 @@ def get_html_page(api_key: str) -> str:
             .list-title {{
                 font-size: 13px;
                 font-weight: 700;
-                color: #00ff00;
+                color: #ffffff;
                 text-transform: uppercase;
                 letter-spacing: 2px;
                 text-shadow: none;
@@ -1074,9 +1074,9 @@ def get_html_page(api_key: str) -> str:
 
             .list-count {{
                 background: #000000;
-                color: #00ff00;
+                color: #ffffff;
                 padding: 4px 10px;
-                border: 1px solid #00ff00;
+                border: 1px solid #ffffff;
                 border-radius: 0px;
                 font-size: 11px;
                 font-weight: 700;
@@ -1099,21 +1099,21 @@ def get_html_page(api_key: str) -> str:
                 gap: 8px;
                 padding: 10px 12px;
                 background: #000000;
-                border: 1px solid #00ff00;
-                border-left: 3px solid #00ff00;
+                border: 1px solid #ffffff;
+                border-left: 3px solid #ffffff;
                 border-radius: 0px;
                 transition: all 0.15s ease;
             }}
 
             .entry-item:hover {{
                 background: #000000;
-                border-left-color: #00ff00;
+                border-left-color: #ffffff;
                 box-shadow: none;
             }}
 
             .entry-index {{
                 font-weight: 700;
-                color: #00ff00;
+                color: #ffffff;
                 font-size: 10px;
                 min-width: 28px;
                 text-align: center;
@@ -1124,7 +1124,7 @@ def get_html_page(api_key: str) -> str:
             .entry-text {{
                 flex: 1;
                 font-size: 12px;
-                color: #00ff00;
+                color: #ffffff;
                 word-break: break-word;
                 font-family: 'Courier Prime', monospace;
                 line-height: 1.4;
@@ -1157,8 +1157,8 @@ def get_html_page(api_key: str) -> str:
                 bottom: 20px;
                 right: 20px;
                 background: #000000;
-                color: #00ff00;
-                border: 1px solid #00ff00;
+                color: #ffffff;
+                border: 1px solid #ffffff;
                 padding: 12px 16px;
                 border-radius: 0px;
                 box-shadow: none;
@@ -1190,17 +1190,17 @@ def get_html_page(api_key: str) -> str:
 
             ::-webkit-scrollbar-track {{
                 background: #000000;
-                border: 1px solid #00ff00;
+                border: 1px solid #ffffff;
             }}
 
             ::-webkit-scrollbar-thumb {{
-                background: #00ff00;
-                border: 1px solid #00ff00;
+                background: #ffffff;
+                border: 1px solid #ffffff;
                 border-radius: 0px;
             }}
 
             ::-webkit-scrollbar-thumb:hover {{
-                background: #00ff00;
+                background: #ffffff;
             }}
 
             @media (max-width: 600px) {{
@@ -1271,10 +1271,10 @@ def get_html_page(api_key: str) -> str:
                     <div class="entries-list" id="entriesList"></div>
                 </div>
 
-                <div class="list-section" style="margin-top: 50px; border-top: 1px solid #00ff00; padding-top: 30px;">
+                <div class="list-section" style="margin-top: 50px; border-top: 1px solid #ffffff; padding-top: 30px;">
                     <div class="list-title" style="margin-bottom: 15px;">Documentation</div>
-                    <div style="font-size: 11px; color: #00ff00;">
-                        <p style="margin-bottom: 10px;">For CLI usage and more information, see the <a href="https://github.com/anthropics/claude-code/blob/main/README.md" style="color: #00ff00; text-decoration: underline;">README</a></p>
+                    <div style="font-size: 11px; color: #ffffff;">
+                        <p style="margin-bottom: 10px;">For CLI usage and more information, see the <a href="https://github.com/anthropics/claude-code/blob/main/README.md" style="color: #ffffff; text-decoration: underline;">README</a></p>
                     </div>
                 </div>
             </div>
