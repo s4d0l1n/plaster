@@ -795,13 +795,13 @@ def get_html_page(api_key: str) -> str:
                 display: flex;
                 flex-direction: column;
                 color: #00ff00;
-                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
+                text-shadow: none;
             }}
 
             .container {{
                 background: #000000;
-                border: 2px solid #00ff00;
-                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+                border: 1px solid #00ff00;
+                box-shadow: none;
                 max-width: 100%;
                 width: 100%;
                 overflow: hidden;
@@ -832,7 +832,7 @@ def get_html_page(api_key: str) -> str:
                 font-weight: 700;
                 letter-spacing: 1px;
                 text-transform: uppercase;
-                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
+                text-shadow: none;
             }}
 
             .header p {{
@@ -857,7 +857,7 @@ def get_html_page(api_key: str) -> str:
                 border: 1px solid #00ff00;
                 border-radius: 0px;
                 margin-top: 10px;
-                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+                box-shadow: none;
             }}
 
             .api-key-label {{
@@ -867,7 +867,7 @@ def get_html_page(api_key: str) -> str:
                 letter-spacing: 2px;
                 margin-bottom: 10px;
                 display: block;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                text-shadow: none;
             }}
 
             .api-key-container {{
@@ -886,7 +886,7 @@ def get_html_page(api_key: str) -> str:
             .api-key-value {{
                 flex: 1;
                 color: #00ff00;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                text-shadow: none;
             }}
 
             .api-key-input {{
@@ -898,7 +898,7 @@ def get_html_page(api_key: str) -> str:
                 font-size: 11px;
                 background: #000000;
                 color: #00ff00;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                text-shadow: none;
             }}
 
             .api-key-input::placeholder {{
@@ -922,7 +922,7 @@ def get_html_page(api_key: str) -> str:
                 transition: all 0.15s;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                text-shadow: none;
             }}
 
             .btn-copy-key:hover,
@@ -931,7 +931,7 @@ def get_html_page(api_key: str) -> str:
             .btn-load-key:hover {{
                 background: #00ff00;
                 color: #000000;
-                box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+                box-shadow: none;
                 text-shadow: none;
             }}
 
@@ -958,7 +958,7 @@ def get_html_page(api_key: str) -> str:
                 margin-bottom: 8px;
                 text-transform: uppercase;
                 letter-spacing: 2px;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                text-shadow: none;
             }}
 
             #textInput {{
@@ -973,13 +973,13 @@ def get_html_page(api_key: str) -> str:
                 transition: all 0.15s ease;
                 resize: none;
                 min-height: 80px;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.1);
+                text-shadow: none;
             }}
 
             #textInput:focus {{
                 outline: none;
                 border-color: #00ff00;
-                box-shadow: 0 0 20px rgba(0, 255, 0, 0.4), inset 0 0 10px rgba(0, 255, 0, 0.1);
+                box-shadow: none;
             }}
 
             .button-group {{
@@ -1001,7 +1001,7 @@ def get_html_page(api_key: str) -> str:
                 letter-spacing: 1px;
                 background: #000000;
                 color: #00ff00;
-                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
+                text-shadow: none;
             }}
 
             .btn-primary {{
@@ -1011,7 +1011,7 @@ def get_html_page(api_key: str) -> str:
             .btn-primary:hover {{
                 background: #00ff00;
                 color: #000000;
-                box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+                box-shadow: none;
                 text-shadow: none;
             }}
 
@@ -1025,7 +1025,7 @@ def get_html_page(api_key: str) -> str:
             .btn-danger:hover {{
                 background: #ff6666;
                 color: #440000;
-                box-shadow: 0 0 15px rgba(255, 102, 102, 0.6);
+                box-shadow: none;
                 text-shadow: none;
             }}
 
@@ -1042,7 +1042,7 @@ def get_html_page(api_key: str) -> str:
             .btn-copy:hover {{
                 background: #00ff00;
                 color: #000000;
-                box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+                box-shadow: none;
             }}
 
             .btn-copy.copied {{
@@ -1069,7 +1069,7 @@ def get_html_page(api_key: str) -> str:
                 color: #00ff00;
                 text-transform: uppercase;
                 letter-spacing: 2px;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                text-shadow: none;
             }}
 
             .list-count {{
@@ -1080,7 +1080,7 @@ def get_html_page(api_key: str) -> str:
                 border-radius: 0px;
                 font-size: 11px;
                 font-weight: 700;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.2);
+                text-shadow: none;
             }}
 
             .entries-list {{
@@ -1108,7 +1108,7 @@ def get_html_page(api_key: str) -> str:
             .entry-item:hover {{
                 background: #000000;
                 border-left-color: #00ff00;
-                box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+                box-shadow: none;
             }}
 
             .entry-index {{
@@ -1117,7 +1117,7 @@ def get_html_page(api_key: str) -> str:
                 font-size: 10px;
                 min-width: 28px;
                 text-align: center;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                text-shadow: none;
                 font-family: 'Courier Prime', monospace;
             }}
 
@@ -1128,7 +1128,7 @@ def get_html_page(api_key: str) -> str:
                 word-break: break-word;
                 font-family: 'Courier Prime', monospace;
                 line-height: 1.4;
-                text-shadow: 0 0 3px rgba(0, 255, 0, 0.1);
+                text-shadow: none;
                 max-height: 200px;
                 overflow: hidden;
             }}
@@ -1161,12 +1161,12 @@ def get_html_page(api_key: str) -> str:
                 border: 1px solid #00ff00;
                 padding: 12px 16px;
                 border-radius: 0px;
-                box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+                box-shadow: none;
                 opacity: 0;
                 transform: translateY(20px);
                 transition: all 0.3s ease;
                 z-index: 1000;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                text-shadow: none;
                 font-family: 'Courier Prime', monospace;
                 font-size: 12px;
             }}
@@ -1180,7 +1180,7 @@ def get_html_page(api_key: str) -> str:
                 color: #ff6666;
                 border-color: #ff6666;
                 background: #440000;
-                box-shadow: 0 0 20px rgba(255, 102, 102, 0.3);
+                box-shadow: none;
             }}
 
             ::-webkit-scrollbar {{
@@ -1234,10 +1234,9 @@ def get_html_page(api_key: str) -> str:
     <body>
         <div class="container">
             <div class="header">
-                <div class="header-line">╔════════════════════════════════════════╗</div>
-                <div class="header-line">║  ▓▓  PLASTER - CLIPBOARD SERVICE  ▓▓  ║</div>
-                <div class="header-line">║  C:\\clipboard>                         ║</div>
-                <div class="header-line">╚════════════════════════════════════════╝</div>
+                <div class="header-line">┌────────────────────────────────────────┐</div>
+                <div class="header-line">│ PLASTER - Clipboard Service            │</div>
+                <div class="header-line">└────────────────────────────────────────┘</div>
 
                 <div class="api-key-section">
                     <span class="api-key-label" id="keyLabel">Your API Key</span>
