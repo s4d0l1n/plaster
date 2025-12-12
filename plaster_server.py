@@ -511,7 +511,7 @@ def get_setup_page() -> str:
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>PLASTER - Clipboard Service</title>
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
             * {
                 margin: 0;
@@ -520,20 +520,21 @@ def get_setup_page() -> str:
             }
 
             body {
-                font-family: 'Courier Prime', monospace;
-                background: #000000;
+                font-family: 'Press Start 2P', cursive;
+                background: #1a4d2e;
                 min-height: 100vh;
                 padding: 20px;
                 display: flex;
                 flex-direction: column;
-                color: #00ff88;
-                text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+                color: #9eff6f;
+                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+                font-size: 18px;
             }
 
             .container {
-                background: #000000;
-                border: 2px solid #00ff88;
-                box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+                background: #2d5a3d;
+                border: 8px solid #9eff6f;
+                box-shadow: inset 0 0 0 4px #4a7c59;
                 max-width: 800px;
                 width: 100%;
                 overflow: hidden;
@@ -542,54 +543,60 @@ def get_setup_page() -> str:
             }
 
             .header {
-                background: #000000;
-                color: #00ff88;
-                padding: 15px;
-                border-bottom: 1px solid #00ff88;
-                font-size: 12px;
-                letter-spacing: 2px;
+                background: #1a4d2e;
+                color: #9eff6f;
+                padding: 20px;
+                border-bottom: 6px solid #4a7c59;
+                font-size: 20px;
+                letter-spacing: 3px;
+                font-family: 'Press Start 2P', cursive;
+                text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
             }
 
             .header-line {
-                margin-bottom: 5px;
+                margin-bottom: 8px;
             }
 
             .content {
-                padding: 20px;
-                line-height: 1.8;
+                padding: 30px;
+                line-height: 2;
+                font-size: 16px;
             }
 
             .command-line {
-                margin-bottom: 15px;
-                font-size: 12px;
+                margin-bottom: 20px;
+                font-size: 16px;
+                font-family: 'Press Start 2P', cursive;
             }
 
             .prompt {
-                color: #00ff88;
+                color: #9eff6f;
+                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
             }
 
             .input-group {
                 display: flex;
-                gap: 10px;
-                margin: 20px 0;
+                gap: 15px;
+                margin: 30px 0;
             }
 
             #apiKeyInput {
                 flex: 1;
-                padding: 8px 10px;
-                border: 1px solid #00ff88;
+                padding: 12px 15px;
+                border: 4px solid #9eff6f;
+                font-family: 'Press Start 2P', cursive;
                 border-radius: 0px;
-                font-size: 12px;
-                font-family: 'Courier Prime', monospace;
-                background: #000000;
-                color: #00ff88;
+                font-size: 14px;
+                background: #2d5a3d;
+                color: #9eff6f;
                 transition: all 0.1s ease;
-                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
+                box-shadow: inset 0 0 0 2px #4a7c59;
+                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
             }
 
             #apiKeyInput:focus {
                 outline: none;
-                border-color: #00ff88;
+                border-color: #9eff6f;
                 box-shadow: 0 0 10px rgba(0, 255, 0, 0.3), inset 0 0 5px rgba(0, 255, 0, 0.1);
             }
 
@@ -598,26 +605,33 @@ def get_setup_page() -> str:
             }
 
             button {
-                padding: 8px 16px;
-                border: 1px solid #00ff88;
+                padding: 12px 24px;
+                border: 4px solid #9eff6f;
                 border-radius: 0px;
-                font-size: 11px;
+                font-size: 14px;
                 font-weight: 700;
-                font-family: 'Courier Prime', monospace;
+                font-family: 'Press Start 2P', cursive;
                 cursor: pointer;
                 transition: all 0.1s ease;
                 text-transform: uppercase;
-                letter-spacing: 1px;
-                background: #000000;
-                color: #00ff88;
-                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
+                letter-spacing: 2px;
+                background: #1a4d2e;
+                color: #9eff6f;
+                text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
+                box-shadow: inset 0 0 0 2px #4a7c59;
             }
 
             button:hover {
-                background: #00ff88;
-                color: #000000;
-                box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-                text-shadow: none;
+                background: #9eff6f;
+                color: #1a4d2e;
+                box-shadow: inset 0 0 0 2px #1a4d2e;
+                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+                transform: translate(-2px, -2px);
+            }
+
+            button:active {
+                transform: translate(0, 0);
+                box-shadow: inset 0 0 0 2px #4a7c59;
             }
 
             .btn-primary {
@@ -628,7 +642,7 @@ def get_setup_page() -> str:
                 font-size: 11px;
                 margin-top: 20px;
                 padding-top: 15px;
-                border-top: 1px solid #00ff88;
+                border-top: 1px solid #9eff6f;
             }
 
             .help-line {
@@ -636,7 +650,7 @@ def get_setup_page() -> str:
             }
 
             a {
-                color: #00ff88;
+                color: #9eff6f;
                 text-decoration: underline;
                 transition: all 0.1s ease;
             }
@@ -649,18 +663,18 @@ def get_setup_page() -> str:
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
-                background: #000000;
-                color: #00ff88;
-                padding: 12px 20px;
-                border: 1px solid #00ff88;
-                box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+                background: #1a4d2e;
+                color: #9eff6f;
+                padding: 16px 24px;
+                border: 4px solid #9eff6f;
+                box-shadow: inset 0 0 0 2px #4a7c59;
                 opacity: 0;
                 transform: translateY(20px);
                 transition: all 0.3s ease;
                 z-index: 1000;
-                font-family: 'Courier Prime', monospace;
-                font-size: 11px;
-                text-shadow: 0 0 3px rgba(0, 255, 0, 0.2);
+                font-family: 'Press Start 2P', cursive;
+                font-size: 12px;
+                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
             }
 
             .toast.show {
@@ -669,11 +683,11 @@ def get_setup_page() -> str:
             }
 
             .toast.error {
-                background: #330000;
-                color: #ff6666;
-                border-color: #ff6666;
-                box-shadow: 0 0 10px rgba(255, 102, 102, 0.3);
-                text-shadow: 0 0 3px rgba(255, 102, 102, 0.2);
+                background: #2d5a3d;
+                color: #9eff6f;
+                border-color: #4a7c59;
+                box-shadow: inset 0 0 0 2px #4a7c59;
+                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
             }
 
             @media (max-width: 600px) {
@@ -698,8 +712,9 @@ def get_setup_page() -> str:
     <body>
         <div class="container">
             <div class="header">
-                <div class="header-line">Microsoft(R) Plaster Clipboard Service v1.0</div>
-                <div class="header-line">(C)2025 Plaster Contributors. All rights reserved.</div>
+                <div class="header-line">┌────────────────────────────────┐</div>
+                <div class="header-line">│ PLASTER - Clipboard Service    │</div>
+                <div class="header-line">└────────────────────────────────┘</div>
             </div>
 
             <div class="content">
@@ -789,20 +804,20 @@ def get_html_page(api_key: str) -> str:
 
             body {{
                 font-family: 'Press Start 2P', cursive;
-                background: #1a1a2e;
+                background: #1a4d2e;
                 min-height: 100vh;
                 padding: 10px;
                 display: flex;
                 flex-direction: column;
-                color: #00ff88;
+                color: #9eff6f;
                 text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
                 font-size: 18px;
             }}
 
             .container {{
-                background: #0f0f23;
-                border: 8px solid #00ff88;
-                box-shadow: inset 0 0 0 4px #ff00ff, 0 0 30px rgba(0, 255, 136, 0.6);
+                background: #2d5a3d;
+                border: 8px solid #9eff6f;
+                box-shadow: inset 0 0 0 4px #4a7c59, 0 0 30px rgba(0, 255, 136, 0.6);
                 max-width: 100%;
                 width: 100%;
                 overflow: hidden;
@@ -815,10 +830,10 @@ def get_html_page(api_key: str) -> str:
             }}
 
             .header {{
-                background: linear-gradient(180deg, #1a0033 0%, #0f0f23 100%);
-                color: #00ff88;
+                background: linear-gradient(180deg, #1a0033 0%, #2d5a3d 100%);
+                color: #9eff6f;
                 padding: 20px;
-                border-bottom: 6px solid #ff00ff;
+                border-bottom: 6px solid #4a7c59;
                 position: relative;
                 z-index: 1;
                 font-size: 20px;
@@ -857,53 +872,66 @@ def get_html_page(api_key: str) -> str:
             }}
 
             .api-key-section {{
-                background: #000000;
-                padding: 10px;
-                border: 1px solid #00ff88;
+                background: #1a4d2e;
+                padding: 15px;
+                border: 4px solid #9eff6f;
                 border-radius: 0px;
                 margin-top: 10px;
-                box-shadow: none;
+                box-shadow: inset 0 0 0 2px #4a7c59;
             }}
 
             .api-key-label {{
-                font-size: 11px;
+                font-size: 14px;
                 text-transform: uppercase;
-                color: #00ff88;
+                color: #9eff6f;
                 letter-spacing: 2px;
-                margin-bottom: 10px;
+                margin-bottom: 12px;
                 display: block;
-                text-shadow: none;
+                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+                font-family: 'Press Start 2P', cursive;
+                font-weight: 700;
             }}
 
             .api-key-container {{
                 display: flex;
-                gap: 8px;
+                gap: 12px;
                 align-items: center;
-                background: #000000;
-                padding: 10px 12px;
-                border: 1px solid #00ff88;
+                background: #2d5a3d;
+                padding: 12px 15px;
+                border: 4px solid #9eff6f;
                 border-radius: 0px;
                 font-family: 'Courier Prime', monospace;
-                font-size: 11px;
+                font-size: 12px;
                 word-break: break-all;
+                box-shadow: inset 0 0 0 2px #4a7c59;
+                margin-bottom: 12px;
             }}
 
             .api-key-value {{
                 flex: 1;
-                color: #00ff88;
+                color: #9eff6f;
                 text-shadow: none;
             }}
 
             .api-key-input {{
                 flex: 1;
-                padding: 8px 10px;
-                border: 1px solid #00ff88;
+                padding: 12px 15px;
+                border: 4px solid #9eff6f;
                 border-radius: 0px;
                 font-family: 'Courier Prime', monospace;
-                font-size: 11px;
-                background: #000000;
-                color: #00ff88;
-                text-shadow: none;
+                font-size: 14px;
+                background: #2d5a3d;
+                color: #9eff6f;
+                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+                box-shadow: inset 0 0 0 2px #4a7c59;
+                margin-bottom: 12px;
+            }}
+
+            #keyInputContainer {{
+                display: flex;
+                gap: 12px;
+                align-items: center;
+                margin-bottom: 12px;
             }}
 
             .api-key-input::placeholder {{
@@ -914,34 +942,37 @@ def get_html_page(api_key: str) -> str:
             .btn-switch,
             .btn-rotate,
             .btn-load-key {{
-                background: #000000;
-                color: #00ff88;
-                border: 1px solid #00ff88;
+                padding: 12px 24px;
+                border: 4px solid #9eff6f;
                 border-radius: 0px;
-                padding: 6px 10px;
-                cursor: pointer;
-                font-size: 10px;
+                font-size: 16px;
                 font-weight: 700;
-                font-family: 'Courier Prime', monospace;
-                white-space: nowrap;
-                transition: all 0.15s;
+                font-family: 'Press Start 2P', cursive;
+                cursor: pointer;
+                transition: all 0.1s ease;
                 text-transform: uppercase;
-                letter-spacing: 1px;
-                text-shadow: none;
+                letter-spacing: 2px;
+                background: #000000;
+                color: #9eff6f;
+                text-shadow: 3px 3px 0px rgba(0, 255, 136, 0.4);
+                box-shadow: inset 0 0 0 2px #4a7c59;
+                white-space: nowrap;
             }}
 
             .btn-copy-key:hover,
             .btn-switch:hover,
             .btn-rotate:hover,
             .btn-load-key:hover {{
-                background: #00ff88;
+                background: #9eff6f;
                 color: #000000;
-                box-shadow: none;
-                text-shadow: none;
+                box-shadow: inset 0 0 0 4px #4a7c59, 0 0 20px rgba(0, 255, 136, 0.6);
+                text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+                transform: translate(-2px, -2px);
+                border-color: #9eff6f;
             }}
 
             .btn-copy-key.copied {{
-                background: #00ff88;
+                background: #9eff6f;
                 color: #000000;
             }}
 
@@ -959,7 +990,7 @@ def get_html_page(api_key: str) -> str:
                 display: block;
                 font-size: 16px;
                 font-weight: 700;
-                color: #00ff88;
+                color: #9eff6f;
                 margin-bottom: 12px;
                 text-transform: uppercase;
                 letter-spacing: 2px;
@@ -970,23 +1001,23 @@ def get_html_page(api_key: str) -> str:
             #textInput {{
                 width: 100%;
                 padding: 12px 15px;
-                border: 4px solid #00ff88;
+                border: 4px solid #9eff6f;
                 border-radius: 0px;
                 font-size: 16px;
                 font-family: 'Press Start 2P', cursive;
                 background: #000000;
-                color: #00ff88;
+                color: #9eff6f;
                 transition: all 0.15s ease;
                 resize: none;
                 min-height: 120px;
                 text-shadow: 2px 2px 0px rgba(0, 255, 136, 0.2);
-                box-shadow: inset 0 0 0 2px #ff00ff;
+                box-shadow: inset 0 0 0 2px #4a7c59;
             }}
 
             #textInput:focus {{
                 outline: none;
-                border-color: #ffff00;
-                box-shadow: inset 0 0 0 4px #ff00ff, 0 0 20px rgba(0, 255, 136, 0.4);
+                border-color: #9eff6f;
+                box-shadow: inset 0 0 0 4px #4a7c59, 0 0 20px rgba(0, 255, 136, 0.4);
             }}
 
             .button-group {{
@@ -997,7 +1028,7 @@ def get_html_page(api_key: str) -> str:
 
             button {{
                 padding: 12px 24px;
-                border: 4px solid #00ff88;
+                border: 4px solid #9eff6f;
                 border-radius: 0px;
                 font-size: 16px;
                 font-weight: 700;
@@ -1007,10 +1038,10 @@ def get_html_page(api_key: str) -> str:
                 text-transform: uppercase;
                 letter-spacing: 2px;
                 background: #000000;
-                color: #00ff88;
+                color: #9eff6f;
                 text-shadow: 3px 3px 0px rgba(0, 255, 136, 0.4);
                 image-rendering: pixelated;
-                box-shadow: inset 0 0 0 2px #ff00ff;
+                box-shadow: inset 0 0 0 2px #4a7c59;
             }}
 
             .btn-primary {{
@@ -1018,55 +1049,30 @@ def get_html_page(api_key: str) -> str:
             }}
 
             .btn-primary:hover {{
-                background: #00ff88;
+                background: #9eff6f;
                 color: #000000;
-                box-shadow: inset 0 0 0 4px #ff00ff, 0 0 20px rgba(0, 255, 136, 0.6);
+                box-shadow: inset 0 0 0 4px #4a7c59, 0 0 20px rgba(0, 255, 136, 0.6);
                 text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
                 transform: translate(-2px, -2px);
-                border-color: #ffff00;
+                border-color: #9eff6f;
             }}
 
             .btn-danger {{
                 background: #000000;
-                color: #ff4444;
-                border-color: #ff4444;
+                color: #4a7c59;
+                border-color: #4a7c59;
                 text-shadow: 3px 3px 0px rgba(255, 68, 68, 0.3);
             }}
 
             .btn-danger:hover {{
-                background: #ff4444;
+                background: #4a7c59;
                 color: #000000;
-                box-shadow: inset 0 0 0 4px #00ff88, 0 0 20px rgba(255, 68, 68, 0.6);
+                box-shadow: inset 0 0 0 4px #9eff6f, 0 0 20px rgba(255, 68, 68, 0.6);
                 text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
                 transform: translate(-2px, -2px);
-                border-color: #ffff00;
+                border-color: #9eff6f;
             }}
 
-            .btn-copy {{
-                background: #000000;
-                color: #00ff88;
-                padding: 8px 16px;
-                font-size: 14px;
-                border-radius: 0px;
-                flex-shrink: 0;
-                border: 3px solid #00ff88;
-                font-family: 'Press Start 2P', cursive;
-                text-shadow: 2px 2px 0px rgba(0, 255, 136, 0.4);
-                box-shadow: inset 0 0 0 2px #ff00ff;
-            }}
-
-            .btn-copy:hover {{
-                background: #00ff88;
-                color: #000000;
-                box-shadow: inset 0 0 0 4px #ff00ff, 0 0 15px rgba(0, 255, 136, 0.6);
-                transform: translate(-1px, -1px);
-                border-color: #ffff00;
-            }}
-
-            .btn-copy.copied {{
-                background: #00ff88;
-                color: #000000;
-            }}
 
             .list-section {{
                 margin-top: 30px;
@@ -1084,7 +1090,7 @@ def get_html_page(api_key: str) -> str:
             .list-title {{
                 font-size: 16px;
                 font-weight: 700;
-                color: #00ff88;
+                color: #9eff6f;
                 text-transform: uppercase;
                 letter-spacing: 2px;
                 text-shadow: 2px 2px 0px rgba(0, 255, 136, 0.3);
@@ -1093,15 +1099,15 @@ def get_html_page(api_key: str) -> str:
 
             .list-count {{
                 background: #000000;
-                color: #00ff88;
+                color: #9eff6f;
                 padding: 6px 12px;
-                border: 3px solid #00ff88;
+                border: 3px solid #9eff6f;
                 border-radius: 0px;
                 font-size: 14px;
                 font-weight: 700;
                 text-shadow: 2px 2px 0px rgba(0, 255, 136, 0.2);
                 font-family: 'Press Start 2P', cursive;
-                box-shadow: inset 0 0 0 2px #ff00ff;
+                box-shadow: inset 0 0 0 2px #4a7c59;
             }}
 
             .entries-list {{
@@ -1120,21 +1126,21 @@ def get_html_page(api_key: str) -> str:
                 gap: 8px;
                 padding: 10px 12px;
                 background: #0a0a15;
-                border: 2px solid #00ff88;
-                border-left: 4px solid #ffff00;
+                border: 2px solid #9eff6f;
+                border-left: 4px solid #9eff6f;
                 border-radius: 0px;
                 transition: all 0.15s ease;
             }}
 
             .entry-item:hover {{
-                background: #1a1a2e;
-                border-left-color: #ffff00;
+                background: #1a4d2e;
+                border-left-color: #9eff6f;
                 box-shadow: 0 0 15px rgba(0, 255, 136, 0.3), inset 0 0 10px rgba(255, 255, 0, 0.1);
             }}
 
             .entry-index {{
                 font-weight: 700;
-                color: #ffff00;
+                color: #9eff6f;
                 font-size: 10px;
                 min-width: 28px;
                 text-align: center;
@@ -1145,7 +1151,7 @@ def get_html_page(api_key: str) -> str:
             .entry-text {{
                 flex: 1;
                 font-size: 14px;
-                color: #00ff88;
+                color: #9eff6f;
                 word-break: break-word;
                 font-family: 'Press Start 2P', cursive;
                 line-height: 1.6;
@@ -1178,8 +1184,8 @@ def get_html_page(api_key: str) -> str:
                 bottom: 20px;
                 right: 20px;
                 background: #000000;
-                color: #00ff88;
-                border: 1px solid #00ff88;
+                color: #9eff6f;
+                border: 1px solid #9eff6f;
                 padding: 12px 16px;
                 border-radius: 0px;
                 box-shadow: none;
@@ -1211,18 +1217,18 @@ def get_html_page(api_key: str) -> str:
 
             ::-webkit-scrollbar-track {{
                 background: #0a0a15;
-                border: 2px solid #00ff88;
+                border: 2px solid #9eff6f;
             }}
 
             ::-webkit-scrollbar-thumb {{
-                background: linear-gradient(180deg, #ff00ff, #00ffff);
-                border: 2px solid #00ff88;
+                background: linear-gradient(180deg, #4a7c59, #00ffff);
+                border: 2px solid #9eff6f;
                 border-radius: 2px;
                 box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
             }}
 
             ::-webkit-scrollbar-thumb:hover {{
-                background: linear-gradient(180deg, #ffff00, #ff00ff);
+                background: linear-gradient(180deg, #9eff6f, #4a7c59);
                 box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
             }}
 
@@ -1294,10 +1300,10 @@ def get_html_page(api_key: str) -> str:
                     <div class="entries-list" id="entriesList"></div>
                 </div>
 
-                <div class="list-section" style="margin-top: 50px; border-top: 1px solid #00ff88; padding-top: 30px;">
+                <div class="list-section" style="margin-top: 50px; border-top: 1px solid #9eff6f; padding-top: 30px;">
                     <div class="list-title" style="margin-bottom: 15px;">Documentation</div>
-                    <div style="font-size: 11px; color: #00ff88;">
-                        <p style="margin-bottom: 10px;">For CLI usage and more information, see the <a href="https://github.com/anthropics/claude-code/blob/main/README.md" style="color: #00ff88; text-decoration: underline;">README</a></p>
+                    <div style="font-size: 11px; color: #9eff6f;">
+                        <p style="margin-bottom: 10px;">For CLI usage and more information, see the <a href="https://github.com/anthropics/claude-code/blob/main/README.md" style="color: #9eff6f; text-decoration: underline;">README</a></p>
                     </div>
                 </div>
             </div>
