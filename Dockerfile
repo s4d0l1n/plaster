@@ -7,7 +7,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application
-COPY plaster_server.py .
+COPY plaster_server.py wordlist.py .
 
 # Create config directory
 RUN mkdir -p /root/.plaster

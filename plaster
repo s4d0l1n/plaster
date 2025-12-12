@@ -21,7 +21,7 @@ SERVER_URL="http://localhost:9321"
 API_KEY=""
 HELP_TEXT="Usage: plaster [OPTION]
 
-A FILO clipboard service client.
+A FILO clipboard service client with multi-key support.
 
 OPTIONS:
   (no args)                 Get the latest clipboard entry
@@ -29,7 +29,8 @@ OPTIONS:
   -n, --entry <index>       Get specific clipboard entry by index (1-based)
   -c, --clear               Clear all clipboard entries
   --setup                   Interactive setup (configure server URL and get API key)
-  --new-api [KEY]           Generate a new API key, or set to KEY if provided
+  --new-api                 Generate a new API key and assign a label
+  --select-api              List available API keys and select one to use
   --new-server-url <url>    Change the server URL
   --api                     Display current API key
   --url                     Display current server URL
@@ -46,14 +47,14 @@ EXAMPLES:
   plaster --api                      # Show current API key
   plaster --url                      # Show current server URL
   plaster --qrcode                   # Generate QR code for web UI link
+  plaster --new-api                  # Generate new labeled API key
+  plaster --select-api               # List and select from stored API keys
   echo 'my text' | plaster           # Push text to clipboard
   plaster                            # Get latest entry
   plaster --list                     # List all entries
   plaster -n 1                       # Get 1st entry
   plaster -n 3                       # Get 3rd entry
   plaster --clear                    # Clear clipboard
-  plaster --new-api                  # Generate new API key
-  plaster --new-api plaster_xyz      # Set API key to plaster_xyz
   plaster --new-server-url <url>     # Change server URL
 "
 
@@ -118,6 +119,133 @@ load_config() {
     fi
 }
 
+# Function to save API key with label
+save_api_key_with_label() {
+    local key="$1"
+    local label="$2"
+    local config_dir=$(dirname "$PLASTER_CONFIG")
+    local keys_file="$config_dir/api_keys.conf"
+
+    # Create keys file if it doesn't exist
+    if [[ ! -f "$keys_file" ]]; then
+        touch "$keys_file"
+        chmod 600 "$keys_file"
+    fi
+
+    # Check if key already exists and update label, or add new entry
+    if grep -q "^$key:" "$keys_file"; then
+        sed -i "s/^$key:.*/&/" "$keys_file"  # Key exists, update its position by re-adding
+        grep -v "^$key:" "$keys_file" > "${keys_file}.tmp"
+        echo "$key:$label" >> "${keys_file}.tmp"
+        mv "${keys_file}.tmp" "$keys_file"
+    else
+        # Add new key, keeping only last 10
+        echo "$key:$label" >> "$keys_file"
+        tail -n 10 "$keys_file" > "${keys_file}.tmp"
+        mv "${keys_file}.tmp" "$keys_file"
+    fi
+}
+
+# Function to verify API key is still active on server
+verify_api_key() {
+    local key="$1"
+    local response
+    response=$(curl -s -X GET "$SERVER_URL/peek" \
+        -H "X-API-Key: $key" 2>&1)
+
+    if echo "$response" | grep -q "status.*ok"; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Function to list stored API keys and verify which are active
+list_stored_api_keys() {
+    local config_dir=$(dirname "$PLASTER_CONFIG")
+    local keys_file="$config_dir/api_keys.conf"
+
+    if [[ ! -f "$keys_file" ]]; then
+        echo "No stored API keys found" >&2
+        return 1
+    fi
+
+    echo "Stored API Keys:" >&2
+    local index=1
+    while IFS=':' read -r key label; do
+        if [[ -z "$key" ]]; then
+            continue
+        fi
+
+        # Verify key is active
+        if verify_api_key "$key"; then
+            status="✓ ACTIVE"
+        else
+            status="✗ INACTIVE"
+        fi
+
+        printf "%d) [%s] %s\n" "$index" "$status" "$label" >&2
+        printf "%s\n" "$key"
+        ((index++))
+    done < "$keys_file"
+}
+
+# Function to select and switch API key
+select_api_key() {
+    local config_dir=$(dirname "$PLASTER_CONFIG")
+    local keys_file="$config_dir/api_keys.conf"
+
+    if [[ ! -f "$keys_file" ]]; then
+        echo "No stored API keys found. Run 'plaster --new-api' to create one." >&2
+        exit 1
+    fi
+
+    echo "Available API Keys:" >&2
+    local index=1
+    local -a keys
+    local -a labels
+
+    while IFS=':' read -r key label; do
+        if [[ -z "$key" ]]; then
+            continue
+        fi
+
+        # Verify key is active
+        if verify_api_key "$key"; then
+            status="✓ ACTIVE"
+        else
+            status="✗ INACTIVE"
+        fi
+
+        printf "%d) [%s] %s\n" "$index" "$status" "$label" >&2
+        keys+=("$key")
+        labels+=("$label")
+        ((index++))
+    done < "$keys_file"
+
+    if [[ ${#keys[@]} -eq 0 ]]; then
+        echo "No valid API keys found." >&2
+        exit 1
+    fi
+
+    # Prompt for selection
+    read -p "Select API key (1-${#keys[@]}): " choice >&2
+
+    if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#keys[@]} )); then
+        echo "Invalid selection" >&2
+        exit 1
+    fi
+
+    local selected_key="${keys[$((choice - 1))]}"
+    local selected_label="${labels[$((choice - 1))]}"
+
+    # Update current API key in config
+    sed -i.bak "s/api_key:.*/api_key: \"$selected_key\"/" "$PLASTER_CONFIG"
+    rm -f "$PLASTER_CONFIG.bak"
+
+    echo "✓ Switched to: $selected_label" >&2
+}
+
 # Function to setup configuration interactively
 setup_config() {
     echo "╔═════════════════════════════════════════╗"
@@ -153,15 +281,21 @@ EOF
 
     chmod 600 "$PLASTER_CONFIG"
 
+    # Save initial API key with "initial" label
+    save_api_key_with_label "$API_KEY" "initial"
+
     echo ""
     echo "✓ Configuration saved to $PLASTER_CONFIG"
     echo "✓ Server URL: $SERVER_URL"
     echo "✓ API Key: $API_KEY"
+    echo "✓ Key labeled as: initial"
     echo ""
     echo "Setup complete! You can now use Plaster:"
     echo "  echo 'my text' | plaster    # Push text"
     echo "  plaster                     # Get latest entry"
     echo "  plaster --list              # List all entries"
+    echo "  plaster --new-api           # Generate new labeled API key"
+    echo "  plaster --select-api        # Switch between stored API keys"
     echo ""
     echo "To make 'plaster' available from anywhere, install it:"
     echo "  plaster --install           # Install to /usr/local/bin"
@@ -182,9 +316,20 @@ generate_new_api_key() {
         echo "✓ API key set to: $new_key"
     fi
 
+    # Prompt for label
+    read -p "Enter a label for this key (e.g., 'work', 'testing', 'shared'): " label
+    if [[ -z "$label" ]]; then
+        label="unlabeled"
+    fi
+
     # Update config file
     sed -i.bak "s/api_key:.*/api_key: \"$new_key\"/" "$PLASTER_CONFIG"
     rm -f "$PLASTER_CONFIG.bak"
+
+    # Save to keys file
+    save_api_key_with_label "$new_key" "$label"
+
+    echo "✓ API key saved with label: $label"
 }
 
 # Function to change server URL
@@ -532,6 +677,9 @@ main() {
                 ;;
             --qrcode)
                 generate_qrcode
+                ;;
+            --select-api)
+                select_api_key
                 ;;
             -l|--list)
                 load_config

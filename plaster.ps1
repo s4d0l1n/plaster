@@ -15,8 +15,8 @@
     PS> .\plaster.ps1 -Entry 3         # Get 3rd entry
     PS> .\plaster.ps1 -Clear           # Clear clipboard
     PS> .\plaster.ps1 -Setup           # Initial setup
-    PS> .\plaster.ps1 -NewApi          # Generate new API key
-    PS> .\plaster.ps1 -NewApi -NewApiKey "plaster_xyz"  # Set API key to plaster_xyz
+    PS> .\plaster.ps1 -NewApi          # Generate new labeled API key
+    PS> .\plaster.ps1 -SelectApi       # List and select from stored API keys
     PS> .\plaster.ps1 -QRCode          # Generate QR code for web UI link
 #>
 
@@ -36,6 +36,7 @@ param(
     [switch]$ShowApi,
     [switch]$ShowUrl,
     [switch]$QRCode,
+    [switch]$SelectApi,
 
     [string]$NewServerUrl,
     [int]$Entry = -1,
@@ -156,10 +157,21 @@ function Set-NewApiKey {
         Write-Host "✓ API key set to: $newKey" -ForegroundColor Green
     }
 
+    # Prompt for label
+    $label = Read-Host "Enter a label for this key (e.g., 'work', 'testing', 'shared')"
+    if ([string]::IsNullOrWhiteSpace($label)) {
+        $label = "unlabeled"
+    }
+
     # Update config file
     $content = Get-Content $Config -Raw
     $newContent = $content -replace 'api_key:.*', "api_key: `"$newKey`""
     Set-Content -Path $Config -Value $newContent
+
+    # Save to keys file
+    Save-ApiKeyWithLabel $newKey $label
+
+    Write-Host "✓ API key saved with label: $label" -ForegroundColor Green
 }
 
 function Load-Config {
@@ -226,15 +238,21 @@ api_key: "$script:ApiKey"
 "@
     Set-Content -Path $Config -Value $configContent
 
+    # Save initial API key with "initial" label
+    Save-ApiKeyWithLabel $script:ApiKey "initial"
+
     Write-Host ""
     Write-Host "✓ Configuration saved to $Config" -ForegroundColor Green
     Write-Host "✓ Server URL: $script:ServerUrl" -ForegroundColor Green
     Write-Host "✓ API Key: $script:ApiKey" -ForegroundColor Green
+    Write-Host "✓ Key labeled as: initial" -ForegroundColor Green
     Write-Host ""
     Write-Host "Setup complete! You can now use Plaster:" -ForegroundColor Green
     Write-Host "  'my text' | .\plaster.ps1    # Push text"
     Write-Host "  .\plaster.ps1                # Get latest entry"
     Write-Host "  .\plaster.ps1 -List          # List all entries"
+    Write-Host "  .\plaster.ps1 -NewApi        # Generate new labeled API key"
+    Write-Host "  .\plaster.ps1 -SelectApi     # Switch between stored API keys"
     Write-Host ""
     Write-Host "To make 'plaster' available from anywhere, install it:" -ForegroundColor Cyan
     Write-Host "  .\plaster.ps1 -Install       # Install to Program Files (requires admin)"
@@ -387,6 +405,105 @@ function Show-QRCode {
     }
 }
 
+function Save-ApiKeyWithLabel {
+    param([string]$Key, [string]$Label)
+
+    $configDir = Split-Path $Config
+    $keysFile = Join-Path $configDir "api_keys.conf"
+
+    # Create keys file if it doesn't exist
+    if (-not (Test-Path $keysFile)) {
+        New-Item -ItemType File -Path $keysFile -Force | Out-Null
+        (Get-Item $keysFile).Attributes = 'Hidden'
+    }
+
+    # Read existing keys and remove if already present
+    $allLines = @()
+    if (Test-Path $keysFile) {
+        $allLines = @(Get-Content $keysFile | Where-Object { $_ -notmatch "^$([regex]::Escape($Key)):" })
+    }
+
+    # Add the new key and keep only last 10
+    $allLines += "$Key`:$Label"
+    $allLines[-10..-1] | Set-Content $keysFile
+}
+
+function Verify-ApiKey {
+    param([string]$Key)
+
+    try {
+        $response = Invoke-WebRequest -Uri "$script:ServerUrl/peek" `
+            -Method Get `
+            -Headers @{'X-API-Key' = $Key} `
+            -UseBasicParsing -ErrorAction SilentlyContinue
+
+        if ($response.Content | ConvertFrom-Json | Select-Object -ExpandProperty status -ErrorAction SilentlyContinue) {
+            return $true
+        }
+    } catch {
+        return $false
+    }
+    return $false
+}
+
+function Select-ApiKey {
+    Load-Config
+
+    $configDir = Split-Path $Config
+    $keysFile = Join-Path $configDir "api_keys.conf"
+
+    if (-not (Test-Path $keysFile)) {
+        Write-Host "No stored API keys found. Run '.\plaster.ps1 -NewApi' to create one." -ForegroundColor Red
+        exit 1
+    }
+
+    Write-Host "Available API Keys:" -ForegroundColor Cyan
+    $keys = @()
+    $labels = @()
+    $index = 1
+
+    Get-Content $keysFile | ForEach-Object {
+        if ($_ -match '^(.+?):(.+)$') {
+            $key = $matches[1]
+            $label = $matches[2]
+
+            if (Verify-ApiKey $key) {
+                $status = "✓ ACTIVE"
+            } else {
+                $status = "✗ INACTIVE"
+            }
+
+            Write-Host "$index) [$status] $label" -ForegroundColor Yellow
+            $keys += $key
+            $labels += $label
+            $index++
+        }
+    }
+
+    if ($keys.Count -eq 0) {
+        Write-Host "No valid API keys found." -ForegroundColor Red
+        exit 1
+    }
+
+    # Prompt for selection
+    $choice = Read-Host "Select API key (1-$($keys.Count))"
+
+    if (-not ($choice -match '^\d+$') -or $choice -lt 1 -or $choice -gt $keys.Count) {
+        Write-Host "Invalid selection" -ForegroundColor Red
+        exit 1
+    }
+
+    $selectedKey = $keys[$choice - 1]
+    $selectedLabel = $labels[$choice - 1]
+
+    # Update current API key in config
+    $content = Get-Content $Config -Raw
+    $newContent = $content -replace 'api_key:\s*["\']?[^"\']+["\']?', "api_key: `"$selectedKey`""
+    Set-Content -Path $Config -Value $newContent
+
+    Write-Host "✓ Switched to: $selectedLabel" -ForegroundColor Green
+}
+
 function Copy-ToSystemClipboard {
     param([string]$Text)
 
@@ -516,6 +633,11 @@ if ($ShowUrl) {
 
 if ($QRCode) {
     Show-QRCode
+    exit 0
+}
+
+if ($SelectApi) {
+    Select-ApiKey
     exit 0
 }
 

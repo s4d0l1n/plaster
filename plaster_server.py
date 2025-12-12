@@ -19,6 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 from cryptography.fernet import Fernet
+from wordlist import generate_passphrase
 
 # Configuration management
 CONFIG_DIR = Path.home() / ".plaster"
@@ -261,14 +262,14 @@ class APIKeyManager:
             logger.error(f"Failed to save keys file: {e}")
 
     def generate_key(self) -> str:
-        """Generate a new API key"""
-        key = f"plaster_{secrets.token_hex(16)}"
+        """Generate a new API key as a human-readable passphrase"""
+        key = generate_passphrase(num_words=6)
         self.keys_data[key] = {
             "created": datetime.now().isoformat(),
             "last_used": None
         }
         self.save_keys()
-        logger.info(f"Generated new API key: {key[:16]}...")
+        logger.info(f"Generated new API key: {key}")
         return key
 
     def validate_key(self, key: str) -> bool:
