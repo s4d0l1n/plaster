@@ -779,7 +779,7 @@ def get_html_page(api_key: str) -> str:
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>PLASTER - Clipboard Service</title>
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
             * {{
                 margin: 0;
@@ -788,7 +788,7 @@ def get_html_page(api_key: str) -> str:
             }}
 
             body {{
-                font-family: 'Courier Prime', monospace;
+                font-family: 'Press Start 2P', cursive;
                 background: #1a1a2e;
                 min-height: 100vh;
                 padding: 10px;
@@ -796,12 +796,13 @@ def get_html_page(api_key: str) -> str:
                 flex-direction: column;
                 color: #00ff88;
                 text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+                font-size: 18px;
             }}
 
             .container {{
                 background: #0f0f23;
-                border: 3px solid #00ff88;
-                box-shadow: 0 0 20px rgba(0, 255, 136, 0.4), inset 0 0 20px rgba(0, 255, 136, 0.1);
+                border: 8px solid #00ff88;
+                box-shadow: inset 0 0 0 4px #ff00ff, 0 0 30px rgba(0, 255, 136, 0.6);
                 max-width: 100%;
                 width: 100%;
                 overflow: hidden;
@@ -809,18 +810,21 @@ def get_html_page(api_key: str) -> str:
                 flex: 1;
                 display: flex;
                 flex-direction: column;
+                image-rendering: pixelated;
+                image-rendering: crisp-edges;
             }}
 
             .header {{
                 background: linear-gradient(180deg, #1a0033 0%, #0f0f23 100%);
                 color: #00ff88;
-                padding: 15px;
-                border-bottom: 3px dashed #ff00ff;
+                padding: 20px;
+                border-bottom: 6px solid #ff00ff;
                 position: relative;
                 z-index: 1;
-                font-size: 11px;
-                letter-spacing: 2px;
-                text-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+                font-size: 20px;
+                letter-spacing: 4px;
+                text-shadow: 0 0 10px rgba(255, 0, 255, 0.3), 4px 4px 0px rgba(0, 255, 136, 0.3);
+                font-family: 'Press Start 2P', cursive;
             }}
 
             .header-line {{
@@ -953,34 +957,36 @@ def get_html_page(api_key: str) -> str:
 
             .input-label {{
                 display: block;
-                font-size: 11px;
+                font-size: 16px;
                 font-weight: 700;
                 color: #00ff88;
-                margin-bottom: 8px;
+                margin-bottom: 12px;
                 text-transform: uppercase;
                 letter-spacing: 2px;
-                text-shadow: none;
+                text-shadow: 2px 2px 0px rgba(0, 255, 136, 0.3);
+                font-family: 'Press Start 2P', cursive;
             }}
 
             #textInput {{
                 width: 100%;
-                padding: 10px 12px;
-                border: 1px solid #00ff88;
+                padding: 12px 15px;
+                border: 4px solid #00ff88;
                 border-radius: 0px;
-                font-size: 12px;
-                font-family: 'Courier Prime', monospace;
+                font-size: 16px;
+                font-family: 'Press Start 2P', cursive;
                 background: #000000;
                 color: #00ff88;
                 transition: all 0.15s ease;
                 resize: none;
-                min-height: 80px;
-                text-shadow: none;
+                min-height: 120px;
+                text-shadow: 2px 2px 0px rgba(0, 255, 136, 0.2);
+                box-shadow: inset 0 0 0 2px #ff00ff;
             }}
 
             #textInput:focus {{
                 outline: none;
-                border-color: #00ff88;
-                box-shadow: none;
+                border-color: #ffff00;
+                box-shadow: inset 0 0 0 4px #ff00ff, 0 0 20px rgba(0, 255, 136, 0.4);
             }}
 
             .button-group {{
@@ -990,19 +996,21 @@ def get_html_page(api_key: str) -> str:
             }}
 
             button {{
-                padding: 6px 12px;
-                border: 1px solid #00ff88;
+                padding: 12px 24px;
+                border: 4px solid #00ff88;
                 border-radius: 0px;
-                font-size: 10px;
+                font-size: 16px;
                 font-weight: 700;
-                font-family: 'Courier Prime', monospace;
+                font-family: 'Press Start 2P', cursive;
                 cursor: pointer;
                 transition: all 0.1s ease;
                 text-transform: uppercase;
-                letter-spacing: 1px;
+                letter-spacing: 2px;
                 background: #000000;
                 color: #00ff88;
-                text-shadow: none;
+                text-shadow: 3px 3px 0px rgba(0, 255, 136, 0.4);
+                image-rendering: pixelated;
+                box-shadow: inset 0 0 0 2px #ff00ff;
             }}
 
             .btn-primary {{
@@ -1012,38 +1020,47 @@ def get_html_page(api_key: str) -> str:
             .btn-primary:hover {{
                 background: #00ff88;
                 color: #000000;
-                box-shadow: 0 0 15px rgba(0, 255, 136, 0.6), inset 0 0 10px rgba(0, 255, 136, 0.3);
-                text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+                box-shadow: inset 0 0 0 4px #ff00ff, 0 0 20px rgba(0, 255, 136, 0.6);
+                text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+                transform: translate(-2px, -2px);
+                border-color: #ffff00;
             }}
 
             .btn-danger {{
                 background: #000000;
                 color: #ff4444;
                 border-color: #ff4444;
-                text-shadow: 0 0 5px rgba(255, 68, 68, 0.3);
+                text-shadow: 3px 3px 0px rgba(255, 68, 68, 0.3);
             }}
 
             .btn-danger:hover {{
                 background: #ff4444;
                 color: #000000;
-                box-shadow: 0 0 15px rgba(255, 68, 68, 0.6), inset 0 0 10px rgba(255, 68, 68, 0.3);
-                text-shadow: none;
+                box-shadow: inset 0 0 0 4px #00ff88, 0 0 20px rgba(255, 68, 68, 0.6);
+                text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+                transform: translate(-2px, -2px);
+                border-color: #ffff00;
             }}
 
             .btn-copy {{
                 background: #000000;
                 color: #00ff88;
-                padding: 6px 10px;
-                font-size: 10px;
+                padding: 8px 16px;
+                font-size: 14px;
                 border-radius: 0px;
                 flex-shrink: 0;
-                border: 1px solid #00ff88;
+                border: 3px solid #00ff88;
+                font-family: 'Press Start 2P', cursive;
+                text-shadow: 2px 2px 0px rgba(0, 255, 136, 0.4);
+                box-shadow: inset 0 0 0 2px #ff00ff;
             }}
 
             .btn-copy:hover {{
                 background: #00ff88;
                 color: #000000;
-                box-shadow: 0 0 15px rgba(0, 255, 136, 0.6), inset 0 0 10px rgba(0, 255, 136, 0.3);
+                box-shadow: inset 0 0 0 4px #ff00ff, 0 0 15px rgba(0, 255, 136, 0.6);
+                transform: translate(-1px, -1px);
+                border-color: #ffff00;
             }}
 
             .btn-copy.copied {{
@@ -1065,23 +1082,26 @@ def get_html_page(api_key: str) -> str:
             }}
 
             .list-title {{
-                font-size: 13px;
+                font-size: 16px;
                 font-weight: 700;
                 color: #00ff88;
                 text-transform: uppercase;
                 letter-spacing: 2px;
-                text-shadow: none;
+                text-shadow: 2px 2px 0px rgba(0, 255, 136, 0.3);
+                font-family: 'Press Start 2P', cursive;
             }}
 
             .list-count {{
                 background: #000000;
                 color: #00ff88;
-                padding: 4px 10px;
-                border: 1px solid #00ff88;
+                padding: 6px 12px;
+                border: 3px solid #00ff88;
                 border-radius: 0px;
-                font-size: 11px;
+                font-size: 14px;
                 font-weight: 700;
-                text-shadow: none;
+                text-shadow: 2px 2px 0px rgba(0, 255, 136, 0.2);
+                font-family: 'Press Start 2P', cursive;
+                box-shadow: inset 0 0 0 2px #ff00ff;
             }}
 
             .entries-list {{
@@ -1124,12 +1144,12 @@ def get_html_page(api_key: str) -> str:
 
             .entry-text {{
                 flex: 1;
-                font-size: 12px;
+                font-size: 14px;
                 color: #00ff88;
                 word-break: break-word;
-                font-family: 'Courier Prime', monospace;
-                line-height: 1.4;
-                text-shadow: none;
+                font-family: 'Press Start 2P', cursive;
+                line-height: 1.6;
+                text-shadow: 1px 1px 0px rgba(0, 255, 136, 0.2);
                 max-height: 200px;
                 overflow: hidden;
             }}
