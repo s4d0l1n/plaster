@@ -33,6 +33,7 @@ OPTIONS:
   --new-server-url <url>    Change the server URL
   --api                     Display current API key
   --url                     Display current server URL
+  --qrcode                  Generate QR code for web UI with current API key
   --install                 Install plaster to /usr/local/bin (requires sudo)
   --uninstall               Uninstall plaster from /usr/local/bin (requires sudo)
   --config <path>           Use custom config file path
@@ -44,6 +45,7 @@ EXAMPLES:
   plaster --setup                    # Initial setup (server URL + API key)
   plaster --api                      # Show current API key
   plaster --url                      # Show current server URL
+  plaster --qrcode                   # Generate QR code for web UI link
   echo 'my text' | plaster           # Push text to clipboard
   plaster                            # Get latest entry
   plaster --list                     # List all entries
@@ -304,6 +306,35 @@ show_server_url() {
     echo "$SERVER_URL"
 }
 
+# Function to generate and display QR code for web UI
+generate_qrcode() {
+    load_config
+
+    # Create the web UI URL with API key
+    local web_url="$SERVER_URL/?api_key=$API_KEY"
+
+    echo "Generating QR code for: $web_url" >&2
+    echo "" >&2
+
+    # Check if qr command is available (qrencode)
+    if command -v qr &> /dev/null; then
+        # Use 'qr' tool (simpler output)
+        qr "$web_url"
+    elif command -v qrencode &> /dev/null; then
+        # Use 'qrencode' tool (more options)
+        qrencode -t ANSI256 "$web_url"
+    else
+        echo "Error: QR code tools not found" >&2
+        echo "Install 'qr' or 'qrencode' package:" >&2
+        echo "  Ubuntu/Debian: sudo apt install qrencode" >&2
+        echo "  macOS: brew install qrencode" >&2
+        echo "" >&2
+        echo "Alternatively, scan this URL manually:" >&2
+        echo "$web_url" >&2
+        exit 1
+    fi
+}
+
 # Function to push text
 push_text() {
     local text="$1"
@@ -498,6 +529,9 @@ main() {
                 ;;
             --url)
                 show_server_url
+                ;;
+            --qrcode)
+                generate_qrcode
                 ;;
             -l|--list)
                 load_config

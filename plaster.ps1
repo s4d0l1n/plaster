@@ -17,6 +17,7 @@
     PS> .\plaster.ps1 -Setup           # Initial setup
     PS> .\plaster.ps1 -NewApi          # Generate new API key
     PS> .\plaster.ps1 -NewApi -NewApiKey "plaster_xyz"  # Set API key to plaster_xyz
+    PS> .\plaster.ps1 -QRCode          # Generate QR code for web UI link
 #>
 
 [CmdletBinding()]
@@ -34,6 +35,7 @@ param(
     [switch]$Uninstall,
     [switch]$ShowApi,
     [switch]$ShowUrl,
+    [switch]$QRCode,
 
     [string]$NewServerUrl,
     [int]$Entry = -1,
@@ -349,6 +351,42 @@ function Show-ServerUrl {
     Write-Output $script:ServerUrl
 }
 
+function Show-QRCode {
+    Load-Config
+
+    # Create the web UI URL with API key
+    $webUrl = "$script:ServerUrl/?api_key=$script:ApiKey"
+
+    Write-Host "Generating QR code for: $webUrl" -ForegroundColor Cyan
+    Write-Host ""
+
+    # Try to use a QR code library or command
+    try {
+        # First, try using qrencode if available
+        if (Get-Command qrencode -ErrorAction SilentlyContinue) {
+            qrencode -t ANSI256 $webUrl
+        }
+        # Try using PowerShell's built-in capability to generate ASCII QR codes
+        elseif (Get-Command qr -ErrorAction SilentlyContinue) {
+            qr $webUrl
+        }
+        else {
+            Write-Host "QR code generation not available." -ForegroundColor Yellow
+            Write-Host "Install qrencode or use this URL directly:" -ForegroundColor Yellow
+            Write-Host $webUrl -ForegroundColor Green
+            Write-Host ""
+            Write-Host "Installation:" -ForegroundColor Cyan
+            Write-Host "  Windows (Chocolatey): choco install qrencode" -ForegroundColor Gray
+            Write-Host "  Windows (Scoop): scoop install qrencode" -ForegroundColor Gray
+            Write-Host "  macOS (Homebrew): brew install qrencode" -ForegroundColor Gray
+        }
+    }
+    catch {
+        Write-Host "Could not generate QR code: $_" -ForegroundColor Red
+        Write-Host "Alternatively, use this URL: $webUrl" -ForegroundColor Green
+    }
+}
+
 function Copy-ToSystemClipboard {
     param([string]$Text)
 
@@ -473,6 +511,11 @@ if ($ShowApi) {
 
 if ($ShowUrl) {
     Show-ServerUrl
+    exit 0
+}
+
+if ($QRCode) {
+    Show-QRCode
     exit 0
 }
 
