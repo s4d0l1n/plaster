@@ -1,54 +1,44 @@
 """
 Word list for generating human-readable API key passphrases.
-Curated list of common, short, phonetically distinct words optimized for CamelCase.
+Reads words from wordlist.txt file.
 """
 
-PASSPHRASE_WORDS = [
-    # Common objects and nature
-    "Apple", "Bear", "Cloud", "Desert", "Eagle", "Forest", "Galaxy", "Harbor",
-    "Island", "Jungle", "Kingdom", "Lighthouse", "Mountain", "Ocean", "Palace", "Quest",
-    "River", "Storm", "Tiger", "Universe", "Valley", "Waterfall", "Wizard", "Zenith",
+import random
+from pathlib import Path
 
-    # Colors and descriptive
-    "Amber", "Bronze", "Crimson", "Diamond", "Emerald", "Frost", "Gold", "Harmony",
-    "Indigo", "Jade", "Kite", "Lime", "Mauve", "Navy", "Onyx", "Pearl",
-    "Quartz", "Ruby", "Scarlet", "Teal", "Umber", "Violet", "White", "Xray",
+def load_words() -> list:
+    """
+    Load words from wordlist.txt file.
+    Tries multiple paths to find the wordlist file.
 
-    # Animals
-    "Antelope", "Badger", "Cheetah", "Dolphin", "Elephant", "Falcon", "Giraffe", "Hippo",
-    "Ibis", "Jaguar", "Koala", "Lion", "Moose", "Narwhal", "Ostrich", "Panda",
-    "Quail", "Raven", "Snake", "Turkey", "Urchin", "Vulture", "Whale", "Yak",
+    Returns:
+        List of words, or empty list if file not found
+    """
+    # Try different paths where wordlist.txt might be located
+    possible_paths = [
+        Path(__file__).parent / "wordlist.txt",  # Same directory as this script
+        Path("/app/wordlist.txt"),               # Docker container path
+        Path("/usr/local/bin/wordlist.txt"),     # Installed path
+        Path.home() / ".plaster" / "wordlist.txt"  # User home
+    ]
 
-    # Action words and verbs
-    "Accelerate", "Bounce", "Climb", "Dance", "Explore", "Fly", "Glide", "Hunt",
-    "Inspire", "Jump", "Kick", "Launch", "Move", "Navigate", "Orbit", "Paddle",
-    "Quicken", "Rush", "Soar", "Travel", "Unite", "Venture", "Wander", "Yield",
+    for path in possible_paths:
+        if path.exists():
+            try:
+                with open(path, 'r') as f:
+                    # Read lines, strip whitespace, filter empty lines
+                    # Capitalize each word (CamelCase)
+                    words = [line.strip().capitalize() for line in f if line.strip()]
+                    if words:
+                        return words
+            except Exception as e:
+                print(f"Warning: Failed to read {path}: {e}")
 
-    # Elements and materials
-    "Ash", "Brick", "Clay", "Dust", "Earth", "Fiber", "Glass", "Granite",
-    "Ice", "Iron", "Lava", "Metal", "Ore", "Plastic", "Rock", "Sand",
-    "Salt", "Silk", "Soil", "Steel", "Stone", "Tar", "Vapor", "Wood",
+    # Fallback: Return empty list and let caller handle it
+    return []
 
-    # Time and celestial
-    "Aurora", "Comet", "Dawn", "Dusk", "Eclipse", "Epoch", "Halo", "Luna",
-    "Meteor", "Midnight", "Nova", "Orbit", "Planet", "Pulsar", "Quasar", "Saturn",
-    "Solar", "Space", "Star", "Stellar", "Sun", "Supernova", "Twilight", "Venus",
-
-    # Weather and water
-    "Blizzard", "Breeze", "Cascade", "Cyclone", "Deluge", "Flurry", "Gale", "Gust",
-    "Hail", "Haze", "Hurricane", "Mist", "Monsoon", "Puff", "Rain", "Sleet",
-    "Snowstorm", "Squall", "Steam", "Surge", "Tempest", "Thunder", "Torrent", "Tornado",
-
-    # Positive and abstract
-    "Beacon", "Bliss", "Brave", "Bright", "Brilliant", "Calm", "Charm", "Clarity",
-    "Comfort", "Courage", "Dawn", "Delight", "Dream", "Eden", "Essence", "Eternal",
-    "Exalt", "Flair", "Gleam", "Glory", "Grace", "Grand", "Grant", "Guide",
-
-    # Additional variety
-    "Haven", "Heron", "Hidden", "Hollow", "Hopeful", "Horizon", "Humble", "Hybrid",
-    "Ignite", "Illume", "Impact", "Import", "Impress", "Impulse", "Incite", "Income",
-    "Index", "Indulge", "Inferno", "Inform", "Inhale", "Initiate", "Inkwell", "Innovate",
-]
+# Load words at module initialization
+PASSPHRASE_WORDS = load_words()
 
 def generate_passphrase(num_words: int = 6) -> str:
     """
@@ -59,6 +49,11 @@ def generate_passphrase(num_words: int = 6) -> str:
 
     Returns:
         A CamelCase passphrase string
+
+    Raises:
+        RuntimeError: If no words could be loaded from wordlist.txt
     """
-    import random
+    if not PASSPHRASE_WORDS:
+        raise RuntimeError("Error: wordlist.txt not found. Please ensure wordlist.txt is in the same directory as the script or in /app/")
+
     return "".join(random.choice(PASSPHRASE_WORDS) for _ in range(num_words))
