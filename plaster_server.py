@@ -1501,7 +1501,10 @@ def get_html_page(api_key: str) -> str:
                 font-weight: 700;
                 cursor: pointer;
                 transition: all 0.1s ease;
-                box-shadow: inset 0 0 0 1px #0a1f14;
+                box-shadow:
+                    inset 1px 1px 0px #9eff6f,
+                    inset -1px -1px 0px #4a4a4a,
+                    -2px 2px 0px rgba(0, 0, 0, 0.4);
                 text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
                 text-transform: uppercase;
                 letter-spacing: 1px;
@@ -1512,13 +1515,18 @@ def get_html_page(api_key: str) -> str:
             .gb-btn:hover {{
                 background: #9eff6f;
                 color: #0a1f14;
-                transform: translate(-2px, -2px);
-                box-shadow: inset 0 0 0 2px #0a1f14;
+                box-shadow:
+                    inset 1px 1px 0px #ffffff,
+                    inset -1px -1px 0px #0a1f14,
+                    -2px 2px 0px rgba(0, 0, 0, 0.4);
             }}
 
             .gb-btn:active {{
-                transform: translate(0, 0);
-                box-shadow: inset 0 0 0 2px #0a1f14;
+                box-shadow:
+                    inset 1px 1px 0px #4a4a4a,
+                    inset -1px -1px 0px #9eff6f,
+                    0px 0px 0px rgba(0, 0, 0, 0);
+                transform: translate(1px, 1px);
             }}
 
             .gb-btn.danger {{
@@ -1692,7 +1700,10 @@ def get_html_page(api_key: str) -> str:
                 font-weight: 700;
                 cursor: pointer;
                 transition: all 0.1s ease;
-                box-shadow: inset 0 0 0 1px #0a1f14;
+                box-shadow:
+                    inset 1px 1px 0px #9eff6f,
+                    inset -1px -1px 0px #4a4a4a,
+                    -1px 1px 0px rgba(0, 0, 0, 0.4);
                 text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
                 text-transform: uppercase;
                 letter-spacing: 1px;
@@ -1703,13 +1714,18 @@ def get_html_page(api_key: str) -> str:
             .gb-btn-small:hover {{
                 background: #9eff6f;
                 color: #0a1f14;
-                transform: translate(-1px, -1px);
-                box-shadow: inset 0 0 0 2px #0a1f14;
+                box-shadow:
+                    inset 1px 1px 0px #ffffff,
+                    inset -1px -1px 0px #0a1f14,
+                    -1px 1px 0px rgba(0, 0, 0, 0.4);
             }}
 
             .gb-btn-small:active {{
-                transform: translate(0, 0);
-                box-shadow: inset 0 0 0 2px #0a1f14;
+                box-shadow:
+                    inset 1px 1px 0px #4a4a4a,
+                    inset -1px -1px 0px #9eff6f,
+                    0px 0px 0px rgba(0, 0, 0, 0);
+                transform: translate(1px, 1px);
             }}
 
             .gb-input {{
