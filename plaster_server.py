@@ -1625,20 +1625,19 @@ def get_html_page(api_key: str) -> str:
             }}
 
             .gb-footer {{
-                background: #2d5a3d;
-                border-top: 4px solid #9eff6f;
-                padding: 12px;
-                display: flex;
+                background: transparent;
+                border-top: none;
+                padding: 0;
+                display: none;
                 justify-content: center;
             }}
 
             .key-section {{
-                background: #1a4d2e;
-                border: 4px solid #9eff6f;
-                box-shadow: inset 0 0 0 2px #4a7c59;
+                background: #9eff6f;
+                border: 4px solid #0a1f14;
+                box-shadow: inset 0 0 0 2px #0a1f14;
                 padding: 12px;
-                max-width: 300px;
-                width: 100%;
+                margin: 8px 12px 12px 12px;
                 display: flex;
                 flex-direction: column;
                 gap: 8px;
@@ -1647,23 +1646,23 @@ def get_html_page(api_key: str) -> str:
             .key-label {{
                 font-size: 12px;
                 font-weight: 700;
-                color: #9eff6f;
+                color: #0a1f14;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                border-bottom: 2px solid #9eff6f;
+                border-bottom: 2px solid #0a1f14;
                 padding-bottom: 6px;
             }}
 
             .key-display {{
-                background: #2d5a3d;
-                border: 2px solid #9eff6f;
+                background: #9eff6f;
+                border: 2px solid #0a1f14;
                 padding: 8px;
-                color: #9eff6f;
+                color: #0a1f14;
                 font-family: 'Courier Prime', monospace;
                 font-size: 9px;
                 word-break: break-all;
-                box-shadow: inset 0 0 0 1px #4a7c59;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+                box-shadow: inset 0 0 0 1px #0a1f14;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
             }}
 
             .key-buttons {{
@@ -1674,15 +1673,15 @@ def get_html_page(api_key: str) -> str:
             .gb-btn-small {{
                 flex: 1;
                 padding: 8px 12px;
-                border: 3px solid #9eff6f;
-                background: #1a4d2e;
+                border: 3px solid #0a1f14;
+                background: #0a1f14;
                 color: #9eff6f;
                 font-family: 'Press Start 2P', cursive;
                 font-size: 10px;
                 font-weight: 700;
                 cursor: pointer;
                 transition: all 0.1s ease;
-                box-shadow: inset 0 0 0 2px #4a7c59;
+                box-shadow: inset 0 0 0 2px #0a1f14;
                 text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
                 text-transform: uppercase;
                 letter-spacing: 1px;
@@ -1691,34 +1690,34 @@ def get_html_page(api_key: str) -> str:
 
             .gb-btn-small:hover {{
                 background: #9eff6f;
-                color: #1a4d2e;
+                color: #0a1f14;
                 transform: translate(-1px, -1px);
-                box-shadow: inset 0 0 0 2px #1a4d2e, 0 0 10px rgba(0, 255, 136, 0.5);
+                box-shadow: inset 0 0 0 2px #0a1f14;
             }}
 
             .gb-btn-small:active {{
                 transform: translate(0, 0);
-                box-shadow: inset 0 0 0 2px #4a7c59;
+                box-shadow: inset 0 0 0 2px #0a1f14;
             }}
 
             .gb-input {{
                 padding: 8px 10px;
-                border: 2px solid #9eff6f;
-                background: #1a4d2e;
-                color: #9eff6f;
+                border: 2px solid #0a1f14;
+                background: #9eff6f;
+                color: #0a1f14;
                 font-family: 'Courier Prime', monospace;
                 font-size: 11px;
-                box-shadow: inset 0 0 0 1px #4a7c59;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+                box-shadow: inset 0 0 0 1px #0a1f14;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
                 outline: none;
             }}
 
             .gb-input:focus {{
-                box-shadow: inset 0 0 0 1px #4a7c59, 0 0 8px rgba(0, 255, 136, 0.3);
+                box-shadow: inset 0 0 0 1px #0a1f14;
             }}
 
             .gb-input::placeholder {{
-                color: #4a7c59;
+                color: #0a1f1466;
                 opacity: 0.7;
             }}
 
@@ -1768,27 +1767,27 @@ def get_html_page(api_key: str) -> str:
 
                 <!-- Right Panel: Clipboard History -->
                 <div class="gb-panel list-panel">
-                    <div class="panel-title">HISTORY (<span id="entryCount">0</span>)</div>
+                    <div class="panel-title">CLIPBOARD STACK (<span id="entryCount">0</span>)</div>
                     <div class="entries-list" id="entriesList"></div>
                 </div>
             </div>
 
-            <div class="gb-footer">
-                <!-- API Key Section -->
-                <div class="key-section">
-                    <div class="key-label">API KEY</div>
-                    <div class="key-display" id="apiKeyDisplay">{api_key}</div>
-                    <div class="key-buttons">
-                        <button class="gb-btn-small" onclick="copyApiKey()">COPY</button>
-                        <button class="gb-btn-small" onclick="toggleKeyInput()">SWITCH</button>
-                        <button class="gb-btn-small" id="rotateBtn" onclick="rotateKey()">NEW</button>
-                    </div>
-                    <div id="keyInputContainer" style="display: none; margin-top: 8px;">
-                        <input type="text" class="gb-input" id="customKeyInput" placeholder="Enter key..." />
-                        <button class="gb-btn-small" onclick="loadCustomKey()">LOAD</button>
-                    </div>
+            <!-- API Key Section (moved below clipboard stack) -->
+            <div class="key-section">
+                <div class="key-label">API KEY</div>
+                <div class="key-display" id="apiKeyDisplay">{api_key}</div>
+                <div class="key-buttons">
+                    <button class="gb-btn-small" onclick="copyApiKey()">COPY</button>
+                    <button class="gb-btn-small" onclick="toggleKeyInput()">SWITCH</button>
+                    <button class="gb-btn-small" id="rotateBtn" onclick="rotateKey()">NEW</button>
+                </div>
+                <div id="keyInputContainer" style="display: none; margin-top: 8px;">
+                    <input type="text" class="gb-input" id="customKeyInput" placeholder="Enter key..." />
+                    <button class="gb-btn-small" onclick="loadCustomKey()">LOAD</button>
                 </div>
             </div>
+
+            <div class="gb-footer"></div>
         </div>
 
         <div class="toast" id="toast"></div>
