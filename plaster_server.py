@@ -1871,7 +1871,21 @@ def get_html_page(api_key: str) -> str:
                         if (data.count === 0) {{
                             entriesList.innerHTML = `
                                 <div class="empty-state">
-                                    <div class="empty-state-icon">📭</div>
+                                    <div class="empty-state-icon">
+                                        <svg width="48" height="48" viewBox="0 0 48 48" style="image-rendering: pixelated; image-rendering: crisp-edges;">
+                                            <!-- Clipboard background -->
+                                            <rect x="10" y="6" width="28" height="36" fill="#0a1f14" stroke="#0a1f14" stroke-width="2"/>
+                                            <!-- Clipboard clip top -->
+                                            <rect x="18" y="2" width="12" height="6" fill="#0a1f14" stroke="#0a1f14" stroke-width="2"/>
+                                            <!-- Clip metal highlight -->
+                                            <rect x="19" y="3" width="10" height="2" fill="#c4ff7f"/>
+                                            <!-- Paper lines -->
+                                            <line x1="14" y1="14" x2="34" y2="14" stroke="#0a1f14" stroke-width="2"/>
+                                            <line x1="14" y1="20" x2="34" y2="20" stroke="#0a1f14" stroke-width="2"/>
+                                            <line x1="14" y1="26" x2="34" y2="26" stroke="#0a1f14" stroke-width="2"/>
+                                            <line x1="14" y1="32" x2="34" y2="32" stroke="#0a1f14" stroke-width="2"/>
+                                        </svg>
+                                    </div>
                                     <div class="empty-state-text">No clipboard entries yet</div>
                                 </div>
                             `;
