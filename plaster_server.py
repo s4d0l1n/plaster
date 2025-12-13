@@ -548,16 +548,16 @@ def get_setup_page() -> str:
 
             .header {
                 background: transparent;
-                padding: 40px 20px;
+                padding: 0;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                min-height: 300px;
+                min-height: auto;
             }
 
             .gb-boot-screen {
-                width: 280px;
-                height: 280px;
+                width: 400px;
+                height: 400px;
                 background: #9eff6f;
                 border: 20px solid #0a1f14;
                 border-radius: 12px;
@@ -571,23 +571,41 @@ def get_setup_page() -> str:
             }
 
             .gb-boot-text {
-                font-size: 12px;
+                font-size: 36px;
                 font-weight: 700;
                 color: #0a1f14;
-                letter-spacing: 1px;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+                letter-spacing: 2px;
+                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
                 font-family: 'Press Start 2P', cursive;
                 text-align: center;
                 display: flex;
                 align-items: baseline;
-                gap: 2px;
+                gap: 3px;
                 animation: gb-text-drop 3s ease-out forwards;
             }
 
             .reg-mark {
-                font-size: 8px;
+                font-size: 14px;
                 position: relative;
-                top: -3px;
+                top: -6px;
+            }
+
+            .login-screen {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #9eff6f;
+                border-radius: 12px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                opacity: 0;
+                animation: fade-in 0.5s ease-out 3.5s forwards;
+                padding: 40px;
+                box-sizing: border-box;
             }
 
             .header-line {
@@ -596,7 +614,7 @@ def get_setup_page() -> str:
 
             .content {
                 padding: 40px 20px;
-                display: flex;
+                display: none;
                 align-items: center;
                 justify-content: center;
                 flex: 1;
@@ -613,85 +631,90 @@ def get_setup_page() -> str:
             }
 
             .login-title {
-                font-size: 18px;
+                font-size: 16px;
                 font-weight: 700;
-                color: #9eff6f;
+                color: #0a1f14;
                 text-transform: uppercase;
-                letter-spacing: 3px;
+                letter-spacing: 2px;
                 text-align: center;
-                margin-bottom: 8px;
-                text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
-                border-bottom: 3px solid #9eff6f;
-                padding-bottom: 12px;
+                margin-bottom: 6px;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+                border-bottom: 2px solid #0a1f14;
+                padding-bottom: 10px;
+                font-family: 'Press Start 2P', cursive;
             }
 
             .login-subtitle {
-                font-size: 12px;
-                color: #9eff6f;
+                font-size: 10px;
+                color: #0a1f14;
                 text-align: center;
-                margin-bottom: 25px;
-                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+                margin-bottom: 20px;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
                 letter-spacing: 1px;
+                font-family: 'Press Start 2P', cursive;
             }
 
             .login-form {
                 display: flex;
                 flex-direction: column;
-                gap: 15px;
+                gap: 12px;
+                width: 100%;
+                max-width: 280px;
             }
 
             .login-label {
-                font-size: 14px;
-                color: #9eff6f;
+                font-size: 10px;
+                color: #0a1f14;
                 font-weight: 700;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+                font-family: 'Press Start 2P', cursive;
             }
 
             .login-input {
-                padding: 12px 15px;
-                border: 4px solid #9eff6f;
-                background: #1a4d2e;
-                color: #9eff6f;
-                font-family: 'Courier Prime', monospace;
-                font-size: 12px;
-                box-shadow: inset 0 0 0 2px #4a7c59;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+                padding: 10px 12px;
+                border: 3px solid #0a1f14;
+                background: #9eff6f;
+                color: #0a1f14;
+                font-family: 'Press Start 2P', cursive;
+                font-size: 10px;
+                box-shadow: inset 0 0 0 1px #0a1f14;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
                 transition: all 0.1s ease;
             }
 
             .login-input:focus {
                 outline: none;
-                box-shadow: inset 0 0 0 2px #4a7c59, 0 0 10px rgba(0, 255, 136, 0.4);
+                box-shadow: inset 0 0 0 2px #0a1f14, 0 0 8px rgba(10, 30, 20, 0.4);
             }
 
             .login-input::placeholder {
-                color: #4a7c5966;
+                color: #0a1f1466;
             }
 
             .login-button {
-                padding: 12px 24px;
-                border: 4px solid #9eff6f;
-                background: #1a4d2e;
-                color: #9eff6f;
+                padding: 10px 20px;
+                border: 3px solid #0a1f14;
+                background: #9eff6f;
+                color: #0a1f14;
                 font-family: 'Press Start 2P', cursive;
-                font-size: 14px;
+                font-size: 10px;
                 font-weight: 700;
                 text-transform: uppercase;
-                letter-spacing: 2px;
+                letter-spacing: 1px;
                 cursor: pointer;
                 transition: all 0.1s ease;
-                box-shadow: inset 0 0 0 2px #4a7c59;
-                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+                box-shadow: inset 0 0 0 1px #0a1f14;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
             }
 
             .login-button:hover {
-                background: #9eff6f;
-                color: #1a4d2e;
-                transform: translate(-2px, -2px);
-                box-shadow: inset 0 0 0 2px #1a4d2e, 0 0 15px rgba(0, 255, 136, 0.6);
-                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+                background: #0a1f14;
+                color: #9eff6f;
+                transform: translate(-1px, -1px);
+                box-shadow: inset 0 0 0 2px #9eff6f;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
             }
 
             .login-button:active {
@@ -699,16 +722,18 @@ def get_setup_page() -> str:
             }
 
             .login-help {
-                border-top: 2px solid #9eff6f;
-                padding-top: 12px;
-                margin-top: 10px;
+                border-top: 1px solid #0a1f14;
+                padding-top: 10px;
+                margin-top: 8px;
+                text-align: center;
             }
 
             .help-item {
-                font-size: 10px;
-                color: #9eff6f;
-                margin-bottom: 6px;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+                font-size: 8px;
+                color: #0a1f14;
+                margin-bottom: 4px;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
+                font-family: 'Press Start 2P', cursive;
             }
 
             a {
@@ -766,6 +791,15 @@ def get_setup_page() -> str:
                 }
             }
 
+            @keyframes fade-in {
+                0% {
+                    opacity: 0;
+                }
+                100% {
+                    opacity: 1;
+                }
+            }
+
             @media (max-width: 600px) {
                 .header {
                     padding: 12px;
@@ -790,23 +824,21 @@ def get_setup_page() -> str:
             <div class="header">
                 <div class="gb-boot-screen">
                     <div class="gb-boot-text">Plaster<span class="reg-mark">®</span></div>
-                </div>
-            </div>
 
-            <div class="content">
-                <div class="login-box">
-                    <div class="login-title">PLASTER LOGIN</div>
-                    <div class="login-subtitle">Clipboard Service</div>
+                    <div class="login-screen">
+                        <div class="login-title">PLASTER LOGIN</div>
+                        <div class="login-subtitle">Clipboard Service</div>
 
-                    <div class="login-form">
-                        <label class="login-label">Enter API Key:</label>
-                        <input type="text" id="apiKeyInput" class="login-input" placeholder="Your API key..." />
+                        <div class="login-form">
+                            <label class="login-label">Enter API Key:</label>
+                            <input type="text" id="apiKeyInput" class="login-input" placeholder="Your API key..." />
 
-                        <button class="login-button" onclick="loadClipboard()">ENTER</button>
+                            <button class="login-button" onclick="loadClipboard()">ENTER</button>
 
-                        <div class="login-help">
-                            <div class="help-item">• Press ENTER to login</div>
-                            <div class="help-item">• See README for help</div>
+                            <div class="login-help">
+                                <div class="help-item">• Press ENTER to login</div>
+                                <div class="help-item">• See README for help</div>
+                            </div>
                         </div>
                     </div>
                 </div>
