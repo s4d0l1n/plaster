@@ -581,7 +581,7 @@ def get_setup_page() -> str:
                 display: flex;
                 align-items: baseline;
                 gap: 2px;
-                animation: gb-text-drop 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                animation: gb-text-drop 3s ease-out forwards;
             }
 
             .reg-mark {
@@ -757,11 +757,8 @@ def get_setup_page() -> str:
                     opacity: 0;
                     transform: translateY(-200px);
                 }
-                10% {
+                15% {
                     opacity: 1;
-                }
-                85% {
-                    transform: translateY(5px);
                 }
                 100% {
                     opacity: 1;
@@ -792,7 +789,7 @@ def get_setup_page() -> str:
         <div class="container">
             <div class="header">
                 <div class="gb-boot-screen">
-                    <div class="gb-boot-text">PLASTER<span class="reg-mark">®</span></div>
+                    <div class="gb-boot-text">Plaster<span class="reg-mark">®</span></div>
                 </div>
             </div>
 
