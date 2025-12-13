@@ -558,33 +558,36 @@ def get_setup_page() -> str:
             .gb-boot-screen {
                 width: 280px;
                 height: 280px;
-                background: #1a4d2e;
-                border: 8px solid #2d5a3d;
+                background: #9eff6f;
+                border: 20px solid #0a1f14;
                 border-radius: 12px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 2px 5px rgba(255, 255, 255, 0.1);
-                animation: gb-boot-drop 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 2px 5px rgba(0, 0, 0, 0.2);
+                padding: 20px;
+                position: relative;
+                overflow: hidden;
             }
 
             .gb-boot-text {
-                font-size: 32px;
-                font-weight: 900;
-                color: #9eff6f;
-                letter-spacing: 2px;
-                text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.7);
+                font-size: 12px;
+                font-weight: 700;
+                color: #0a1f14;
+                letter-spacing: 1px;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
                 font-family: 'Press Start 2P', cursive;
                 text-align: center;
                 display: flex;
                 align-items: baseline;
-                gap: 4px;
+                gap: 2px;
+                animation: gb-text-drop 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
             }
 
             .reg-mark {
-                font-size: 16px;
+                font-size: 8px;
                 position: relative;
-                top: -6px;
+                top: -3px;
             }
 
             .header-line {
@@ -1289,17 +1292,17 @@ def get_html_page(api_key: str) -> str:
                 box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
             }}
 
-            /* Game Boy boot screen drop animation */
-            @keyframes gb-boot-drop {{
+            /* Game Boy text drop animation - text falls from top to middle of screen */
+            @keyframes gb-text-drop {{
                 0% {{
                     opacity: 0;
-                    transform: translateY(-600px);
+                    transform: translateY(-200px);
                 }}
                 10% {{
                     opacity: 1;
                 }}
                 85% {{
-                    transform: translateY(10px);
+                    transform: translateY(5px);
                 }}
                 100% {{
                     opacity: 1;
