@@ -752,6 +752,23 @@ def get_setup_page() -> str:
                 text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
             }
 
+            @keyframes gb-text-drop {
+                0% {
+                    opacity: 0;
+                    transform: translateY(-200px);
+                }
+                10% {
+                    opacity: 1;
+                }
+                85% {
+                    transform: translateY(5px);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
             @media (max-width: 600px) {
                 .header {
                     padding: 12px;
