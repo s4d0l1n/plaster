@@ -499,8 +499,11 @@ function Verify-ApiKey {
             -Headers @{'X-API-Key' = $Key} `
             -UseBasicParsing -ErrorAction SilentlyContinue
 
-        if ($response.Content | ConvertFrom-Json | Select-Object -ExpandProperty status -ErrorAction SilentlyContinue) {
-            return $true
+        if ($response.StatusCode -eq 200) {
+            $json = $response.Content | ConvertFrom-Json -ErrorAction SilentlyContinue
+            if ($json -and $json.status -eq "ok") {
+                return $true
+            }
         }
     } catch {
         return $false
