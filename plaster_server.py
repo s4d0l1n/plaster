@@ -547,14 +547,44 @@ def get_setup_page() -> str:
             }
 
             .header {
+                background: transparent;
+                padding: 40px 20px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 300px;
+            }
+
+            .gb-boot-screen {
+                width: 280px;
+                height: 280px;
                 background: #1a4d2e;
+                border: 8px solid #2d5a3d;
+                border-radius: 12px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 2px 5px rgba(255, 255, 255, 0.1);
+                animation: gb-boot-drop 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            }
+
+            .gb-boot-text {
+                font-size: 32px;
+                font-weight: 900;
                 color: #9eff6f;
-                padding: 20px;
-                border-bottom: 6px solid #4a7c59;
-                font-size: 20px;
-                letter-spacing: 3px;
+                letter-spacing: 2px;
+                text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.7);
                 font-family: 'Press Start 2P', cursive;
-                text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
+                text-align: center;
+                display: flex;
+                align-items: baseline;
+                gap: 4px;
+            }
+
+            .reg-mark {
+                font-size: 16px;
+                position: relative;
+                top: -6px;
             }
 
             .header-line {
@@ -741,9 +771,9 @@ def get_setup_page() -> str:
     <body>
         <div class="container">
             <div class="header">
-                <div class="header-line">┌────────────────────────────────┐</div>
-                <div class="header-line">│ PLASTER - Clipboard Service    │</div>
-                <div class="header-line">└────────────────────────────────┘</div>
+                <div class="gb-boot-screen">
+                    <div class="gb-boot-text">PLASTER<span class="reg-mark">®</span></div>
+                </div>
             </div>
 
             <div class="content">
@@ -1257,6 +1287,24 @@ def get_html_page(api_key: str) -> str:
             ::-webkit-scrollbar-thumb:hover {{
                 background: linear-gradient(180deg, #9eff6f, #4a7c59);
                 box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
+            }}
+
+            /* Game Boy boot screen drop animation */
+            @keyframes gb-boot-drop {{
+                0% {{
+                    opacity: 0;
+                    transform: translateY(-600px);
+                }}
+                10% {{
+                    opacity: 1;
+                }}
+                85% {{
+                    transform: translateY(10px);
+                }}
+                100% {{
+                    opacity: 1;
+                    transform: translateY(0);
+                }}
             }}
 
             /* Boot animation for Plaster */
