@@ -1263,14 +1263,18 @@ def get_html_page(api_key: str) -> str:
             @keyframes plaster-boot {{
                 0% {{
                     opacity: 0;
-                    transform: translateY(-100px);
+                    transform: translateY(-500px) scale(0.8);
                 }}
-                50% {{
+                40% {{
                     opacity: 1;
+                    transform: translateY(-20px) scale(1.05);
+                }}
+                70% {{
+                    transform: translateY(10px) scale(0.95);
                 }}
                 100% {{
                     opacity: 1;
-                    transform: translateY(0);
+                    transform: translateY(0) scale(1);
                 }}
             }}
 
@@ -1291,7 +1295,7 @@ def get_html_page(api_key: str) -> str:
                 color: #9eff6f;
                 letter-spacing: 2px;
                 text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
-                animation: plaster-boot 1.5s ease-out forwards;
+                animation: plaster-boot 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
                 display: flex;
                 align-items: baseline;
                 gap: 4px;
