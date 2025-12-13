@@ -1377,8 +1377,8 @@ def get_html_page(api_key: str) -> str:
 
             /* Game Boy OS Layout */
             .gb-header {{
-                background: #2d5a3d;
-                border-bottom: 4px solid #9eff6f;
+                background: #9eff6f;
+                border-bottom: 4px solid #0a1f14;
                 padding: 12px 16px;
                 display: flex;
                 justify-content: space-between;
@@ -1389,10 +1389,9 @@ def get_html_page(api_key: str) -> str:
             .gb-title {{
                 font-size: 16px;
                 font-weight: 700;
-                color: #9eff6f;
+                color: #0a1f14;
                 letter-spacing: 2px;
-                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
-                animation: plaster-boot 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
                 display: flex;
                 align-items: baseline;
                 gap: 4px;
@@ -1410,7 +1409,7 @@ def get_html_page(api_key: str) -> str:
 
             .gb-status {{
                 font-size: 12px;
-                color: #4a7c59;
+                color: #0a1f14;
                 text-transform: uppercase;
                 letter-spacing: 1px;
                 min-width: 100px;
@@ -1423,14 +1422,14 @@ def get_html_page(api_key: str) -> str:
                 grid-template-columns: 1fr 1fr;
                 gap: 8px;
                 padding: 12px;
-                background: #1a4d2e;
+                background: #9eff6f;
                 overflow: hidden;
             }}
 
             .gb-panel {{
-                background: #2d5a3d;
-                border: 4px solid #9eff6f;
-                box-shadow: inset 0 0 0 2px #4a7c59;
+                background: #9eff6f;
+                border: 4px solid #0a1f14;
+                box-shadow: inset 0 0 0 2px #0a1f14;
                 display: flex;
                 flex-direction: column;
                 padding: 12px;
@@ -1440,10 +1439,10 @@ def get_html_page(api_key: str) -> str:
             .panel-title {{
                 font-size: 12px;
                 font-weight: 700;
-                color: #9eff6f;
+                color: #0a1f14;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                border-bottom: 2px solid #9eff6f;
+                border-bottom: 2px solid #0a1f14;
                 padding-bottom: 6px;
                 margin-bottom: 4px;
             }}
@@ -1457,23 +1456,23 @@ def get_html_page(api_key: str) -> str:
             .gb-textarea {{
                 flex: 1;
                 padding: 8px 10px;
-                border: 3px solid #9eff6f;
-                background: #1a4d2e;
-                color: #9eff6f;
+                border: 3px solid #0a1f14;
+                background: #9eff6f;
+                color: #0a1f14;
                 font-family: 'Courier Prime', monospace;
                 font-size: 11px;
                 resize: none;
-                box-shadow: inset 0 0 0 2px #4a7c59;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+                box-shadow: inset 0 0 0 2px #0a1f14;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
                 outline: none;
             }}
 
             .gb-textarea:focus {{
-                box-shadow: inset 0 0 0 2px #4a7c59, 0 0 10px rgba(0, 255, 136, 0.4);
+                box-shadow: inset 0 0 0 2px #0a1f14;
             }}
 
             .gb-textarea::placeholder {{
-                color: #4a7c59;
+                color: #0a1f1466;
                 opacity: 0.7;
             }}
 
@@ -1485,16 +1484,16 @@ def get_html_page(api_key: str) -> str:
             .gb-btn {{
                 flex: 1;
                 padding: 12px 16px;
-                border: 4px solid #9eff6f;
-                background: #1a4d2e;
+                border: 4px solid #0a1f14;
+                background: #0a1f14;
                 color: #9eff6f;
                 font-family: 'Press Start 2P', cursive;
                 font-size: 12px;
                 font-weight: 700;
                 cursor: pointer;
                 transition: all 0.1s ease;
-                box-shadow: inset 0 0 0 2px #4a7c59;
-                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+                box-shadow: inset 0 0 0 2px #0a1f14;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
                 text-transform: uppercase;
                 letter-spacing: 1px;
                 outline: none;
@@ -1502,25 +1501,25 @@ def get_html_page(api_key: str) -> str:
 
             .gb-btn:hover {{
                 background: #9eff6f;
-                color: #1a4d2e;
+                color: #0a1f14;
                 transform: translate(-2px, -2px);
-                box-shadow: inset 0 0 0 2px #1a4d2e, 0 0 15px rgba(0, 255, 136, 0.6);
+                box-shadow: inset 0 0 0 2px #0a1f14;
             }}
 
             .gb-btn:active {{
                 transform: translate(0, 0);
-                box-shadow: inset 0 0 0 2px #4a7c59;
+                box-shadow: inset 0 0 0 2px #0a1f14;
             }}
 
             .gb-btn.danger {{
-                border-color: #4a7c59;
-                color: #4a7c59;
+                border-color: #0a1f14;
+                color: #9eff6f;
             }}
 
             .gb-btn.danger:hover {{
-                background: #4a7c59;
-                color: #1a4d2e;
-                border-color: #9eff6f;
+                background: #9eff6f;
+                color: #0a1f14;
+                border-color: #0a1f14;
             }}
 
             .list-panel {{
@@ -1536,10 +1535,10 @@ def get_html_page(api_key: str) -> str:
                 display: flex;
                 flex-direction: column;
                 gap: 4px;
-                background: #1a4d2e;
+                background: #9eff6f;
                 padding: 8px;
-                border: 2px solid #4a7c59;
-                box-shadow: inset 0 0 0 1px #4a7c59;
+                border: 2px solid #0a1f14;
+                box-shadow: inset 0 0 0 1px #0a1f14;
             }}
 
             .entry-item {{
@@ -1547,21 +1546,21 @@ def get_html_page(api_key: str) -> str:
                 align-items: center;
                 gap: 6px;
                 padding: 6px 8px;
-                background: #1a4d2e;
-                border: 2px solid #9eff6f;
-                border-left: 3px solid #9eff6f;
+                background: #9eff6f;
+                border: 2px solid #0a1f14;
+                border-left: 3px solid #0a1f14;
                 transition: all 0.1s ease;
                 font-size: 10px;
             }}
 
             .entry-item:hover {{
-                background: #2d5a3d;
-                box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+                background: #c4ff7f;
+                box-shadow: inset 0 0 10px rgba(10, 30, 20, 0.1);
             }}
 
             .entry-index {{
                 font-weight: 700;
-                color: #9eff6f;
+                color: #0a1f14;
                 min-width: 25px;
                 text-align: center;
                 font-size: 9px;
@@ -1569,7 +1568,7 @@ def get_html_page(api_key: str) -> str:
 
             .entry-text {{
                 flex: 1;
-                color: #9eff6f;
+                color: #0a1f14;
                 word-break: break-word;
                 max-height: 30px;
                 overflow: hidden;
