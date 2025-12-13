@@ -1426,6 +1426,13 @@ def get_html_page(api_key: str) -> str:
                 overflow: hidden;
             }}
 
+            .gb-right-column {{
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                min-height: 0;
+            }}
+
             .gb-panel {{
                 background: #9eff6f;
                 border: 4px solid #0a1f14;
@@ -1637,7 +1644,6 @@ def get_html_page(api_key: str) -> str:
                 border: 4px solid #0a1f14;
                 box-shadow: inset 0 0 0 2px #0a1f14;
                 padding: 12px;
-                margin: 8px 12px 12px 12px;
                 display: flex;
                 flex-direction: column;
                 gap: 8px;
@@ -1765,25 +1771,28 @@ def get_html_page(api_key: str) -> str:
                     </div>
                 </div>
 
-                <!-- Right Panel: Clipboard History -->
-                <div class="gb-panel list-panel">
-                    <div class="panel-title">CLIPBOARD STACK (<span id="entryCount">0</span>)</div>
-                    <div class="entries-list" id="entriesList"></div>
-                </div>
-            </div>
+                <!-- Right Column: Clipboard Stack + API Key -->
+                <div class="gb-right-column">
+                    <!-- Clipboard History -->
+                    <div class="gb-panel list-panel">
+                        <div class="panel-title">CLIPBOARD STACK (<span id="entryCount">0</span>)</div>
+                        <div class="entries-list" id="entriesList"></div>
+                    </div>
 
-            <!-- API Key Section (moved below clipboard stack) -->
-            <div class="key-section">
-                <div class="key-label">API KEY</div>
-                <div class="key-display" id="apiKeyDisplay">{api_key}</div>
-                <div class="key-buttons">
-                    <button class="gb-btn-small" onclick="copyApiKey()">COPY</button>
-                    <button class="gb-btn-small" onclick="toggleKeyInput()">SWITCH</button>
-                    <button class="gb-btn-small" id="rotateBtn" onclick="rotateKey()">NEW</button>
-                </div>
-                <div id="keyInputContainer" style="display: none; margin-top: 8px;">
-                    <input type="text" class="gb-input" id="customKeyInput" placeholder="Enter key..." />
-                    <button class="gb-btn-small" onclick="loadCustomKey()">LOAD</button>
+                    <!-- API Key Section -->
+                    <div class="key-section">
+                        <div class="key-label">API KEY</div>
+                        <div class="key-display" id="apiKeyDisplay">{api_key}</div>
+                        <div class="key-buttons">
+                            <button class="gb-btn-small" onclick="copyApiKey()">COPY</button>
+                            <button class="gb-btn-small" onclick="toggleKeyInput()">SWITCH</button>
+                            <button class="gb-btn-small" id="rotateBtn" onclick="rotateKey()">NEW</button>
+                        </div>
+                        <div id="keyInputContainer" style="display: none; margin-top: 8px;">
+                            <input type="text" class="gb-input" id="customKeyInput" placeholder="Enter key..." />
+                            <button class="gb-btn-small" onclick="loadCustomKey()">LOAD</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
