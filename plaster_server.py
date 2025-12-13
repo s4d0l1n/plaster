@@ -914,7 +914,7 @@ def get_html_page(api_key: str) -> str:
 
             .container {{
                 background: #9eff6f;
-                border: 20px solid #4a4a4a;
+                border: 60px 120px 60px 120px solid #4a4a4a;
                 box-shadow: inset 0 0 0 2px #0a1f14;
                 max-width: 100%;
                 width: 100%;
@@ -925,7 +925,7 @@ def get_html_page(api_key: str) -> str:
                 flex-direction: column;
                 image-rendering: pixelated;
                 image-rendering: crisp-edges;
-                border-radius: 12px 12px 36px 12px;
+                border-radius: 12px 12px 24px 12px;
             }}
 
             .container.gb-screen {{
@@ -934,6 +934,17 @@ def get_html_page(api_key: str) -> str:
                 gap: 0;
                 padding: 0;
                 background: #9eff6f;
+            }}
+
+            .container.gb-screen::after {{
+                content: '';
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                width: 24px;
+                height: 24px;
+                background: #d3d3d3;
+                pointer-events: none;
             }}
 
             .header {{
