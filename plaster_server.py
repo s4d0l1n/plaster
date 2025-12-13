@@ -902,20 +902,20 @@ def get_html_page(api_key: str) -> str:
 
             body {{
                 font-family: 'Press Start 2P', cursive;
-                background: #1a4d2e;
+                background: #9eff6f;
                 min-height: 100vh;
                 padding: 10px;
                 display: flex;
                 flex-direction: column;
-                color: #9eff6f;
-                text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+                color: #0a1f14;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
                 font-size: 18px;
             }}
 
             .container {{
-                background: #1a4d2e;
-                border: 8px solid #9eff6f;
-                box-shadow: inset 0 0 0 4px #4a7c59, 0 0 30px rgba(0, 255, 136, 0.6);
+                background: #9eff6f;
+                border: 8px solid #0a1f14;
+                box-shadow: inset 0 0 0 4px #0a1f14;
                 max-width: 100%;
                 width: 100%;
                 overflow: hidden;
@@ -932,19 +932,19 @@ def get_html_page(api_key: str) -> str:
                 flex-direction: column;
                 gap: 0;
                 padding: 0;
-                background: #1a4d2e;
+                background: #9eff6f;
             }}
 
             .header {{
-                background: linear-gradient(180deg, #1a0033 0%, #2d5a3d 100%);
-                color: #9eff6f;
+                background: #9eff6f;
+                color: #0a1f14;
                 padding: 20px;
-                border-bottom: 6px solid #4a7c59;
+                border-bottom: 4px solid #0a1f14;
                 position: relative;
                 z-index: 1;
                 font-size: 20px;
-                letter-spacing: 4px;
-                text-shadow: 0 0 10px rgba(255, 0, 255, 0.3), 4px 4px 0px rgba(0, 255, 136, 0.3);
+                letter-spacing: 2px;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
                 font-family: 'Press Start 2P', cursive;
             }}
 
@@ -978,22 +978,22 @@ def get_html_page(api_key: str) -> str:
             }}
 
             .api-key-section {{
-                background: #1a4d2e;
+                background: #9eff6f;
                 padding: 15px;
-                border: 4px solid #9eff6f;
+                border: 4px solid #0a1f14;
                 border-radius: 0px;
                 margin-top: 10px;
-                box-shadow: inset 0 0 0 2px #4a7c59;
+                box-shadow: inset 0 0 0 2px #0a1f14;
             }}
 
             .api-key-label {{
                 font-size: 14px;
                 text-transform: uppercase;
-                color: #9eff6f;
+                color: #0a1f14;
                 letter-spacing: 2px;
                 margin-bottom: 12px;
                 display: block;
-                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
                 font-family: 'Press Start 2P', cursive;
                 font-weight: 700;
             }}
@@ -1002,34 +1002,34 @@ def get_html_page(api_key: str) -> str:
                 display: flex;
                 gap: 12px;
                 align-items: center;
-                background: #2d5a3d;
+                background: #9eff6f;
                 padding: 12px 15px;
-                border: 4px solid #9eff6f;
+                border: 4px solid #0a1f14;
                 border-radius: 0px;
                 font-family: 'Courier Prime', monospace;
                 font-size: 12px;
                 word-break: break-all;
-                box-shadow: inset 0 0 0 2px #4a7c59;
+                box-shadow: inset 0 0 0 2px #0a1f14;
                 margin-bottom: 12px;
             }}
 
             .api-key-value {{
                 flex: 1;
-                color: #9eff6f;
+                color: #0a1f14;
                 text-shadow: none;
             }}
 
             .api-key-input {{
                 flex: 1;
                 padding: 12px 15px;
-                border: 4px solid #9eff6f;
+                border: 4px solid #0a1f14;
                 border-radius: 0px;
                 font-family: 'Courier Prime', monospace;
                 font-size: 14px;
-                background: #2d5a3d;
-                color: #9eff6f;
-                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
-                box-shadow: inset 0 0 0 2px #4a7c59;
+                background: #9eff6f;
+                color: #0a1f14;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+                box-shadow: inset 0 0 0 2px #0a1f14;
                 margin-bottom: 12px;
             }}
 
@@ -1041,7 +1041,7 @@ def get_html_page(api_key: str) -> str:
             }}
 
             .api-key-input::placeholder {{
-                color: #00884422;
+                color: #0a1f1444;
             }}
 
             .btn-copy-key,
@@ -1049,7 +1049,7 @@ def get_html_page(api_key: str) -> str:
             .btn-rotate,
             .btn-load-key {{
                 padding: 12px 24px;
-                border: 4px solid #9eff6f;
+                border: 4px solid #0a1f14;
                 border-radius: 0px;
                 font-size: 16px;
                 font-weight: 700;
@@ -1058,10 +1058,10 @@ def get_html_page(api_key: str) -> str:
                 transition: all 0.1s ease;
                 text-transform: uppercase;
                 letter-spacing: 2px;
-                background: #000000;
+                background: #0a1f14;
                 color: #9eff6f;
-                text-shadow: 3px 3px 0px rgba(0, 255, 136, 0.4);
-                box-shadow: inset 0 0 0 2px #4a7c59;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+                box-shadow: inset 0 0 0 2px #0a1f14;
                 white-space: nowrap;
             }}
 
@@ -1070,16 +1070,16 @@ def get_html_page(api_key: str) -> str:
             .btn-rotate:hover,
             .btn-load-key:hover {{
                 background: #9eff6f;
-                color: #000000;
-                box-shadow: inset 0 0 0 4px #4a7c59, 0 0 20px rgba(0, 255, 136, 0.6);
-                text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+                color: #0a1f14;
+                box-shadow: inset 0 0 0 2px #0a1f14;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
                 transform: translate(-2px, -2px);
-                border-color: #9eff6f;
+                border-color: #0a1f14;
             }}
 
             .btn-copy-key.copied {{
                 background: #9eff6f;
-                color: #000000;
+                color: #0a1f14;
             }}
 
             .content {{
@@ -1096,34 +1096,34 @@ def get_html_page(api_key: str) -> str:
                 display: block;
                 font-size: 16px;
                 font-weight: 700;
-                color: #9eff6f;
+                color: #0a1f14;
                 margin-bottom: 12px;
                 text-transform: uppercase;
                 letter-spacing: 2px;
-                text-shadow: 2px 2px 0px rgba(0, 255, 136, 0.3);
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
                 font-family: 'Press Start 2P', cursive;
             }}
 
             #textInput {{
                 width: 100%;
                 padding: 12px 15px;
-                border: 4px solid #9eff6f;
+                border: 4px solid #0a1f14;
                 border-radius: 0px;
                 font-size: 16px;
                 font-family: 'Press Start 2P', cursive;
-                background: #000000;
-                color: #9eff6f;
+                background: #9eff6f;
+                color: #0a1f14;
                 transition: all 0.15s ease;
                 resize: none;
                 min-height: 120px;
-                text-shadow: 2px 2px 0px rgba(0, 255, 136, 0.2);
-                box-shadow: inset 0 0 0 2px #4a7c59;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+                box-shadow: inset 0 0 0 2px #0a1f14;
             }}
 
             #textInput:focus {{
                 outline: none;
-                border-color: #9eff6f;
-                box-shadow: inset 0 0 0 4px #4a7c59, 0 0 20px rgba(0, 255, 136, 0.4);
+                border-color: #0a1f14;
+                box-shadow: inset 0 0 0 2px #0a1f14;
             }}
 
             .button-group {{
@@ -1134,7 +1134,7 @@ def get_html_page(api_key: str) -> str:
 
             button {{
                 padding: 12px 24px;
-                border: 4px solid #9eff6f;
+                border: 4px solid #0a1f14;
                 border-radius: 0px;
                 font-size: 16px;
                 font-weight: 700;
@@ -1143,11 +1143,11 @@ def get_html_page(api_key: str) -> str:
                 transition: all 0.1s ease;
                 text-transform: uppercase;
                 letter-spacing: 2px;
-                background: #000000;
+                background: #0a1f14;
                 color: #9eff6f;
-                text-shadow: 3px 3px 0px rgba(0, 255, 136, 0.4);
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
                 image-rendering: pixelated;
-                box-shadow: inset 0 0 0 2px #4a7c59;
+                box-shadow: inset 0 0 0 2px #0a1f14;
             }}
 
             .btn-primary {{
@@ -1156,27 +1156,27 @@ def get_html_page(api_key: str) -> str:
 
             .btn-primary:hover {{
                 background: #9eff6f;
-                color: #000000;
-                box-shadow: inset 0 0 0 4px #4a7c59, 0 0 20px rgba(0, 255, 136, 0.6);
-                text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+                color: #0a1f14;
+                box-shadow: inset 0 0 0 2px #0a1f14;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
                 transform: translate(-2px, -2px);
-                border-color: #9eff6f;
+                border-color: #0a1f14;
             }}
 
             .btn-danger {{
-                background: #000000;
-                color: #4a7c59;
-                border-color: #4a7c59;
-                text-shadow: 3px 3px 0px rgba(255, 68, 68, 0.3);
+                background: #0a1f14;
+                color: #9eff6f;
+                border-color: #0a1f14;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
             }}
 
             .btn-danger:hover {{
-                background: #4a7c59;
-                color: #000000;
-                box-shadow: inset 0 0 0 4px #9eff6f, 0 0 20px rgba(255, 68, 68, 0.6);
-                text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+                background: #9eff6f;
+                color: #0a1f14;
+                box-shadow: inset 0 0 0 2px #0a1f14;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
                 transform: translate(-2px, -2px);
-                border-color: #9eff6f;
+                border-color: #0a1f14;
             }}
 
 
@@ -1190,30 +1190,30 @@ def get_html_page(api_key: str) -> str:
                 align-items: center;
                 margin-bottom: 15px;
                 padding-bottom: 10px;
-                border-bottom: 1px solid #00884422;
+                border-bottom: 2px solid #0a1f14;
             }}
 
             .list-title {{
                 font-size: 16px;
                 font-weight: 700;
-                color: #9eff6f;
+                color: #0a1f14;
                 text-transform: uppercase;
                 letter-spacing: 2px;
-                text-shadow: 2px 2px 0px rgba(0, 255, 136, 0.3);
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
                 font-family: 'Press Start 2P', cursive;
             }}
 
             .list-count {{
-                background: #000000;
+                background: #0a1f14;
                 color: #9eff6f;
                 padding: 6px 12px;
-                border: 3px solid #9eff6f;
+                border: 3px solid #0a1f14;
                 border-radius: 0px;
                 font-size: 14px;
                 font-weight: 700;
-                text-shadow: 2px 2px 0px rgba(0, 255, 136, 0.2);
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
                 font-family: 'Press Start 2P', cursive;
-                box-shadow: inset 0 0 0 2px #4a7c59;
+                box-shadow: inset 0 0 0 2px #0a1f14;
             }}
 
             .entries-list {{
@@ -1231,37 +1231,37 @@ def get_html_page(api_key: str) -> str:
                 align-items: center;
                 gap: 8px;
                 padding: 10px 12px;
-                background: #0a0a15;
-                border: 2px solid #9eff6f;
-                border-left: 4px solid #9eff6f;
+                background: #9eff6f;
+                border: 2px solid #0a1f14;
+                border-left: 4px solid #0a1f14;
                 border-radius: 0px;
                 transition: all 0.15s ease;
             }}
 
             .entry-item:hover {{
-                background: #1a4d2e;
-                border-left-color: #9eff6f;
-                box-shadow: 0 0 15px rgba(0, 255, 136, 0.3), inset 0 0 10px rgba(255, 255, 0, 0.1);
+                background: #c4ff7f;
+                border-left-color: #0a1f14;
+                box-shadow: inset 0 0 10px rgba(10, 30, 20, 0.1);
             }}
 
             .entry-index {{
                 font-weight: 700;
-                color: #9eff6f;
+                color: #0a1f14;
                 font-size: 10px;
                 min-width: 28px;
                 text-align: center;
-                text-shadow: 0 0 5px rgba(255, 255, 0, 0.4);
+                text-shadow: none;
                 font-family: 'Courier Prime', monospace;
             }}
 
             .entry-text {{
                 flex: 1;
                 font-size: 14px;
-                color: #9eff6f;
+                color: #0a1f14;
                 word-break: break-word;
                 font-family: 'Press Start 2P', cursive;
                 line-height: 1.6;
-                text-shadow: 1px 1px 0px rgba(0, 255, 136, 0.2);
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
                 max-height: 200px;
                 overflow: hidden;
             }}
@@ -1269,7 +1269,7 @@ def get_html_page(api_key: str) -> str:
             .empty-state {{
                 text-align: center;
                 padding: 30px 20px;
-                color: #00884422;
+                color: #0a1f1444;
             }}
 
             .empty-state-icon {{
@@ -1280,7 +1280,7 @@ def get_html_page(api_key: str) -> str:
 
             .empty-state-text {{
                 font-size: 12px;
-                color: #00884422;
+                color: #0a1f1444;
                 text-transform: uppercase;
                 letter-spacing: 1px;
             }}
@@ -1289,9 +1289,9 @@ def get_html_page(api_key: str) -> str:
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
-                background: #000000;
+                background: #0a1f14;
                 color: #9eff6f;
-                border: 1px solid #9eff6f;
+                border: 2px solid #0a1f14;
                 padding: 12px 16px;
                 border-radius: 0px;
                 box-shadow: none;
@@ -1300,7 +1300,7 @@ def get_html_page(api_key: str) -> str:
                 transition: all 0.3s ease;
                 z-index: 1000;
                 text-shadow: none;
-                font-family: 'Courier Prime', monospace;
+                font-family: 'Press Start 2P', cursive;
                 font-size: 12px;
             }}
 
