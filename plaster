@@ -219,10 +219,15 @@ save_api_key_with_label() {
 verify_api_key() {
     local key="$1"
     local response
-    response=$(curl -s -X GET "$SERVER_URL/peek" \
+    local http_code
+    response=$(curl -s -w "\n%{http_code}" -X GET "$SERVER_URL/peek" \
         -H "X-API-Key: $key" 2>&1)
 
-    if echo "$response" | grep -q "status.*ok"; then
+    http_code=$(echo "$response" | tail -n 1)
+    response=$(echo "$response" | sed '$d')
+
+    # Check for successful HTTP status and valid response
+    if [[ "$http_code" == "200" ]] && echo "$response" | grep -q '"status".*"ok"'; then
         return 0
     else
         return 1
