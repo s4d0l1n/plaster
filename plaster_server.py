@@ -475,7 +475,7 @@ async def check_api_key(request: Request, call_next):
     client_ip = request.client.host if request.client else "unknown"
 
     # Skip auth for health check, static docs, key generation, version, and root path (initial setup)
-    if path in ["/health", "/docs", "/openapi.json", "/auth/generate", "/version", "/"]:
+    if path in ["/health", "/docs", "/openapi.json", "/auth/generate", "/version", "/", "/setup"]:
         return await call_next(request)
 
     # Get API key from header
@@ -525,7 +525,7 @@ def get_setup_page() -> str:
 
             body {
                 font-family: 'Press Start 2P', cursive;
-                background: #1a4d2e;
+                background: #d3d3d3;
                 min-height: 100vh;
                 padding: 20px;
                 display: flex;
@@ -536,9 +536,9 @@ def get_setup_page() -> str:
             }
 
             .container {
-                background: #2d5a3d;
-                border: 8px solid #9eff6f;
-                box-shadow: inset 0 0 0 4px #4a7c59;
+                background: transparent;
+                border: none;
+                box-shadow: none;
                 max-width: 800px;
                 width: 100%;
                 overflow: hidden;
@@ -556,56 +556,73 @@ def get_setup_page() -> str:
             }
 
             .gb-boot-screen {
-                width: 400px;
-                height: 400px;
-                background: #9eff6f;
-                border: 20px solid #0a1f14;
-                border-radius: 12px;
+                width: 823px;
+                height: 617px;
+                background: linear-gradient(135deg, #4a4a4a 0%, #4a4a4a 100%);
+                background-clip: padding-box;
+                border-top: 70px solid #4a4a4a;
+                border-bottom: 70px solid #4a4a4a;
+                border-left: 150px solid #4a4a4a;
+                border-right: 150px solid #4a4a4a;
+                box-shadow: inset 0 0 0 2px #0a1f14;
+                border-radius: 30px 30px 128px 30px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 2px 5px rgba(0, 0, 0, 0.2);
-                padding: 20px;
+                padding: 0;
+                background: #9eff6f;
                 position: relative;
                 overflow: hidden;
+                box-sizing: border-box;
             }
 
             .gb-boot-text {
-                font-size: 36px;
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                width: 496px;
+                height: 473px;
+                font-size: 20px;
                 font-weight: 700;
                 color: #0a1f14;
+                
                 letter-spacing: 2px;
                 text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
                 font-family: 'Press Start 2P', cursive;
                 text-align: center;
                 display: flex;
-                align-items: baseline;
+                align-items: center;
+                justify-content: center;
                 gap: 3px;
                 animation: gb-text-drop 3s ease-out forwards;
+                z-index: 1;
+                pointer-events: none;
             }
 
             .reg-mark {
-                font-size: 14px;
+                font-size: 18px;
                 position: relative;
-                top: -6px;
+                top: -0.3vmin;
             }
 
             .login-screen {
                 position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
+                top: 2px;
+                left: 2px;
+                width: 496px;
+                height: 473px;
                 background: #9eff6f;
-                border-radius: 12px;
+                border-radius: 0;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
                 opacity: 0;
                 animation: fade-in 0.5s ease-out 3.5s forwards;
-                padding: 40px;
+                padding: 0;
                 box-sizing: border-box;
+                overflow: hidden;
+                z-index: 2;
             }
 
             .header-line {
@@ -622,12 +639,17 @@ def get_setup_page() -> str:
             }
 
             .login-box {
-                background: #2d5a3d;
-                border: 6px solid #9eff6f;
-                padding: 30px;
-                box-shadow: inset 0 0 0 3px #4a7c59;
-                max-width: 400px;
+                background: #9eff6f;
+                border-top: 48px solid #4a4a4a;
+                border-bottom: 48px solid #4a4a4a;
+                border-left: 96px solid #4a4a4a;
+                border-right: 96px solid #4a4a4a;
+                box-shadow: inset 0 0 0 2px #0a1f14;
+                padding: 20px;
                 width: 100%;
+                position: relative;
+                border-radius: 10px 10px 56px 10px;
+                overflow: hidden;
             }
 
             .login-title {
@@ -638,7 +660,7 @@ def get_setup_page() -> str:
                 letter-spacing: 2px;
                 text-align: center;
                 margin-bottom: 6px;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
                 border-bottom: 2px solid #0a1f14;
                 padding-bottom: 10px;
                 font-family: 'Press Start 2P', cursive;
@@ -657,36 +679,43 @@ def get_setup_page() -> str:
             .login-form {
                 display: flex;
                 flex-direction: column;
-                gap: 12px;
+                gap: 1vmin;
                 width: 100%;
-                max-width: 280px;
+                max-height: 100%;
+                padding: 1.5vmin;
+                box-sizing: border-box;
+                justify-content: center;
+                align-items: center;
+                overflow: hidden;
             }
 
             .login-label {
-                font-size: 10px;
+                font-size: 1.25vmin;
                 color: #0a1f14;
                 font-weight: 700;
                 text-transform: uppercase;
-                letter-spacing: 1px;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+                letter-spacing: 0.25vmin;
+                text-shadow: 0.25vmin 0.25vmin 0px rgba(0, 0, 0, 0.2);
                 font-family: 'Press Start 2P', cursive;
+                display: none;
             }
 
             .login-input {
-                padding: 10px 12px;
-                border: 3px solid #0a1f14;
-                background: #9eff6f;
+                padding: 1.25vmin 1.5vmin;
+                border: 0.25vmin solid #0a1f14;
+                background: #c4ff7f;
                 color: #0a1f14;
                 font-family: 'Press Start 2P', cursive;
-                font-size: 10px;
-                box-shadow: inset 0 0 0 1px #0a1f14;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
+                font-size: 1.25vmin;
+                box-shadow: inset 0 0 0 0.25vmin #0a1f14;
+                text-shadow: 0.25vmin 0.25vmin 0px rgba(0, 0, 0, 0.05);
                 transition: all 0.1s ease;
+                width: 100%;
             }
 
             .login-input:focus {
                 outline: none;
-                box-shadow: inset 0 0 0 2px #0a1f14, 0 0 8px rgba(10, 30, 20, 0.4);
+                box-shadow: inset 0 0 0 0.25vmin #0a1f14, 0 0 1vmin rgba(10, 30, 20, 0.4);
             }
 
             .login-input::placeholder {
@@ -694,45 +723,45 @@ def get_setup_page() -> str:
             }
 
             .login-button {
-                padding: 10px 20px;
-                border: 3px solid #0a1f14;
-                background: #9eff6f;
-                color: #0a1f14;
+                padding: 1.25vmin 2.5vmin;
+                border: 0.25vmin solid #0a1f14;
+                background: #0a1f14;
+                color: #9eff6f;
                 font-family: 'Press Start 2P', cursive;
-                font-size: 10px;
+                font-size: 1.25vmin;
                 font-weight: 700;
                 text-transform: uppercase;
-                letter-spacing: 1px;
+                letter-spacing: 0px;
                 cursor: pointer;
                 transition: all 0.1s ease;
-                box-shadow: inset 0 0 0 1px #0a1f14;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+                box-shadow: inset 0px 0px 0px #9eff6f, inset 0px 0px 0px #4a4a4a, 0px 0px 0px rgba(0, 0, 0, 0.4);
+                text-shadow: 0.25vmin 0.25vmin 0px rgba(0, 0, 0, 0.3);
+                width: 100%;
             }
 
             .login-button:hover {
-                background: #0a1f14;
-                color: #9eff6f;
-                transform: translate(-1px, -1px);
-                box-shadow: inset 0 0 0 2px #9eff6f;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+                box-shadow: inset 0px 0px 0px #9eff6f, inset 0px 0px 0px #4a4a4a, 0px 0px 0px rgba(0, 0, 0, 0.5);
+                transform: translate(0px, 0px);
             }
 
             .login-button:active {
-                transform: translate(0, 0);
+                box-shadow: inset 0px 0px 0px #4a4a4a, inset 0px 0px 0px #9eff6f, 0px 0px 0px rgba(0, 0, 0, 0);
+                transform: translate(0px, 0px);
             }
 
             .login-help {
-                border-top: 1px solid #0a1f14;
-                padding-top: 10px;
-                margin-top: 8px;
+                border-top: 0px solid #0a1f14;
+                padding-top: 0px;
+                margin-top: 0px;
                 text-align: center;
+                display: none;
             }
 
             .help-item {
-                font-size: 8px;
+                font-size: 1vmin;
                 color: #0a1f14;
-                margin-bottom: 4px;
-                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
+                margin-bottom: 0.5vmin;
+                text-shadow: 0.25vmin 0.25vmin 0px rgba(0, 0, 0, 0.1);
                 font-family: 'Press Start 2P', cursive;
             }
 
@@ -826,22 +855,22 @@ def get_setup_page() -> str:
                     <div class="gb-boot-text">Plaster<span class="reg-mark">®</span></div>
 
                     <div class="login-screen">
-                        <div class="login-title">PLASTER LOGIN</div>
-                        <div class="login-subtitle">Clipboard Service</div>
+                    <div class="login-title">PLASTER LOGIN</div>
+                    <div class="login-subtitle">Clipboard Service</div>
 
-                        <div class="login-form">
-                            <label class="login-label">Enter API Key:</label>
-                            <input type="text" id="apiKeyInput" class="login-input" placeholder="Your API key..." />
+                    <div class="login-form">
+                        <label class="login-label">Enter API Key:</label>
+                        <input type="text" id="apiKeyInput" class="login-input" placeholder="Your API key..." />
 
-                            <button class="login-button" onclick="loadClipboard()">ENTER</button>
+                        <button class="login-button" onclick="loadClipboard()">ENTER</button>
 
-                            <div class="login-help">
-                                <div class="help-item">• Press ENTER to login</div>
-                                <div class="help-item">• See README for help</div>
-                            </div>
+                        <div class="login-help">
+                            <div class="help-item">• Press ENTER to login</div>
+                            <div class="help-item">• See README for help</div>
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
 
@@ -914,7 +943,10 @@ def get_html_page(api_key: str) -> str:
 
             .container {{
                 background: #9eff6f;
-                border: 60px 120px 60px 120px solid #4a4a4a;
+                border-top: 70px solid #4a4a4a;
+                border-bottom: 70px solid #4a4a4a;
+                border-left: 150px solid #4a4a4a;
+                border-right: 150px solid #4a4a4a;
                 box-shadow: inset 0 0 0 2px #0a1f14;
                 max-width: 100%;
                 width: 100%;
@@ -925,7 +957,7 @@ def get_html_page(api_key: str) -> str:
                 flex-direction: column;
                 image-rendering: pixelated;
                 image-rendering: crisp-edges;
-                border-radius: 12px 12px 24px 12px;
+                border-radius: 12px 12px 96px 12px;
             }}
 
             .container.gb-screen {{
@@ -934,17 +966,6 @@ def get_html_page(api_key: str) -> str:
                 gap: 0;
                 padding: 0;
                 background: #9eff6f;
-            }}
-
-            .container.gb-screen::after {{
-                content: '';
-                position: absolute;
-                bottom: 0;
-                right: 0;
-                width: 24px;
-                height: 24px;
-                background: #d3d3d3;
-                pointer-events: none;
             }}
 
             .header {{
