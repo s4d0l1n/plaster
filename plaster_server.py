@@ -902,7 +902,7 @@ def get_html_page(api_key: str) -> str:
 
             body {{
                 font-family: 'Press Start 2P', cursive;
-                background: #9eff6f;
+                background: #d3d3d3;
                 min-height: 100vh;
                 padding: 10px;
                 display: flex;
@@ -914,8 +914,8 @@ def get_html_page(api_key: str) -> str:
 
             .container {{
                 background: #9eff6f;
-                border: 8px solid #0a1f14;
-                box-shadow: inset 0 0 0 4px #0a1f14;
+                border: 20px solid #4a4a4a;
+                box-shadow: inset 0 0 0 2px #0a1f14;
                 max-width: 100%;
                 width: 100%;
                 overflow: hidden;
@@ -925,6 +925,7 @@ def get_html_page(api_key: str) -> str:
                 flex-direction: column;
                 image-rendering: pixelated;
                 image-rendering: crisp-edges;
+                border-radius: 12px 12px 36px 12px;
             }}
 
             .container.gb-screen {{
