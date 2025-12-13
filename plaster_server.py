@@ -1435,12 +1435,13 @@ def get_html_page(api_key: str) -> str:
 
             .gb-panel {{
                 background: #9eff6f;
-                border: 4px solid #0a1f14;
-                box-shadow: inset 0 0 0 2px #0a1f14;
+                border: 2px solid #0a1f14;
+                box-shadow: inset 0 0 0 1px #0a1f14;
                 display: flex;
                 flex-direction: column;
                 padding: 12px;
                 gap: 8px;
+                border-radius: 6px;
             }}
 
             .panel-title {{
@@ -1463,15 +1464,16 @@ def get_html_page(api_key: str) -> str:
             .gb-textarea {{
                 flex: 1;
                 padding: 8px 10px;
-                border: 3px solid #0a1f14;
+                border: 2px solid #0a1f14;
                 background: #9eff6f;
                 color: #0a1f14;
                 font-family: 'Courier Prime', monospace;
                 font-size: 11px;
                 resize: none;
-                box-shadow: inset 0 0 0 2px #0a1f14;
+                box-shadow: inset 0 0 0 1px #0a1f14;
                 text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
                 outline: none;
+                border-radius: 4px;
             }}
 
             .gb-textarea:focus {{
@@ -1491,7 +1493,7 @@ def get_html_page(api_key: str) -> str:
             .gb-btn {{
                 flex: 1;
                 padding: 12px 16px;
-                border: 4px solid #0a1f14;
+                border: 2px solid #0a1f14;
                 background: #0a1f14;
                 color: #9eff6f;
                 font-family: 'Press Start 2P', cursive;
@@ -1499,11 +1501,12 @@ def get_html_page(api_key: str) -> str:
                 font-weight: 700;
                 cursor: pointer;
                 transition: all 0.1s ease;
-                box-shadow: inset 0 0 0 2px #0a1f14;
+                box-shadow: inset 0 0 0 1px #0a1f14;
                 text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
                 text-transform: uppercase;
                 letter-spacing: 1px;
                 outline: none;
+                border-radius: 4px;
             }}
 
             .gb-btn:hover {{
@@ -1641,12 +1644,13 @@ def get_html_page(api_key: str) -> str:
 
             .key-section {{
                 background: #9eff6f;
-                border: 4px solid #0a1f14;
-                box-shadow: inset 0 0 0 2px #0a1f14;
+                border: 2px solid #0a1f14;
+                box-shadow: inset 0 0 0 1px #0a1f14;
                 padding: 12px;
                 display: flex;
                 flex-direction: column;
                 gap: 8px;
+                border-radius: 6px;
             }}
 
             .key-label {{
@@ -1669,6 +1673,7 @@ def get_html_page(api_key: str) -> str:
                 word-break: break-all;
                 box-shadow: inset 0 0 0 1px #0a1f14;
                 text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
+                border-radius: 3px;
             }}
 
             .key-buttons {{
@@ -1679,7 +1684,7 @@ def get_html_page(api_key: str) -> str:
             .gb-btn-small {{
                 flex: 1;
                 padding: 8px 12px;
-                border: 3px solid #0a1f14;
+                border: 2px solid #0a1f14;
                 background: #0a1f14;
                 color: #9eff6f;
                 font-family: 'Press Start 2P', cursive;
@@ -1687,11 +1692,12 @@ def get_html_page(api_key: str) -> str:
                 font-weight: 700;
                 cursor: pointer;
                 transition: all 0.1s ease;
-                box-shadow: inset 0 0 0 2px #0a1f14;
+                box-shadow: inset 0 0 0 1px #0a1f14;
                 text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
                 text-transform: uppercase;
                 letter-spacing: 1px;
                 outline: none;
+                border-radius: 3px;
             }}
 
             .gb-btn-small:hover {{
@@ -1716,6 +1722,7 @@ def get_html_page(api_key: str) -> str:
                 box-shadow: inset 0 0 0 1px #0a1f14;
                 text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
                 outline: none;
+                border-radius: 3px;
             }}
 
             .gb-input:focus {{
@@ -1748,7 +1755,12 @@ def get_html_page(api_key: str) -> str:
                 }}
 
                 .gb-textarea {{
-                    min-height: 80px;
+                    min-height: 50px;
+                    max-height: 50px;
+                }}
+
+                .entries-list {{
+                    max-height: 100px;
                 }}
             }}
         </style>
